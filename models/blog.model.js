@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const postSchema = new mongoose.Schema(
+const blogSchema = new mongoose.Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -33,4 +33,4 @@ const postSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model("post", postSchema);
+module.exports = mongoose.model("Blog", blogSchema);
