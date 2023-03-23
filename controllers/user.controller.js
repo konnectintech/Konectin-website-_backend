@@ -1,6 +1,10 @@
 const User = require('../models/user.model')
+const Blog = require('../models/blog.model')
+const Comment = require('../models/comment.model')
+const Like = require('../models/like.model')
 const { passwordCompare, passwordHash} = require('../helpers/bcrypt')
 
+// endpoint for allowing a user to sign up
 const register = async(request, response) => {
     try{
         const {fullname, email, password } = request.body
@@ -27,6 +31,7 @@ const register = async(request, response) => {
     }
 }
 
+// endpoint for allowing a user to login
 const login = async(request, response) => {
     try{
         const {email, password} = request.body
@@ -49,6 +54,7 @@ const login = async(request, response) => {
     }
 }
 
+//endpoint for getting user
 const getUser = async(request, response) => {
     try {
         const userId = request.query.userId
