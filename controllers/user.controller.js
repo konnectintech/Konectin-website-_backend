@@ -229,7 +229,63 @@ const deleteComments = async(request, response)=> {
     }
 }
 
+// endpoint to like a blog post
+const likePost = async(request, response) => {
+    try{
+        const {blogId, userId} = request.query
+        const user = await User.findById({_id: userId})
+        const blog = await Blog.findById({_id: blogId})
+
+        if(!user){
+            return response.status(400).json({message: "User not found"})
+        }
+        if(!blog){
+            return response.status(400).json({message: "Blog post not found"})
+        }
+
+        const ifLikeExists = await Like.findOne({userId, postId: blogId})
+        if(ifLikeExists){
+            return response.status(400).json({message: "You already liked this post"})
+        }
+        const like = new Like({
+            userId: userId,
+            postId: blogId
+        })
+        await like.save()
+        const postLikes = await Like.find({postId: blogId}).count()
+        blog.likes = postLikes
+        await blog.save()
+        return response.status(200).json({message: "Post liked successfully"})
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+const dislikePost = async(request, response) => {
+    try{
+        const blogId = request.query.blogId
+        const userId = request.query.userId
+
+        const like = await Like.findOne({ postId: blogId, userId });
+        const blog = await Blog.findById({ _id: blogId });
+        const user = await User.findById({ _id: userId });
+
+        if(!blog){
+            return response.status(400),json({message: "Blog post not found"})
+        }
+        await Like.deleteOne({postId: blogId, userId})
+        const postLikes = await Like.find({postId: blogId}).count()
+        blog.likes = postLikes
+        await blog.save()
+        return response.status(200).json({message: "Blog post disliked successfully"})
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
-    commentPost, getComments, deleteComments
+    commentPost, getComments, deleteComments, likePost, dislikePost
 }
