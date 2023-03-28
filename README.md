@@ -9,7 +9,7 @@ Lead Backend Developer - <b>Akinloluwa Olumuyide</b>
 <br></br>
 
 ## API Documentation
-<link>Coming soon.....</link>
+<link>https://documenter.getpostman.com/view/16987750/2s93RRvsyu</link>
 
 <br>
 
