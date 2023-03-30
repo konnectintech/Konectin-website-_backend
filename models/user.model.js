@@ -13,6 +13,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    picture: {
+        type: String
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    typeOfUser: {
+        type: String,
+        enum: ["Regular", "Google"],
+        default: "Regular"
+    }
 }, {timestamps: true})
 
 module.exports = mongoose.model('users', userSchema)

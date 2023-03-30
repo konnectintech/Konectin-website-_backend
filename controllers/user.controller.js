@@ -3,6 +3,13 @@ const Blog = require('../models/blog.model')
 const Comment = require('../models/comment.model')
 const Like = require('../models/like.model')
 const { passwordCompare, passwordHash} = require('../helpers/bcrypt')
+const {transporter} = require("../config/email")
+const {generateRegisterOTP} = require("../helpers/registerToken")
+const {generatePasswordOTP} = require("../helpers/passwordToken")
+const registerOTP = require('../models/registerOTP')
+const {jwtSign} = require('../helpers/jsonwebtoken')
+const passwordOTP = require('../models/passwordOTP')
+
 
 // endpoint for allowing a user to sign up
 const register = async(request, response) => {
@@ -22,12 +29,64 @@ const register = async(request, response) => {
             email: email,
             password: hashedPassword
         })
-
+        const token = await generateRegisterOTP(user._id)
+        const subject = "Konectin Technical - Email Verification"
+        const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
+			<h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
+			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+		`;
+        await transporter(email, subject, msg)
         await user.save()
+
         return response.status(201).json({message: "User created successfully", user})
     }
     catch(err){
+        console.log(err.message);
         return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+const verifyEmailAddress = async(request, response) => {
+    try {
+        const {OTP} = request.body
+        const userId = request.query.userId
+        const token = await registerOTP.findOne({userId: userId, OTP: OTP})
+        const user = await User.findOne({userId: userId})
+
+        if(token.expiresIn < new Date().getTime){
+            return new response.status(400).json({message: "Token has expired, please request a new one"})
+        }
+
+        await User.findByIdAndUpdate({ _id: userId }, { $set: { isEmailVerified: true } }, { new: true }).exec()
+        await user.save()
+
+        return response.status(200).json({message: "Email verified successfully"})
+    }
+    catch(err){
+        return response.status(500).json({ message: "Some error occured, try again later!"})
+    }
+}
+
+// endpoint for requesting a new OTP code to verify email address
+const requestEmailToken = async(request, response) => {
+    try{
+        const {email} = request.body
+        const userId = request.query.userId
+        const user = await User.findOne({email: email})
+        if(!user){
+            return response.status(400).json({message: "Please sign up before requesting a new token"})
+        }
+        const token = await generateRegisterOTP(user._id)
+        const subject = "Konectin Technical - OTP Code Request"
+        const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
+			<h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
+			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+		`;
+        await transporter(email, subject, msg)
+        return response.status(200).json({message: "Check your email for the verification code"})
+    }
+    catch(err){
+        return response.status(500).json({message: "Some error occured, try again later!"})
     }
 }
 
@@ -47,10 +106,98 @@ const login = async(request, response) => {
             return response.status(400).json({message: "Incorrect password"})
         }
 
-        return response.status(200).json({message: "User logged in successfully!"})
+        const payload = {
+            _id: user._id,
+            fullname: user.fullname,
+            email: user.email
+        }
+        const token = jwtSign(payload)
+
+        return response.status(200).json({message: "User logged in successfully!", token: token, data: payload})
     }
     catch(err){
         return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+// endpoint for signing in with google
+const googleSignin = async (req, res) => {
+    const {displayName, email} = req.body;
+
+    const password = 'googlesignup';
+
+    const user = User.findOne({email}).exec();
+    const token = jwtSign(payload)
+
+    if (!user) {
+        await new user({
+            email: email,
+            fullname: displayName,
+            password: password,
+            typeOfUser: "Google"
+        }).save();
+
+        const payload = {
+            _id: user._id,
+            fullname: user.fullname,
+            email: user.email
+        }
+        
+
+        return response.status(200).json({message: "User logged in successfully!", data: user, token: token});
+    } else {
+        return response.status(200).json({message: "User logged in successfully!", data: user, token: token});
+    }
+}
+
+//endpoint for forget password
+const forgetPassword = async(request, response) => {
+    try {
+        const {email} = request.body 
+        const user = await User.findOne({email: email})
+
+        if(!user){
+            return response.status(400).json({message: "Please sign-up first"})
+        }
+        const token = await generatePasswordOTP(user._id)
+        const subject = "Konectin Technical - Reset password"
+        const msg = `Use this code to reset the password to your Konectin account. It expires in 10 minutes.
+			<h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
+			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+		`;
+        await transporter(email, subject, msg)
+        return response.status(200).json({message: "Please check email for the code to reset your password"})
+    }
+    catch(err){
+        return response.status(500).json({message: "Some error occured, try again later"})
+    }
+}
+
+//endpoint to reset password
+const resetPassword = async(request, response) => {
+    try {
+        const {OTP, password, confirmPassword} = request.body
+        if(!password && !confirmPassword){
+            return response.status(400).json({message: "Please fill all fields"})
+        }
+        if(password !== confirmPassword){
+            return response.status(400).json({message: "Passwords do not match"})
+        }
+        const token = await passwordOTP.findOne({OTP: OTP})
+        if(!token){
+            return response.status(400).json({message: "Please fill the token field"})
+        }
+        if (token.expiresIn < new Date().getTime()) {
+            return response.status(400).json({message: "The token has expired, please request a new one "})
+        }
+
+        const hashedPassword = await passwordHash(password)
+
+        await User.findByIdAndUpdate({ _id: token.userId }, { $set: { password: hashedPassword } }, { new: true }).exec()
+        return response.status(200).json({message: "Password updated successfully, please login"})
+    }
+    catch(err){
+        return response.status(500).json({message: "Some error occured, try again later"})
     }
 }
 
@@ -287,5 +434,7 @@ const dislikePost = async(request, response) => {
 
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
-    commentPost, getComments, deleteComments, likePost, dislikePost
+    commentPost, getComments, deleteComments, likePost, dislikePost,
+    verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword
 }
+

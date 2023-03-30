@@ -5,8 +5,7 @@ mongoose.set('strictQuery', true)
 require('dotenv').config()
 const logger = require('morgan')
 const userRoutes = require('./routes/userRoutes')
-const passport = require("passport")
-require('./passportConfig')(passport)
+
 
 const port = process.env.PORT
 const app = express()
@@ -33,17 +32,6 @@ app.get('/', (request, response) => {
     response.json({message: "Welcome to Konectin!"})
 })
 
-app.get("/auth/google", passport.authenticate("google", {scope: ["email", "profile"]}))
-app.get("/auth/google/callback", 
-    passport.authenticate("google", {session: false}),
-        (request, response) => {
-            response.redirect('/profile/')
-        }
-)
-
-app.get("/profile", (request, response) => {
-    response.send('Welcome')
-})
 app.use('/user', userRoutes)
 
 app.listen(port, () => {
