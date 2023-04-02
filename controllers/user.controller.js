@@ -280,6 +280,18 @@ const getPost = async (request, response) => {
     }
 }
 
+
+//endpoint to get all blogs in the database
+const getAllBlogs = async (request, response) => {
+    try{
+        const blogs = await Blog.find().exec()
+        return response.status(200).json({message: "All blog posts", blogs})
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later"})
+    }
+}
+
 // endpoint to comment on a post
 const commentPost = async(request, response)=>{
     try{
@@ -435,6 +447,7 @@ const dislikePost = async(request, response) => {
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
     commentPost, getComments, deleteComments, likePost, dislikePost,
-    verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword
+    verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
+    getAllBlogs
 }
 

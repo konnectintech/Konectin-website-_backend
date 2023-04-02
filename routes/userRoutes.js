@@ -5,7 +5,7 @@ const {register, login, getUser,
         commentPost, deleteComments, getComments,
         likePost, dislikePost,
         verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword,
-        resetPassword} = require('../controllers/user.controller')
+        resetPassword, getAllBlogs} = require('../controllers/user.controller')
 
 const {verifyUserToken} = require("../helpers/jsonwebtoken")
 const {isEmailVerified} = require("../helpers/isEmailVerified")
@@ -21,6 +21,7 @@ router.get('/getUser', getUser)
 router.post('/makeBlog', verifyUserToken, isEmailVerified, makeBlog)
 router.delete('/deleteBlog', verifyUserToken, isEmailVerified, deleteBlog)
 router.get('/getBlog', verifyUserToken, isEmailVerified, getPost)
+router.get('/getAllBlogs', getAllBlogs)
 router.post('/commentPost', verifyUserToken, isEmailVerified, commentPost)
 router.delete('/deleteComment', verifyUserToken, isEmailVerified, deleteComments)
 router.get('/getComments', verifyUserToken, isEmailVerified, getComments)
