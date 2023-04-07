@@ -9,6 +9,8 @@ const {generatePasswordOTP} = require("../helpers/passwordToken")
 const registerOTP = require('../models/registerOTP')
 const {jwtSign} = require('../helpers/jsonwebtoken')
 const passwordOTP = require('../models/passwordOTP')
+const resume = require("../models/resume.model")
+const {resumeSchema} = require("../helpers/resumeValidate")
 
 
 // endpoint for allowing a user to sign up
@@ -444,10 +446,29 @@ const dislikePost = async(request, response) => {
     }
 }
 
+const resumeBuilder = async (request, response) => {
+    try{
+        const {userId} = request.query
+        const {error, value} = resumeSchema.validate(request.body)
+        if(error){
+            return response.status(400).json({Error: error.details[0].message})
+        }
+        const cv = new resume({
+            userId,
+            ...value
+        })
+        await cv.save()
+        return response.status(201).json({message: "Resume created successfully", cv})        
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
     commentPost, getComments, deleteComments, likePost, dislikePost,
     verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
-    getAllBlogs
+    getAllBlogs, resumeBuilder
 }
 
