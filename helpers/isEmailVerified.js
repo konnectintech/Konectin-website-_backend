@@ -6,7 +6,7 @@ function isEmailVerified(req, res, next) {
 
   // Use the User model to find the user by ID and check if their account is verified
   const user = User.findById(userId)
-  if (!user.isEmailVerified) {
+  if (user.isEmailVerified == false) {
     return res.status(403).json({ error: 'Account not verified' });
   }
     next();
