@@ -4,6 +4,8 @@ const {passwordHash,passwordCompare} = require("../helpers/bcrypt")
 const Comment = require('../models/comment.model')
 const Like = require("../models/like.model")
 const User = require("../models/user.model")
+const {cloudinaryUpload} = require("../helpers/cloudinary")
+const cloudinary = require("cloudinary").v2
 
 
 const register = async(request, response) => {
@@ -51,31 +53,27 @@ const login = async(request, response) => {
 
 const makeBlog = async(request, response) => {
     try{
-        const {title, body, category} = request.body
         const adminId = request.query.adminId
-        if(!title && !body){
-            return response.status(400).json({message: "Please fill all required fields"})
-        }
-        const admin = await Admin.findById({_id: adminId})
-        if(!admin){
-            return response.status(400).json({message: "Admin account does not exist"})
-        }
-        const wordsPerMinute = 120; // Average reading speed of an adult
-        const words = body.split(' ').length;
-        const minutes = Math.ceil(words / wordsPerMinute);
-        const readTime = `${minutes} min read`
-    
-        const post = new Blog({
+        const {title, body, category, image} = request.body
+        
+        const blog = new Blog({
             userId: adminId,
-            post: {
-                title: title,
-                body: body,
-                category: category
-            },
-            readingTime: readTime
+            title: title,
+            body: body,
+            category: category,
+            image: image
         })
-        await post.save()
-        return response.status(201).json({message: "Blog created successfully"})
+        // if (image) {
+        //     await cloudinaryUpload(image.path)
+        //         .then((downloadURL) => {
+        //             blog.image = downloadURL
+        //         })
+        //         .catch((err) => {
+        //             throw new Error(`CLOUDINARY ERROR => ${err.message}`)
+        //         })
+        // }
+        await blog.save()
+        return response.status(201).json({message: "Blog created successfully", blog})
     }
     catch(err){
         console.log(err.message);

@@ -4,18 +4,16 @@ const blogSchema = new mongoose.Schema(
         userId: {
             type: mongoose.Schema.Types.ObjectId,
         },
-        post: {
-            title: {
-                type: String,
-                required: true,
-            },
-            body: {
-                type: String,
-                required: true,
-            },
-            category: {
-                type: String,
-            }
+        title: {
+            type: String,
+            required: true,
+        },
+        body: {
+            type: String,
+            required: true,
+        },
+        category: {
+            type: String,
         },
         comments: [
             {
@@ -41,6 +39,9 @@ const blogSchema = new mongoose.Schema(
         },
         readingTime: {
             type: String
+        },
+        image: {
+            type: String,
         }
     },
     { timestamps: true }

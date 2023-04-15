@@ -16,7 +16,7 @@ const {resumeSchema} = require("../helpers/resumeValidate")
 // endpoint for allowing a user to sign up
 const register = async(request, response) => {
     try{
-        const {fullname, email, password } = request.body
+        const {fullname, email, password, profilePhoto } = request.body
         if(!fullname && !email & !password){
             return response.status(400).json({message: 'Please fill all required fields'})
         }
@@ -29,7 +29,8 @@ const register = async(request, response) => {
         const user = new User({
             fullname: fullname,
             email: email,
-            password: hashedPassword
+            password: hashedPassword,
+            picture: profilePhoto
         })
         const token = await generateRegisterOTP(user._id)
         const subject = "Konectin Technical - Email Verification"

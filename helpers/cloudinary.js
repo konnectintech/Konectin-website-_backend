@@ -19,4 +19,4 @@ const cloudinaryUpload = (file) => {
     })
 }
 
-export default cloudinaryUpload
+module.exports = {cloudinaryUpload}
