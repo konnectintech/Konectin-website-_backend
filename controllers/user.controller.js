@@ -54,8 +54,11 @@ const verifyEmailAddress = async(request, response) => {
         const {OTP} = request.body
         const userId = request.query.userId
         const token = await registerOTP.findOne({userId: userId, OTP: OTP})
+        if(!token){
+            return response.status(400).json({message: "User does not exists"})
+        }
         const user = await User.findOne({userId: userId})
-        if(!token && !user){
+        if(!user){
             return response.status(400).json({message: "User does not exists"})
         }
 
@@ -69,6 +72,7 @@ const verifyEmailAddress = async(request, response) => {
         return response.status(200).json({message: "Email verified successfully"})
     }
     catch(err){
+        console.log(err.message);
         return response.status(500).json({ message: "Some error occured, try again later!"})
     }
 }
