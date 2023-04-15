@@ -5,6 +5,7 @@ mongoose.set('strictQuery', true)
 require('dotenv').config()
 const logger = require('morgan')
 const userRoutes = require('./routes/userRoutes')
+const adminRoutes = require('./routes/adminRoutes')
 
 
 const port = process.env.PORT
@@ -33,6 +34,7 @@ app.get('/', (request, response) => {
 })
 
 app.use('/user', userRoutes)
+app.use('/admin', adminRoutes)
 
 app.listen(port, () => {
     console.log(`Server running on port: ${port}`)

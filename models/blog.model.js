@@ -3,12 +3,19 @@ const blogSchema = new mongoose.Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
-            required: true,
         },
         post: {
-            type: String,
-            required: true,
+            title: {
+                type: String,
+                required: true,
+            },
+            body: {
+                type: String,
+                required: true,
+            },
+            category: {
+                type: String,
+            }
         },
         comments: [
             {
@@ -29,8 +36,22 @@ const blogSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        numOfReads: {
+            type: Number
+        },
+        readingTime: {
+            type: String
+        }
     },
     { timestamps: true }
 );
+
+// blogSchema.pre('save', function(next) {
+//     const wordsPerMinute = 200; // Average reading speed of an adult
+//     const words = this.post.body.split(' ').length;
+//     const minutes = Math.ceil(words / wordsPerMinute);
+//     this.readTime = `${minutes} min read`;
+//     next();
+//   });
 
 module.exports = mongoose.model("Blog", blogSchema);
