@@ -54,6 +54,10 @@ const login = async(request, response) => {
 const makeBlog = async(request, response) => {
     try{
         const adminId = request.query.adminId
+        const admin = await Admin.findById({_id: adminId})
+        if(!admin){
+            return response.status(400).json({message: "Admin account does not exits, please register"})
+        }
         const {title, body, category, image} = request.body
         
         const blog = new Blog({
