@@ -55,6 +55,9 @@ const verifyEmailAddress = async(request, response) => {
         const userId = request.query.userId
         const token = await registerOTP.findOne({userId: userId, OTP: OTP})
         const user = await User.findOne({userId: userId})
+        if(!user){
+            return response.status(400).json({message: "User does not exists"})
+        }
 
         if(token.expiresIn < new Date().getTime){
             return new response.status(400).json({message: "Token has expired, please request a new one"})
