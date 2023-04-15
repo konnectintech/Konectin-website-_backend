@@ -450,6 +450,10 @@ const dislikePost = async(request, response) => {
 const resumeBuilder = async (request, response) => {
     try{
         const {userId} = request.query
+        const user = await User.findById({_id: userId})
+        if(!user){
+            return response.status(400).json({message: "User does not exist, please register"})
+        }
         const {error, value} = resumeSchema.validate(request.body)
         if(error){
             return response.status(400).json({Error: error.details[0].message})
