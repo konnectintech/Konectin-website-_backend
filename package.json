@@ -8,6 +8,9 @@
     "dev": "nodemon server.js",
     "start": "node server.js"
   },
+  "engines": {
+    "node": ">=14.17.0"
+  },
   "author": "Akinloluwa Olumuyide",
   "license": "ISC",
   "dependencies": {
