@@ -194,7 +194,7 @@ const resetPassword = async(request, response) => {
             return response.status(400).json({message: "Passwords do not match"})
         }
         const token = await passwordOTP.findOne({OTP: OTP})
-        if(!token){
+        if(!OTP){
             return response.status(400).json({message: "Please fill the token field"})
         }
         if (token.expiresIn < new Date().getTime()) {
