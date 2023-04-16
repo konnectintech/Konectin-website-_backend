@@ -194,9 +194,13 @@ const resetPassword = async(request, response) => {
             return response.status(400).json({message: "Passwords do not match"})
         }
         const token = await passwordOTP.findOne({OTP: OTP})
+        if(!token){
+            return response.status(400).json({message: "No such token"})
+        }
         if(!OTP){
             return response.status(400).json({message: "Please fill the token field"})
         }
+        
         if (token.expiresIn < new Date().getTime()) {
             return response.status(400).json({message: "The token has expired, please request a new one "})
         }
@@ -207,6 +211,7 @@ const resetPassword = async(request, response) => {
         return response.status(200).json({message: "Password updated successfully, please login"})
     }
     catch(err){
+        console.log(err.message);
         return response.status(500).json({message: "Some error occured, try again later"})
     }
 }
