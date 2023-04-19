@@ -295,6 +295,22 @@ const getPost = async (request, response) => {
     }
 }
 
+const updateNumOfReads = async(request, response) => {
+    try{
+        const blogId = request.query.blogId
+        const blog = await Blog.findById({_id: blogId})
+
+        if(!blog){
+            return response.status(400).json({message: "Blog post not found"})
+        }
+
+        const updatedBlog = await blog.updateOne({$inc: {numOfReads: 1}})
+        return response.status(200).json({message: "Number of reads updated", updatedBlog})
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later"})
+    }
+}
 
 //endpoint to get all blogs in the database
 const getAllBlogs = async (request, response) => {
@@ -486,6 +502,6 @@ module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
     commentPost, getComments, deleteComments, likePost, dislikePost,
     verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
-    getAllBlogs, resumeBuilder
+    getAllBlogs, resumeBuilder, updateNumOfReads
 }
 

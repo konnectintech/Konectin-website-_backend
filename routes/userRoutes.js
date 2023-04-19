@@ -5,7 +5,7 @@ const {register, login, getUser,
         commentPost, deleteComments, getComments,
         likePost, dislikePost,
         verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword,
-        resetPassword, getAllBlogs, resumeBuilder} = require('../controllers/user.controller')
+        resetPassword, getAllBlogs, resumeBuilder, updateNumOfReads} = require('../controllers/user.controller')
 
 const {verifyUserToken} = require("../helpers/jsonwebtoken")
 const {isEmailVerified} = require("../helpers/isEmailVerified")
@@ -28,5 +28,6 @@ router.get('/getComments', verifyUserToken, isEmailVerified, getComments)
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost)
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost)
 router.post("/resume", resumeBuilder)
+router.put("/updateNumOfReads", updateNumOfReads)
 
 module.exports = router
