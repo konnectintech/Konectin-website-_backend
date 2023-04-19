@@ -8,7 +8,7 @@ const generateRegisterOTP = async (userId) => {
         userId: userId,
         OTP: random
     })
-    await token.save()
+    token.save()
     return random
 }
 
