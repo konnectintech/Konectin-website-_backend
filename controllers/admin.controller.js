@@ -58,6 +58,10 @@ const makeBlog = async(request, response) => {
         if(!admin){
             return response.status(400).json({message: "Admin account does not exits, please register"})
         }
+        const wordsPerMinute = 100; // Average reading speed of an adult
+        const words = body.split(" ").length;
+        const minutes = Math.ceil(words / wordsPerMinute);
+        const readTime = `${minutes} min read`;
         const {title, body, category, image} = request.body
         
         const blog = new Blog({
@@ -65,7 +69,8 @@ const makeBlog = async(request, response) => {
             title: title,
             body: body,
             category: category,
-            image: image
+            image: image,
+            readingTime: readTime
         })
         // if (image) {
         //     await cloudinaryUpload(image.path)
