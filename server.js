@@ -7,8 +7,8 @@ const logger = require('morgan')
 const userRoutes = require('./routes/userRoutes')
 const adminRoutes = require('./routes/adminRoutes')
 
-
 const port = process.env.PORT
+
 const app = express()
 
 process.env.NODE_ENV === "development"

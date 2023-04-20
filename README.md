@@ -5,7 +5,7 @@ KONECTIN is an application that takes away the hassle of job searching. It conne
 Lead Backend Developer - <b>Akinloluwa Olumuyide</b>
 
 ## Backend Server URL
-<link>Coming soon.....</link>
+<link>https://konectin-backend-hj09.onrender.com</link>
 <br></br>
 
 ## API Documentation
