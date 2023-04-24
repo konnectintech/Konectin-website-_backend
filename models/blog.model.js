@@ -42,7 +42,10 @@ const blogSchema = new mongoose.Schema(
         },
         image: {
             type: String,
-        }
+        },
+        userIP:[{
+            type: String
+        }]
     },
     { timestamps: true }
 );

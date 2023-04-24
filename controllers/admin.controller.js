@@ -102,6 +102,20 @@ const getAllBlogs = async(request, response) => {
     }
 }
 
+const getBlogById = async(request, response) => {
+    try{
+        const blogId = request.query.blogId
+        const blog = await Blog.findById({_id: blogId})
+        if(!blog){
+            return response.status(400).json({message: "Blog post not found"})
+        }
+        return response.status(200).json({message: "Blog post fetched successfully,", Blog: blog})
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later"})
+    }
+}
+
 const deleteBlog = async(request, response) => {
     try{
         const blogId = request.query.blogId
@@ -121,5 +135,5 @@ const deleteBlog = async(request, response) => {
 }
 
 module.exports = {
-    register, login, makeBlog, getAllBlogs, deleteBlog
+    register, login, makeBlog, getAllBlogs, deleteBlog, getBlogById
 }

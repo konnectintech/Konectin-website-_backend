@@ -304,8 +304,15 @@ const updateNumOfReads = async(request, response) => {
             return response.status(400).json({message: "Blog post not found"})
         }
 
-        const updatedBlog = await blog.updateOne({$inc: {numOfReads: 1}})
-        return response.status(200).json({message: "Number of reads updated", updatedBlog})
+        const userHasRead = blog.userIP.includes(request.ip)
+        if(!userHasRead){
+            blog.readBy.push(request.ip) // add user's IP address to readBy array
+            await blog.save()
+            const updatedBlog = await blog.updateOne({$inc: {numOfReads: 1}})
+            return response.status(200).json({message: "Number of reads updated", updatedBlog})
+        } else {
+            return response.status(200).json({message: "Number of reads not updated"})
+        }
     }
     catch(err){
         return response.status(500).json({message: "Server error, try again later"})
