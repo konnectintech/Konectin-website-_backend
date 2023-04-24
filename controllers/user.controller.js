@@ -306,7 +306,7 @@ const updateNumOfReads = async(request, response) => {
 
         const userHasRead = blog.userIP.includes(request.ip)
         if(!userHasRead){
-            blog.readBy.push(request.ip) // add user's IP address to readBy array
+            blog.userIP.push(request.ip) // add user's IP address to readBy array
             await blog.save()
             const updatedBlog = await blog.updateOne({$inc: {numOfReads: 1}})
             return response.status(200).json({message: "Number of reads updated", updatedBlog})
@@ -315,6 +315,7 @@ const updateNumOfReads = async(request, response) => {
         }
     }
     catch(err){
+        console.log(err.message);
         return response.status(500).json({message: "Server error, try again later"})
     }
 }
