@@ -68,11 +68,10 @@ const Default = (title, content, signature) => {
                   src="https://res.cloudinary.com/konectin-cloud/image/upload/v1680126997/2023-03-28_teeamq.png"
                   alt="Logo"
                   style="
-                    max-height: 35%;
+                    max-height: 20%;
                     object-fit: contain;
                     margin-left: auto;
                     margin-right: auto;
-                    display: block;
                   "
                 />
               </header>

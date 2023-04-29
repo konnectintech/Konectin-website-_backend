@@ -5,7 +5,8 @@ const {register, login, getUser,
         commentPost, deleteComments, getComments,
         likePost, dislikePost,
         verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword,
-        resetPassword, getAllBlogs, resumeBuilder, updateNumOfReads} = require('../controllers/user.controller')
+        resetPassword, getAllBlogs, resumeBuilder, updateNumOfReads,
+        konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter} = require('../controllers/user.controller')
 
 const {verifyUserToken} = require("../helpers/jsonwebtoken")
 const {isEmailVerified} = require("../helpers/isEmailVerified")
@@ -22,12 +23,15 @@ router.post('/makeBlog', verifyUserToken, isEmailVerified, makeBlog)
 router.delete('/deleteBlog', verifyUserToken, isEmailVerified, deleteBlog)
 router.get('/getBlog', verifyUserToken, isEmailVerified, getPost)
 router.get('/getAllBlogs', getAllBlogs)
-router.post('/commentPost', verifyUserToken, isEmailVerified, commentPost)
+router.post('/commentPost', isEmailVerified, commentPost)
 router.delete('/deleteComment', verifyUserToken, isEmailVerified, deleteComments)
 router.get('/getComments', verifyUserToken, isEmailVerified, getComments)
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost)
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost)
 router.post("/resume", resumeBuilder)
 router.put("/updateNumOfReads", updateNumOfReads)
+router.post("/internshipMail", konectinInternshipMail)
+router.post("/subscribeMail", subscribeNewsLetter)
+router.post("/unsubscribeMail", unsubscribeNewsLetter)
 
 module.exports = router

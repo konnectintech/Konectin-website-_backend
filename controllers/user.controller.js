@@ -10,6 +10,9 @@ const registerOTP = require('../models/registerOTP')
 const {jwtSign} = require('../helpers/jsonwebtoken')
 const passwordOTP = require('../models/passwordOTP')
 const resume = require("../models/resume.model")
+const intern = require('../models/internshipModel')
+const newsletter = require('../models/newsletter')
+
 const {resumeSchema} = require("../helpers/resumeValidate")
 
 
@@ -506,10 +509,85 @@ const resumeBuilder = async (request, response) => {
     }
 }
 
+const konectinInternshipMail = async(request, response) => {
+    try {
+        const {email} = request.body
+        if(!email){
+            return response.status(400).json({message: "Your email is required"})
+        }
+        const find = await intern.findOne({email: email})
+        if(find){
+            return response.status(400).json({message: "You already subscribed"})
+        }
+        const internship = new intern({
+            email: email
+        })
+        await internship.save()
+        const subject = "Konectin Technical - Konectin Internship"
+        const msg = `This email is to signify that you have requested to be notified when the internship service launch.
+			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+		`;
+        await transporter(email, subject, msg)
+        return response.status(200).json({message: "You will be notified accordingly, please check your email for a vverification message"})
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+const subscribeNewsLetter = async(request, response) => {
+    try {
+        const {email} = request.body
+        if(!email){
+            return response.status(400).json({message: "Your email is required"})
+        }
+        const user = await newsletter.findOne({email: email})
+
+        if(user){
+            return response.status(400).json({message: "You already subscribed"})
+        }
+        const news = new newsletter({
+            email: email
+        })
+        await news.save()
+        const subject = "Konectin Technical"
+        const msg = `This email is to signify that you have successfully subscribed to our newsletter.
+			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+		`;
+        await transporter(email, subject, msg)
+        return response.status(200).json({message: "Subscribed successfully"})
+
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+const unsubscribeNewsLetter = async(request, response) => {
+    try {
+        const {email} = request.body
+        const user = await newsletter.findOne({email: email})
+
+        if(!user){
+            return response.status(400).json({message: "You need to be subscribed first"})
+        }
+        await user.deleteOne()
+        const subject = "Konectin Technical"
+        const msg = `This email is to signify that you have successfully unsubscribed from our newsletter.
+			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+		`;
+        await transporter(email, subject, msg)
+        return response.status(200).json({message: "You have successfully unsubscribed from the mailing list."})
+    }
+    catch(err){
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
     commentPost, getComments, deleteComments, likePost, dislikePost,
     verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
-    getAllBlogs, resumeBuilder, updateNumOfReads
+    getAllBlogs, resumeBuilder, updateNumOfReads, konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter
 }
 
