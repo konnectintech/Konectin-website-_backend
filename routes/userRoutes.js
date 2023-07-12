@@ -6,7 +6,9 @@ const {register, login, getUser,
         likePost, dislikePost,
         verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword,
         resetPassword, getAllBlogs, resumeBuilder, updateNumOfReads,
-        konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,getUserResumes} = require('../controllers/user.controller')
+        konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,getUserResumes,
+        getUserResume
+} = require('../controllers/user.controller')
 
 const {verifyUserToken} = require("../helpers/jsonwebtoken")
 const {isEmailVerified} = require("../helpers/isEmailVerified")
@@ -29,7 +31,8 @@ router.get('/getComments', isEmailVerified, getComments)
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost)
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost)
 router.post("/resume", resumeBuilder)
-router.get("/resume", getUserResumes)
+router.get("/getResumes", getUserResumes)
+router.get("/getResume", getUserResume)
 router.put("/updateNumOfReads", updateNumOfReads)
 router.post("/internshipMail", konectinInternshipMail)
 router.post("/subscribeMail", subscribeNewsLetter)
