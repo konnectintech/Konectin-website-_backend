@@ -505,6 +505,7 @@ const resumeBuilder = async (request, response) => {
         return response.status(201).json({message: "Resume created successfully", cv})        
     }
     catch(err){
+        console.error(err)
         return response.status(500).json({message: "Server error, try again later!"})
     }
 }
@@ -584,10 +585,29 @@ const unsubscribeNewsLetter = async(request, response) => {
     }
 }
 
+const getUserResumes = async function(request,response){
+        try{
+        const {userId} = request.query
+        const user = await User.findById({_id: userId})
+        if(!user){
+            return response.status(400).json({message: "User does not exist, please register"})
+        }
+        cvs = await resume.find({userId:userId});
+
+        return response.status(200).json({message: "Resumes retrieved successfully", cvs})        
+    }
+    catch(err){
+        console.error(err)
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+
+}
+
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
     commentPost, getComments, deleteComments, likePost, dislikePost,
     verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
-    getAllBlogs, resumeBuilder, updateNumOfReads, konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter
+    getAllBlogs, resumeBuilder, updateNumOfReads, konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,
+    getUserResumes
 }
 
