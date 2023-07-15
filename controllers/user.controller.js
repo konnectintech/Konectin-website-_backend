@@ -13,7 +13,7 @@ const resume = require("../models/resume.model")
 const intern = require('../models/internshipModel')
 const newsletter = require('../models/newsletter')
 
-const {resumeSchema} = require("../helpers/resumeValidate")
+const {resumeSchema,resumeUpdateSchema} = require("../helpers/resumeValidate");
 
 
 // endpoint for allowing a user to sign up
@@ -623,6 +623,30 @@ const getUserResume = async function(request,response){
     }
 
 }
+const updateUserResume = async function(request,response){
+        try{
+        const {userId,resumeId} = request.query
+        const user = await User.findById({_id: userId})
+        if(!user){
+            return response.status(400).json({message: "User does not exist, please register"})
+        }
+        const {error, value} = resumeUpdateSchema.validate(request.body)
+        if(error){
+            return response.status(400).json({Error: error.details[0].message})
+        }
+        const cv = await resume.findByIdAndUpdate(resumeId,{...value},{new:true});
+        if(!cv){
+            return response.status(400).json({message: "Resume with Id does not exist"})
+        }
+
+        return response.status(200).json({message: "Resume Updated successfully", cv})        
+    }
+    catch(err){
+        console.error(err)
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+
+}
 
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
@@ -630,6 +654,7 @@ module.exports = {
     verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
     getAllBlogs, resumeBuilder, updateNumOfReads, konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,
     getUserResumes,
-    getUserResume
+    getUserResume,
+    updateUserResume
 }
 
