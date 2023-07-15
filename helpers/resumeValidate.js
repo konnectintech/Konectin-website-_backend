@@ -1,16 +1,18 @@
 const Joi = require("joi")
 
 const resumeSchema = Joi.object({
-    firstName: Joi.string().required(),
-    lastName: Joi.string().required(),
-    email: Joi.string().email().required(),
-    profileSummary: Joi.string(),
-    phoneNumber: Joi.string().required(),
-    country: Joi.string(),
-    city: Joi.string(),
-    state: Joi.string(),
-    zipCode: Joi.string(),
-    profession: Joi.string().required(),
+    basicInfo: Joi.object({
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        email: Joi.string().email().required(),
+        profileSummary: Joi.string(),
+        phoneNumber: Joi.string().required(),
+        country: Joi.string(),
+        city: Joi.string(),
+        state: Joi.string(),
+        zipCode: Joi.string(),
+        profession: Joi.string().required(),
+    }),
     jobExperience: Joi.array().items(Joi.object({
         jobTitle: Joi.string().required(),
         company: Joi.string().required(),

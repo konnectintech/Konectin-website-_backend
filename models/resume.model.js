@@ -4,35 +4,37 @@ const resumeSchema = new mongoose.Schema({
     userId:{
         type: mongoose.Types.ObjectId,
     },
-    firstName: {
-        type: String
-    },
-    lastName: {
-        type: String
-    },
-    email: {
-        type: String
-    },
-    profileSummary: {
-        type: String
-    },
-    phoneNumber: {
-        type: String
-    },
-    country: {
-        type: String
-    },
-    city: {
-        type: String
-    },
-    state: {
-        type: String
-    },
-    zipCode: {
-        type: String
-    },
-    profession: {
-        type: String,
+    basicInfo: {
+        firstName: {
+            type: String
+        },
+        lastName: {
+            type: String
+        },
+        email: {
+            type: String
+        },
+        profileSummary: {
+            type: String
+        },
+        phoneNumber: {
+            type: String
+        },
+        country: {
+            type: String
+        },
+        city: {
+            type: String
+        },
+        state: {
+            type: String
+        },
+        zipCode: {
+            type: String
+        },
+        profession: {
+            type: String,
+        }
     },
     jobExperience: [{
         jobTitle: {type: String},
