@@ -6,6 +6,7 @@ require('dotenv').config()
 const logger = require('morgan')
 const userRoutes = require('./routes/userRoutes')
 const adminRoutes = require('./routes/adminRoutes')
+const expressFileUpload = require('express-fileupload');
 
 const port = process.env.PORT
 
@@ -28,6 +29,7 @@ app.use(cors())
 app.use((logger('dev')))
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+app.use(expressFileUpload({limits:{fileSize:5 * 1024 * 1024}}))
 
 app.get('/', (request, response) => {
     response.json({message: "Welcome to Konectin!"})
