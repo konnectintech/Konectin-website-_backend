@@ -8,7 +8,8 @@ const {register, login, getUser,
         resetPassword, getAllBlogs, resumeBuilder, updateNumOfReads,
         konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,getUserResumes,
         getUserResume,
-        updateUserResume
+        updateUserResume,
+        createPdf
 } = require('../controllers/user.controller')
 
 const {verifyUserToken} = require("../helpers/jsonwebtoken")
@@ -34,6 +35,7 @@ router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost)
 router.post("/resume", resumeBuilder)
 router.get("/getResumes", getUserResumes)
 router.get("/getResume", getUserResume)
+router.post("/createPdf",createPdf)
 router.put("/updateResume",updateUserResume)
 router.put("/updateNumOfReads", updateNumOfReads)
 router.post("/internshipMail", konectinInternshipMail)

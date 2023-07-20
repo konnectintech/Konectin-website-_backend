@@ -12,7 +12,7 @@ const passwordOTP = require('../models/passwordOTP')
 const resume = require("../models/resume.model")
 const intern = require('../models/internshipModel')
 const newsletter = require('../models/newsletter')
-
+const pdf = require('html-pdf');
 const {resumeSchema,resumeUpdateSchema} = require("../helpers/resumeValidate");
 
 
@@ -623,6 +623,31 @@ const getUserResume = async function(request,response){
     }
 
 }
+
+const createPdf = async function(request,response){
+        try{
+        const {userId} = request.query
+        const {html} = request.body;
+        const user = await User.findById({_id: userId})
+        if(!user){
+            return response.status(400).json({message: "User does not exist, please register"})
+        }
+        const data = pdf.create(html).toBuffer((err,buffer)=>{
+            if(err){
+                console.error(err);
+                return response.status(500).json({message: "Error Generating Pdf, Please Try Again Later"})
+            }
+            response.setHeader('Content-Type', 'application/pdf');
+            response.setHeader('Content-Disposition', 'attachment; filename=resume.pdf');
+            return response.status(200).send(buffer);
+        });       
+    }
+    catch(err){
+        console.error(err)
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+
+}
 const updateUserResume = async function(request,response){
         try{
         const {userId,resumeId} = request.query
@@ -655,6 +680,7 @@ module.exports = {
     getAllBlogs, resumeBuilder, updateNumOfReads, konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,
     getUserResumes,
     getUserResume,
-    updateUserResume
+    updateUserResume,
+    createPdf
 }
 
