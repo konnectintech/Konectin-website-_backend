@@ -29,7 +29,8 @@
     "passport": "^0.6.0",
     "passport-google-oauth2": "^0.2.0",
     "prettier": "^2.8.6",
-    "rand-token": "^1.0.1"
+    "rand-token": "^1.0.1",
+    "tmp": "^0.2.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.21"
