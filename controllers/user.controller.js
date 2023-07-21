@@ -646,28 +646,7 @@ const createPdf = async function(request,response){
             }
             response.type("pdf");
             return response.end(buffer,"binary");
-        })
-        // tmp.tmpName((err,filePath)=>{
-        //     if(err){
-        //         console.error(err)
-        //     }
-            
-        //     pdf.create(html,{
-        //         childProcessOptions:{
-        //             env:{
-        //                 OPENSSL_CONF:'/dev/null'
-        //             }
-        //         }
-        //     }).toFile(filePath,(err,res)=>{
-        //         if(err){
-        //             console.error(err)
-        //             return response.status(500).json({message: "Error Generating Pdf, Please Try Again Later"})
-        //         }
-        //         console.log(res.filename)
-        //         console.log(filePath)
-        //         return response.sendFile(res.filename);
-        //     })
-        // })     
+        }) 
     }
     catch(err){
         console.error(err)
