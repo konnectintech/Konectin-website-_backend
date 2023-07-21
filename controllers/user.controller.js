@@ -13,6 +13,7 @@ const resume = require("../models/resume.model")
 const intern = require('../models/internshipModel')
 const newsletter = require('../models/newsletter')
 const pdf = require('html-pdf');
+const tmp = require('tmp');
 const {resumeSchema,resumeUpdateSchema} = require("../helpers/resumeValidate");
 
 
@@ -632,21 +633,35 @@ const createPdf = async function(request,response){
         if(!user){
             return response.status(400).json({message: "User does not exist, please register"})
         }
-        const data = pdf.create(html,{
-            childProcessOptions:{
-                env:{
-                    OPENSSL_CONF:'/dev/null'
-                }
-            }
-        }).toBuffer((err,buffer)=>{
+        pdf.create(html).toBuffer((err,buffer)=>{
             if(err){
-                console.error(err);
+                console.error(err)
                 return response.status(500).json({message: "Error Generating Pdf, Please Try Again Later"})
             }
-            response.setHeader('Content-Type', 'application/pdf');
-            response.setHeader('Content-Disposition', 'attachment; filename=resume.pdf');
-            return response.status(200).send(buffer);
-        });       
+            response.type("pdf");
+            return response.end(buffer,"binary");
+        })
+        // tmp.tmpName((err,filePath)=>{
+        //     if(err){
+        //         console.error(err)
+        //     }
+            
+        //     pdf.create(html,{
+        //         childProcessOptions:{
+        //             env:{
+        //                 OPENSSL_CONF:'/dev/null'
+        //             }
+        //         }
+        //     }).toFile(filePath,(err,res)=>{
+        //         if(err){
+        //             console.error(err)
+        //             return response.status(500).json({message: "Error Generating Pdf, Please Try Again Later"})
+        //         }
+        //         console.log(res.filename)
+        //         console.log(filePath)
+        //         return response.sendFile(res.filename);
+        //     })
+        // })     
     }
     catch(err){
         console.error(err)
@@ -654,6 +669,7 @@ const createPdf = async function(request,response){
     }
 
 }
+
 const updateUserResume = async function(request,response){
         try{
         const {userId,resumeId} = request.query
