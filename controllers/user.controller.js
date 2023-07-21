@@ -633,7 +633,13 @@ const createPdf = async function(request,response){
         if(!user){
             return response.status(400).json({message: "User does not exist, please register"})
         }
-        pdf.create(html).toBuffer((err,buffer)=>{
+        pdf.create(html,{
+            childProcessOptions:{
+                env:{
+                    OPENSSL_CONF:'/dev/null'
+                }
+            }
+        }).toBuffer((err,buffer)=>{
             if(err){
                 console.error(err)
                 return response.status(500).json({message: "Error Generating Pdf, Please Try Again Later"})
