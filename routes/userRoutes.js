@@ -10,7 +10,10 @@ const {register, login, getUser,
         getUserResume,
         updateUserResume,
         createPdf,
-        replyComment
+        replyComment,
+        updateComment,
+        updateCommentReply,
+        deleteCommentReply
 } = require('../controllers/user.controller')
 
 const {verifyUserToken} = require("../helpers/jsonwebtoken")
@@ -30,8 +33,11 @@ router.get('/getBlog', verifyUserToken, isEmailVerified, getPost)
 router.get('/getAllBlogs', getAllBlogs)
 router.post('/commentPost', verifyUserToken, isEmailVerified, commentPost)
 router.get('/getComments', isEmailVerified, getComments)
-router.post('/replyComment', verifyUserToken, isEmailVerified, replyComment)
+router.post('/replyComment', verifyUserToken, isEmailVerified, replyComment),
+router.put('/updateComment', verifyUserToken, isEmailVerified, updateComment),
+router.put('/updateCommentReply', verifyUserToken, isEmailVerified, updateCommentReply),
 router.delete('/deleteComment', verifyUserToken, isEmailVerified, deleteComments)
+router.delete('/deleteCommentReply', verifyUserToken, isEmailVerified, deleteCommentReply)
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost)
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost)
 router.post("/resume", resumeBuilder)

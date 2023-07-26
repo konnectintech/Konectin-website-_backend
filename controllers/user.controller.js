@@ -439,6 +439,49 @@ const replyComment = async(request, response)=> {
     }
 }
 
+const updateComment = async(request, response)=> {
+    try{
+        const userId = request.query.userId
+        const commentId = request.query.commentId
+        const user = await User.findById(userId);
+        const message = request.body.comment;
+        if(!user){
+            return response.status(404).json({ message: "User not found!" });
+        }
+        const comment= await Comment.findByIdAndUpdate(commentId,{comment:message},{new:true});
+        if(!comment){
+            return response.status(404).json({ message: "Comment not found!" });
+        }
+        return response.status(200).json({message: "Comment Updated successfully", data: comment})
+    }
+    catch(err){
+        console.error(err)
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+const updateCommentReply = async(request, response)=> {
+    try{
+        const userId = request.query.userId
+        const commentId = request.query.commentId
+        const user = await User.findById(userId);
+        const message = request.body.comment;
+        if(!user){
+            return response.status(404).json({ message: "User not found!" });
+        }
+        const comment = await CommentReply.findByIdAndUpdate(commentId,{comment:message},{new:true});
+        if(!comment){
+            return response.status(404).json({ message: "Comment Reply not found!" });
+        }
+        return response.status(200).json({message: "Comment Reply Updated successfully", data: comment})
+    }
+    catch(err){
+        console.error(err)
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+
 // endpoint to delete a comment
 const deleteComments = async(request, response)=> {
     try{
@@ -457,6 +500,32 @@ const deleteComments = async(request, response)=> {
         
     }
     catch(err){
+        console.error(err)
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+
+const deleteCommentReply = async(request, response)=> {
+    try{
+        const userId = request.query.userId
+        const commentId = request.query.commentId
+        const user = await User.findById(userId);
+        if (!user) {
+            return response.status(400).json({ message: "User not found!" });
+        }
+        // const comment = await Comment.findOne({"reply.id":commentId});
+        // console.log("the comment",comment)
+        // comment.reply.id(commentReply.id).deleteOne();
+        // await comment.save();
+        const commentReply = await CommentReply.findByIdAndDelete(commentId);
+        if (!commentReply) {
+            return response.status(400).json({ message: "Comment not found!" });
+        }
+        return response.status(200).json({ message: "Comment Reply Deleted Succesfully",data:commentReply });
+        
+    }
+    catch(err){
+        console.error(err)
         return response.status(500).json({message: "Server error, try again later!"})
     }
 }
@@ -719,6 +788,9 @@ module.exports = {
     getUserResume,
     updateUserResume,
     createPdf,
-    replyComment
+    replyComment,
+    updateComment,
+    updateCommentReply,
+    deleteCommentReply
 }
 
