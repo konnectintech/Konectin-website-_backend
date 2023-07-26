@@ -17,25 +17,24 @@ const blogSchema = new mongoose.Schema(
         }],
         comments: [
             {
-                commentId: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "comment",
-                },
-                comment: {
-                    type: String,
-                },
-                user: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "users",
-                },
-            },
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "comment",
+            }
         ],
-        likes: {
-            type: Number,
-            default: 0,
-        },
+        likes: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "users",
+            }
+
+        ],
         numOfReads: {
-            type: Number
+            type: Number,
+            default:0
+        },
+        numOfShares: {
+            type: Number,
+            default:0
         },
         readingTime: {
             type: String

@@ -9,7 +9,8 @@ const {register, login, getUser,
         konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,getUserResumes,
         getUserResume,
         updateUserResume,
-        createPdf
+        createPdf,
+        replyComment
 } = require('../controllers/user.controller')
 
 const {verifyUserToken} = require("../helpers/jsonwebtoken")
@@ -27,9 +28,10 @@ router.post('/makeBlog', verifyUserToken, isEmailVerified, makeBlog)
 router.delete('/deleteBlog', verifyUserToken, isEmailVerified, deleteBlog)
 router.get('/getBlog', verifyUserToken, isEmailVerified, getPost)
 router.get('/getAllBlogs', getAllBlogs)
-router.post('/commentPost', /*verifyUserToken,*/ isEmailVerified, commentPost)
-router.delete('/deleteComment', verifyUserToken, isEmailVerified, deleteComments)
+router.post('/commentPost', verifyUserToken, isEmailVerified, commentPost)
 router.get('/getComments', isEmailVerified, getComments)
+router.post('/replyComment', verifyUserToken, isEmailVerified, replyComment)
+router.delete('/deleteComment', verifyUserToken, isEmailVerified, deleteComments)
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost)
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost)
 router.post("/resume", resumeBuilder)

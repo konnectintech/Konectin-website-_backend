@@ -1,6 +1,6 @@
 const User = require('../models/user.model')
 const Blog = require('../models/blog.model')
-const Comment = require('../models/comment.model')
+const {Comment, CommentReply} = require('../models/comment.model')
 const Like = require('../models/like.model')
 const { passwordCompare, passwordHash} = require('../helpers/bcrypt')
 const {transporter} = require("../config/email")
@@ -336,40 +336,64 @@ const getAllBlogs = async (request, response) => {
 }
 
 // endpoint to comment on a post
+// const commentPost = async(request, response)=>{
+//     try{
+//         const {comment} = request.body
+//         const userId = request.query.userId
+//         const postId = request.query.postId
+
+//         const post = await Blog.findById({_id: postId})
+//         const user = await User.findById({_id: userId})
+//         const comment1 = await Comment.findOne({postId})
+
+//         if (!post) {
+//             return response.status(404).json({ message: "Post not found!" });
+//         }
+//         if (!user) {
+//             return response.status(404).json({ message: "User not found!" });
+//         }
+
+//         const newComment = new Comment({
+//             userId: userId,
+//             postId: postId,
+//             comment: comment
+//         })
+//         await newComment.save()
+        
+//         post.comments.push({
+//             commentId: newComment._id,
+//             comment: comment,
+//             user: user._id
+//         })
+//         await post.save()
+//         return response.status(200).json({message: "Comment posted successfully", comment: newComment.comment})
+//     }
+//     catch(err){
+//         console.log(err.message);
+//         return response.status(500).json({message: "Server error, try again later!"})
+//     }
+// }
+
 const commentPost = async(request, response)=>{
     try{
         const {comment} = request.body
         const userId = request.query.userId
-        const postId = request.query.postId
+        const blogId = request.query.blogId
 
-        const comment1 = await Comment.findOne({postId})
-        const post = await Blog.findById({_id: postId})
         const user = await User.findById({_id: userId})
-
-        if (!post) {
-            return response.status(400).json({ message: "Post not found!" });
-        }
         if (!user) {
-            return response.status(400).json({ message: "User not found!" });
+            return response.status(404).json({ message: "User not found!" });
         }
 
-        const newComment = new Comment({
+        const newComment = await Comment.create({
             userId: userId,
-            postId: postId,
+            blogId: blogId,
             comment: comment
         })
-        await newComment.save()
-        
-        post.comments.push({
-            commentId: newComment._id,
-            comment: comment,
-            user: user._id
-        })
-        await post.save()
-        return response.status(200).json({message: "Comment posted successfully", comment: newComment.comment})
+        return response.status(201).json({message: "Comment posted successfully", data: newComment})
     }
     catch(err){
-        console.log(err.message);
+        console.error(err.message);
         return response.status(500).json({message: "Server error, try again later!"})
     }
 }
@@ -378,15 +402,39 @@ const commentPost = async(request, response)=>{
 const getComments = async(request, response)=> {
     try{
         const blogId = request.query.blogId
-        const blog = await Blog.findById({_id: blogId})
-        if(!blog){
-            return response.status(400).json({message: "Blog post not found"})
-        }
-
-        const comments = await Comment.find({postId: blog._id}).sort({createdAt: -1})
-        return response.status(200).json({message: "Comments fetched successfully", comments: comments})
+        const comments = await Comment.find({blogId: blogId}).sort({createdAt: -1}).populate('reply')
+        return response.status(200).json({message: "Comments fetched successfully", data: comments})
     }
     catch(err){
+        console.error(err)
+        return response.status(500).json({message: "Server error, try again later!"})
+    }
+}
+// reply to a comment
+const replyComment = async(request, response)=> {
+    try{
+        const userId = request.query.userId
+        const commentId = request.query.commentId
+        const user = await User.findById(userId);
+        const comment= await Comment.findById(commentId);
+        const message = request.body.comment;
+        if(!user){
+            return response.status(404).json({ message: "User not found!" });
+        }
+        if(!comment){
+            return response.status(404).json({ message: "Comment not found!" });
+        }
+        const commentReply = await CommentReply.create({
+            commentId:comment.id,
+            userId:user.id,
+            comment:message
+        })
+        comment.reply.unshift(commentReply.id);
+        await comment.save();
+        return response.status(200).json({message: "Comment Replied successfully", data: commentReply})
+    }
+    catch(err){
+        console.error(err)
         return response.status(500).json({message: "Server error, try again later!"})
     }
 }
@@ -395,36 +443,18 @@ const getComments = async(request, response)=> {
 const deleteComments = async(request, response)=> {
     try{
         const userId = request.query.userId
-        const blogId = request.query.blogId
         const commentId = request.query.commentId
-
-        const user = await User.findById({_id: userId})
-        const blog = await Blog.findById({_id: blogId})
-        const comment = await Comment.findById({_id: commentId})
-
+        const user = await User.findById(userId);
         if (!user) {
             return response.status(400).json({ message: "User not found!" });
         }
-        if (!blog) {
-            return response.status(400).json({ message: "Blog post not found!" });
-        }
+        const comment = await Comment.findByIdAndDelete(commentId);
         if (!comment) {
             return response.status(400).json({ message: "Comment not found!" });
         }
-        let notInComment = true
-
-        blog.comments.forEach((comment, index) => {
-            if (comment.commentId == commentId) {
-                notInComment = false;
-                blog.comments.splice(index, 1);
-                blog.save();
-                return response.status(200).json({ message: "Comment deleted!" });
-            }
-        });
-        if (notInComment) {
-            return response.status(400).json({ message: "Comment not found!" });
-        }
-        await Comment.findByIdAndDelete(commentId);
+        await CommentReply.deleteMany({commentId:comment.id});
+        return response.status(200).json({ message: "Comment Deleted Succesfully",data:comment });
+        
     }
     catch(err){
         return response.status(500).json({message: "Server error, try again later!"})
@@ -688,6 +718,7 @@ module.exports = {
     getUserResumes,
     getUserResume,
     updateUserResume,
-    createPdf
+    createPdf,
+    replyComment
 }
 
