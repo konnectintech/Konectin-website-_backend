@@ -1,32 +1,32 @@
 const User = require('../models/user.model')
 const Blog = require('../models/blog.model')
-const {Comment, CommentReply} = require('../models/comment.model')
+const { Comment, CommentReply } = require('../models/comment.model')
 const Like = require('../models/like.model')
-const { passwordCompare, passwordHash} = require('../helpers/bcrypt')
-const {transporter} = require("../config/email")
-const {generateRegisterOTP} = require("../helpers/registerToken")
-const {generatePasswordOTP} = require("../helpers/passwordToken")
+const { passwordCompare, passwordHash } = require('../helpers/bcrypt')
+const { transporter } = require("../config/email")
+const { generateRegisterOTP } = require("../helpers/registerToken")
+const { generatePasswordOTP } = require("../helpers/passwordToken")
 const registerOTP = require('../models/registerOTP')
-const {jwtSign} = require('../helpers/jsonwebtoken')
+const { jwtSign } = require('../helpers/jsonwebtoken')
 const passwordOTP = require('../models/passwordOTP')
 const resume = require("../models/resume.model")
 const intern = require('../models/internshipModel')
 const newsletter = require('../models/newsletter')
 const pdf = require('html-pdf');
 const tmp = require('tmp');
-const {resumeSchema,resumeUpdateSchema} = require("../helpers/resumeValidate");
+const { resumeSchema, resumeUpdateSchema } = require("../helpers/resumeValidate");
 
 
 // endpoint for allowing a user to sign up
-const register = async(request, response) => {
-    try{
-        const {fullname, email, password, profilePhoto } = request.body
-        if(!fullname && !email & !password){
-            return response.status(400).json({message: 'Please fill all required fields'})
+const register = async (request, response) => {
+    try {
+        const { fullname, email, password, profilePhoto } = request.body
+        if (!fullname && !email & !password) {
+            return response.status(400).json({ message: 'Please fill all required fields' })
         }
-        const userExists = await User.findOne({email: email})
-        if(userExists){
-            return response.status(401).json({message: "User already exists"})
+        const userExists = await User.findOne({ email: email })
+        if (userExists) {
+            return response.status(401).json({ message: "User already exists" })
         }
 
         const hashedPassword = await passwordHash(password)
@@ -45,50 +45,50 @@ const register = async(request, response) => {
         await transporter(email, subject, msg)
         await user.save()
 
-        return response.status(201).json({message: "User created successfully", user})
+        return response.status(201).json({ message: "User created successfully", user })
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const verifyEmailAddress = async(request, response) => {
+const verifyEmailAddress = async (request, response) => {
     try {
-        const {OTP} = request.body
+        const { OTP } = request.body
         const userId = request.query.userId
-        const token = await registerOTP.findOne({userId: userId, OTP: OTP})
-        if(!token){
-            return response.status(400).json({message: "User does not exists"})
+        const token = await registerOTP.findOne({ userId: userId, OTP: OTP })
+        if (!token) {
+            return response.status(400).json({ message: "User does not exists" })
         }
-        const user = await User.findOne({userId: userId})
-        if(!user){
-            return response.status(400).json({message: "User does not exists"})
+        const user = await User.findOne({ userId: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exists" })
         }
 
-        if(token.expiresIn < new Date().getTime){
-            return new response.status(400).json({message: "Token has expired, please request a new one"})
+        if (token.expiresIn < new Date().getTime) {
+            return new response.status(400).json({ message: "Token has expired, please request a new one" })
         }
 
         await User.findByIdAndUpdate({ _id: userId }, { $set: { isEmailVerified: true } }, { new: true }).exec()
         await user.save()
 
-        return response.status(200).json({message: "Email verified successfully"})
+        return response.status(200).json({ message: "Email verified successfully" })
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
-        return response.status(500).json({ message: "Some error occured, try again later!"})
+        return response.status(500).json({ message: "Some error occured, try again later!" })
     }
 }
 
 // endpoint for requesting a new OTP code to verify email address
-const requestEmailToken = async(request, response) => {
-    try{
-        const {email} = request.body
+const requestEmailToken = async (request, response) => {
+    try {
+        const { email } = request.body
         const userId = request.query.userId
-        const user = await User.findOne({email: email})
-        if(!user){
-            return response.status(400).json({message: "Please sign up before requesting a new token"})
+        const user = await User.findOne({ email: email })
+        if (!user) {
+            return response.status(400).json({ message: "Please sign up before requesting a new token" })
         }
         const token = await generateRegisterOTP(user._id)
         const subject = "Konectin Technical - OTP Code Request"
@@ -97,27 +97,27 @@ const requestEmailToken = async(request, response) => {
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
         await transporter(email, subject, msg)
-        return response.status(200).json({message: "Check your email for the verification code"})
+        return response.status(200).json({ message: "Check your email for the verification code" })
     }
-    catch(err){
-        return response.status(500).json({message: "Some error occured, try again later!"})
+    catch (err) {
+        return response.status(500).json({ message: "Some error occured, try again later!" })
     }
 }
 
 // endpoint for allowing a user to login
-const login = async(request, response) => {
-    try{
-        const {email, password} = request.body
-        if(!email && !password){
-            return response.status(400).json({message: "Please fill all required fields"})
+const login = async (request, response) => {
+    try {
+        const { email, password } = request.body
+        if (!email && !password) {
+            return response.status(400).json({ message: "Please fill all required fields" })
         }
-        const user = await User.findOne({email: email})
-        if(!user){
-            return response.status(400).json({ message: "User does not exist"})
+        const user = await User.findOne({ email: email })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist" })
         }
         const passwordMatch = await passwordCompare(password, user.password)
-        if(!passwordMatch){
-            return response.status(400).json({message: "Incorrect password"})
+        if (!passwordMatch) {
+            return response.status(400).json({ message: "Incorrect password" })
         }
 
         const payload = {
@@ -127,20 +127,20 @@ const login = async(request, response) => {
         }
         const token = jwtSign(payload)
 
-        return response.status(200).json({message: "User logged in successfully!", token: token, data: payload})
+        return response.status(200).json({ message: "User logged in successfully!", token: token, data: payload })
     }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later!"})
+    catch (err) {
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
 // endpoint for signing in with google
 const googleSignin = async (req, res) => {
-    const {displayName, email} = req.body;
+    const { displayName, email } = req.body;
 
     const password = 'googlesignup';
 
-    const user = User.findOne({email}).exec();
+    const user = User.findOne({ email }).exec();
     const token = jwtSign(payload)
 
     if (!user) {
@@ -156,22 +156,22 @@ const googleSignin = async (req, res) => {
             fullname: user.fullname,
             email: user.email
         }
-        
 
-        return response.status(200).json({message: "User logged in successfully!", data: user, token: token});
+
+        return response.status(200).json({ message: "User logged in successfully!", data: user, token: token });
     } else {
-        return response.status(200).json({message: "User logged in successfully!", data: user, token: token});
+        return response.status(200).json({ message: "User logged in successfully!", data: user, token: token });
     }
 }
 
 //endpoint for forget password
-const forgetPassword = async(request, response) => {
+const forgetPassword = async (request, response) => {
     try {
-        const {email} = request.body 
-        const user = await User.findOne({email: email})
+        const { email } = request.body
+        const user = await User.findOne({ email: email })
 
-        if(!user){
-            return response.status(400).json({message: "Please sign-up first"})
+        if (!user) {
+            return response.status(400).json({ message: "Please sign-up first" })
         }
         const token = await generatePasswordOTP(user._id)
         const subject = "Konectin Technical - Reset password"
@@ -180,158 +180,158 @@ const forgetPassword = async(request, response) => {
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
         await transporter(email, subject, msg)
-        return response.status(200).json({message: "Please check email for the code to reset your password"})
+        return response.status(200).json({ message: "Please check email for the code to reset your password" })
     }
-    catch(err){
-        return response.status(500).json({message: "Some error occured, try again later"})
+    catch (err) {
+        return response.status(500).json({ message: "Some error occured, try again later" })
     }
 }
 
 //endpoint to reset password
-const resetPassword = async(request, response) => {
+const resetPassword = async (request, response) => {
     try {
-        const {OTP, password, confirmPassword} = request.body
-        if(!password && !confirmPassword){
-            return response.status(400).json({message: "Please fill all fields"})
+        const { OTP, password, confirmPassword } = request.body
+        if (!password && !confirmPassword) {
+            return response.status(400).json({ message: "Please fill all fields" })
         }
-        if(password !== confirmPassword){
-            return response.status(400).json({message: "Passwords do not match"})
+        if (password !== confirmPassword) {
+            return response.status(400).json({ message: "Passwords do not match" })
         }
-        const token = await passwordOTP.findOne({OTP: OTP})
-        if(!token){
-            return response.status(400).json({message: "No such token"})
+        const token = await passwordOTP.findOne({ OTP: OTP })
+        if (!token) {
+            return response.status(400).json({ message: "No such token" })
         }
-        if(!OTP){
-            return response.status(400).json({message: "Please fill the token field"})
+        if (!OTP) {
+            return response.status(400).json({ message: "Please fill the token field" })
         }
-        
+
         if (token.expiresIn < new Date().getTime()) {
-            return response.status(400).json({message: "The token has expired, please request a new one "})
+            return response.status(400).json({ message: "The token has expired, please request a new one " })
         }
 
         const hashedPassword = await passwordHash(password)
 
         await User.findByIdAndUpdate({ _id: token.userId }, { $set: { password: hashedPassword } }, { new: true }).exec()
-        return response.status(200).json({message: "Password updated successfully, please login"})
+        return response.status(200).json({ message: "Password updated successfully, please login" })
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
-        return response.status(500).json({message: "Some error occured, try again later"})
+        return response.status(500).json({ message: "Some error occured, try again later" })
     }
 }
 
 //endpoint for getting user
-const getUser = async(request, response) => {
+const getUser = async (request, response) => {
     try {
         const userId = request.query.userId
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "No such user exists"})
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "No such user exists" })
         }
-        return response.status(200).json({message: "User profile fetched successfully", user})
+        return response.status(200).json({ message: "User profile fetched successfully", user })
     }
-    catch(err){
-        return response.status(500).json({message: 'Server error, try again later!'})
+    catch (err) {
+        return response.status(500).json({ message: 'Server error, try again later!' })
     }
 }
 
 //endpoint to allow a user make a blog post
-const makeBlog = async(request, response) => {
-    try{
+const makeBlog = async (request, response) => {
+    try {
         const { blog } = request.body
         const userId = request.query.userId
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "User not found"})
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User not found" })
         }
         const post = new Blog({
             userId: userId,
             post: blog
         })
         await post.save()
-        return response.status(201).json({message: "Blog uploaded successfully"})
+        return response.status(201).json({ message: "Blog uploaded successfully" })
     }
-    catch(err){
-        return response.status(500).json({message: 'Server error, try again later!'})
+    catch (err) {
+        return response.status(500).json({ message: 'Server error, try again later!' })
     }
 }
 
 // endpoint to enable a user delete a blog post
-const deleteBlog = async(request, response) => {
-    try{
+const deleteBlog = async (request, response) => {
+    try {
         const userId = request.query.userId
         const blogId = request.query.blogId
-        const user = await User.findById({_id: userId})
-        const blog = await Blog.findById({_id: blogId})
+        const user = await User.findById({ _id: userId })
+        const blog = await Blog.findById({ _id: blogId })
 
-        if(!user){
-            return response.status(400).json({message: "User does not exist"})
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist" })
         }
-        if(!blog){
-            return response.status(400).json({message: "Blog post does not exists"})
+        if (!blog) {
+            return response.status(400).json({ message: "Blog post does not exists" })
         }
-        await Blog.findByIdAndDelete({_id: blogId})
-        await Comment.deleteMany({postId: blogId})
-        await Like.deleteMany({postId: blogId})
+        await Blog.findByIdAndDelete({ _id: blogId })
+        await Comment.deleteMany({ postId: blogId })
+        await Like.deleteMany({ postId: blogId })
 
-        return response.status(200).json({message: "Blog post deleted succesfully"})
+        return response.status(200).json({ message: "Blog post deleted succesfully" })
     }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later!"})
+    catch (err) {
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
 //endpoint to get all blog post of a particular user
 const getPost = async (request, response) => {
-    try{
+    try {
         const userId = request.query.userId
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "User does not exist"})
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist" })
         }
 
-        const blogPost =  await Blog.find({ userId: user._id });
-        return response.status(200).json({message: 'Blog posts fetched successfully', posts: blogPost})
+        const blogPost = await Blog.find({ userId: user._id });
+        return response.status(200).json({ message: 'Blog posts fetched successfully', posts: blogPost })
     }
-    catch(err){
+    catch (err) {
         console.log(err.message)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const updateNumOfReads = async(request, response) => {
-    try{
+const updateNumOfReads = async (request, response) => {
+    try {
         const blogId = request.query.blogId
-        const blog = await Blog.findById({_id: blogId})
+        const blog = await Blog.findById({ _id: blogId })
 
-        if(!blog){
-            return response.status(400).json({message: "Blog post not found"})
+        if (!blog) {
+            return response.status(400).json({ message: "Blog post not found" })
         }
 
         const userHasRead = blog.userIP.includes(request.ip)
-        if(!userHasRead){
+        if (!userHasRead) {
             blog.userIP.push(request.ip) // add user's IP address to readBy array
             await blog.save()
-            const updatedBlog = await blog.updateOne({$inc: {numOfReads: 1}})
-            return response.status(200).json({message: "Number of reads updated", updatedBlog})
+            const updatedBlog = await blog.updateOne({ $inc: { numOfReads: 1 } })
+            return response.status(200).json({ message: "Number of reads updated", updatedBlog })
         } else {
-            return response.status(200).json({message: "Number of reads not updated"})
+            return response.status(200).json({ message: "Number of reads not updated" })
         }
     }
-    catch(err){
+    catch (err) {
         console.log(err.message);
-        return response.status(500).json({message: "Server error, try again later"})
+        return response.status(500).json({ message: "Server error, try again later" })
     }
 }
 
 //endpoint to get all blogs in the database
 const getAllBlogs = async (request, response) => {
-    try{
+    try {
         const blogs = await Blog.find().exec()
-        return response.status(200).json({message: "All blog posts", blogs})
+        return response.status(200).json({ message: "All blog posts", blogs })
     }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later"})
+    catch (err) {
+        return response.status(500).json({ message: "Server error, try again later" })
     }
 }
 
@@ -359,7 +359,7 @@ const getAllBlogs = async (request, response) => {
 //             comment: comment
 //         })
 //         await newComment.save()
-        
+
 //         post.comments.push({
 //             commentId: newComment._id,
 //             comment: comment,
@@ -374,13 +374,13 @@ const getAllBlogs = async (request, response) => {
 //     }
 // }
 
-const commentPost = async(request, response)=>{
-    try{
-        const {comment} = request.body
+const commentPost = async (request, response) => {
+    try {
+        const { comment } = request.body
         const userId = request.query.userId
         const blogId = request.query.blogId
 
-        const user = await User.findById({_id: userId})
+        const user = await User.findById({ _id: userId })
         if (!user) {
             return response.status(404).json({ message: "User not found!" });
         }
@@ -390,101 +390,101 @@ const commentPost = async(request, response)=>{
             blogId: blogId,
             comment: comment
         })
-        return response.status(201).json({message: "Comment posted successfully", data: newComment})
+        return response.status(201).json({ message: "Comment posted successfully", data: newComment })
     }
-    catch(err){
+    catch (err) {
         console.error(err.message);
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
 // endpoint to get all comments under a post
-const getComments = async(request, response)=> {
-    try{
+const getComments = async (request, response) => {
+    try {
         const blogId = request.query.blogId
-        const comments = await Comment.find({blogId: blogId}).sort({createdAt: -1}).populate('reply')
-        return response.status(200).json({message: "Comments fetched successfully", data: comments})
+        const comments = await Comment.find({ blogId: blogId }).sort({ createdAt: -1 }).populate('reply')
+        return response.status(200).json({ message: "Comments fetched successfully", data: comments })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 // reply to a comment
-const replyComment = async(request, response)=> {
-    try{
+const replyComment = async (request, response) => {
+    try {
         const userId = request.query.userId
         const commentId = request.query.commentId
         const user = await User.findById(userId);
-        const comment= await Comment.findById(commentId);
+        const comment = await Comment.findById(commentId);
         const message = request.body.comment;
-        if(!user){
+        if (!user) {
             return response.status(404).json({ message: "User not found!" });
         }
-        if(!comment){
+        if (!comment) {
             return response.status(404).json({ message: "Comment not found!" });
         }
         const commentReply = await CommentReply.create({
-            commentId:comment.id,
-            userId:user.id,
-            comment:message
+            commentId: comment.id,
+            userId: user.id,
+            comment: message
         })
         comment.reply.unshift(commentReply.id);
         await comment.save();
-        return response.status(200).json({message: "Comment Replied successfully", data: commentReply})
+        return response.status(200).json({ message: "Comment Replied successfully", data: commentReply })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const updateComment = async(request, response)=> {
-    try{
+const updateComment = async (request, response) => {
+    try {
         const userId = request.query.userId
         const commentId = request.query.commentId
         const user = await User.findById(userId);
         const message = request.body.comment;
-        if(!user){
+        if (!user) {
             return response.status(404).json({ message: "User not found!" });
         }
-        const comment= await Comment.findByIdAndUpdate(commentId,{comment:message},{new:true});
-        if(!comment){
+        const comment = await Comment.findByIdAndUpdate(commentId, { comment: message }, { new: true });
+        if (!comment) {
             return response.status(404).json({ message: "Comment not found!" });
         }
-        return response.status(200).json({message: "Comment Updated successfully", data: comment})
+        return response.status(200).json({ message: "Comment Updated successfully", data: comment })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const updateCommentReply = async(request, response)=> {
-    try{
+const updateCommentReply = async (request, response) => {
+    try {
         const userId = request.query.userId
         const commentId = request.query.commentId
         const user = await User.findById(userId);
         const message = request.body.comment;
-        if(!user){
+        if (!user) {
             return response.status(404).json({ message: "User not found!" });
         }
-        const comment = await CommentReply.findByIdAndUpdate(commentId,{comment:message},{new:true});
-        if(!comment){
+        const comment = await CommentReply.findByIdAndUpdate(commentId, { comment: message }, { new: true });
+        if (!comment) {
             return response.status(404).json({ message: "Comment Reply not found!" });
         }
-        return response.status(200).json({message: "Comment Reply Updated successfully", data: comment})
+        return response.status(200).json({ message: "Comment Reply Updated successfully", data: comment })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
 
 // endpoint to delete a comment
-const deleteComments = async(request, response)=> {
-    try{
+const deleteComments = async (request, response) => {
+    try {
         const userId = request.query.userId
         const commentId = request.query.commentId
         const user = await User.findById(userId);
@@ -495,18 +495,18 @@ const deleteComments = async(request, response)=> {
         if (!comment) {
             return response.status(400).json({ message: "Comment not found!" });
         }
-        await CommentReply.deleteMany({commentId:comment.id});
-        return response.status(200).json({ message: "Comment Deleted Succesfully",data:comment });
-        
+        await CommentReply.deleteMany({ commentId: comment.id });
+        return response.status(200).json({ message: "Comment Deleted Succesfully", data: comment });
+
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const deleteCommentReply = async(request, response)=> {
-    try{
+const deleteCommentReply = async (request, response) => {
+    try {
         const userId = request.query.userId
         const commentId = request.query.commentId
         const user = await User.findById(userId);
@@ -521,104 +521,77 @@ const deleteCommentReply = async(request, response)=> {
         if (!commentReply) {
             return response.status(400).json({ message: "Comment not found!" });
         }
-        return response.status(200).json({ message: "Comment Reply Deleted Succesfully",data:commentReply });
-        
+        return response.status(200).json({ message: "Comment Reply Deleted Succesfully", data: commentReply });
+
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
 // endpoint to like a blog post
-const likePost = async(request, response) => {
-    try{
-        const {blogId, userId} = request.query
-        const user = await User.findById({_id: userId})
-        const blog = await Blog.findById({_id: blogId})
+const likePost = async (request, response) => {
+    try {
+        const { blogId, userId } = request.query
+        const user = await User.findById({ _id: userId })
 
-        if(!user){
-            return response.status(400).json({message: "User not found"})
-        }
-        if(!blog){
-            return response.status(400).json({message: "Blog post not found"})
+        if (!user) {
+            return response.status(400).json({ message: "User not found" })
         }
 
-        const ifLikeExists = await Like.findOne({userId, postId: blogId})
-        if(ifLikeExists){
-            return response.status(400).json({message: "You already liked this post"})
+        const userLike = await Like.findOneAndDelete({ userId, blogId: blogId })
+        if (!userLike) {
+            await Like.create({
+                userId,
+                blogId
+            })
+            return response.status(200).json({ message: "Blog Liked successfully" })
+        } else {
+            return response.status(200).json({ message: "Blog Unliked successfully" })
         }
-        const like = new Like({
-            userId: userId,
-            postId: blogId
-        })
-        await like.save()
-        const postLikes = await Like.find({postId: blogId}).count()
-        blog.likes = postLikes
-        await blog.save()
-        return response.status(200).json({message: "Post liked successfully"})
+
+
     }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later!"})
+    catch (err) {
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const dislikePost = async(request, response) => {
-    try{
-        const blogId = request.query.blogId
-        const userId = request.query.userId
-
-        const like = await Like.findOne({ postId: blogId, userId });
-        const blog = await Blog.findById({ _id: blogId });
-        const user = await User.findById({ _id: userId });
-
-        if(!blog){
-            return response.status(400),json({message: "Blog post not found"})
-        }
-        await Like.deleteOne({postId: blogId, userId})
-        const postLikes = await Like.find({postId: blogId}).count()
-        blog.likes = postLikes
-        await blog.save()
-        return response.status(200).json({message: "Blog post disliked successfully"})
-    }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later!"})
-    }
-}
 
 const resumeBuilder = async (request, response) => {
-    try{
-        const {userId} = request.query
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "User does not exist, please register"})
+    try {
+        const { userId } = request.query
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist, please register" })
         }
-        const {error, value} = resumeSchema.validate(request.body)
-        if(error){
-            return response.status(400).json({Error: error.details[0].message})
+        const { error, value } = resumeSchema.validate(request.body)
+        if (error) {
+            return response.status(400).json({ Error: error.details[0].message })
         }
         const cv = new resume({
             userId,
             ...value
         })
         await cv.save()
-        return response.status(201).json({message: "Resume created successfully", cv})        
+        return response.status(201).json({ message: "Resume created successfully", cv })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const konectinInternshipMail = async(request, response) => {
+const konectinInternshipMail = async (request, response) => {
     try {
-        const {email} = request.body
-        if(!email){
-            return response.status(400).json({message: "Your email is required"})
+        const { email } = request.body
+        if (!email) {
+            return response.status(400).json({ message: "Your email is required" })
         }
-        const find = await intern.findOne({email: email})
-        if(find){
-            return response.status(400).json({message: "You already subscribed"})
+        const find = await intern.findOne({ email: email })
+        if (find) {
+            return response.status(400).json({ message: "You already subscribed" })
         }
         const internship = new intern({
             email: email
@@ -629,23 +602,23 @@ const konectinInternshipMail = async(request, response) => {
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
         await transporter(email, subject, msg)
-        return response.status(200).json({message: "You will be notified accordingly, please check your email for a vverification message"})
+        return response.status(200).json({ message: "You will be notified accordingly, please check your email for a vverification message" })
     }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later!"})
+    catch (err) {
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const subscribeNewsLetter = async(request, response) => {
+const subscribeNewsLetter = async (request, response) => {
     try {
-        const {email} = request.body
-        if(!email){
-            return response.status(400).json({message: "Your email is required"})
+        const { email } = request.body
+        if (!email) {
+            return response.status(400).json({ message: "Your email is required" })
         }
-        const user = await newsletter.findOne({email: email})
+        const user = await newsletter.findOne({ email: email })
 
-        if(user){
-            return response.status(400).json({message: "You already subscribed"})
+        if (user) {
+            return response.status(400).json({ message: "You already subscribed" })
         }
         const news = new newsletter({
             email: email
@@ -656,21 +629,21 @@ const subscribeNewsLetter = async(request, response) => {
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
         await transporter(email, subject, msg)
-        return response.status(200).json({message: "Subscribed successfully"})
+        return response.status(200).json({ message: "Subscribed successfully" })
 
     }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later!"})
+    catch (err) {
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const unsubscribeNewsLetter = async(request, response) => {
+const unsubscribeNewsLetter = async (request, response) => {
     try {
-        const {email} = request.body
-        const user = await newsletter.findOne({email: email})
+        const { email } = request.body
+        const user = await newsletter.findOne({ email: email })
 
-        if(!user){
-            return response.status(400).json({message: "You need to be subscribed first"})
+        if (!user) {
+            return response.status(400).json({ message: "You need to be subscribed first" })
         }
         await user.deleteOne()
         const subject = "Konectin Technical"
@@ -678,110 +651,110 @@ const unsubscribeNewsLetter = async(request, response) => {
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
         await transporter(email, subject, msg)
-        return response.status(200).json({message: "You have successfully unsubscribed from the mailing list."})
+        return response.status(200).json({ message: "You have successfully unsubscribed from the mailing list." })
     }
-    catch(err){
-        return response.status(500).json({message: "Server error, try again later!"})
+    catch (err) {
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 }
 
-const getUserResumes = async function(request,response){
-        try{
-        const {userId} = request.query
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "User does not exist, please register"})
+const getUserResumes = async function (request, response) {
+    try {
+        const { userId } = request.query
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist, please register" })
         }
-        cvs = await resume.find({userId:userId});
+        cvs = await resume.find({ userId: userId });
 
-        return response.status(200).json({message: "Resumes retrieved successfully", cvs})        
+        return response.status(200).json({ message: "Resumes retrieved successfully", cvs })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 
 }
 
-const getUserResume = async function(request,response){
-        try{
-        const {userId,resumeId} = request.query
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "User does not exist, please register"})
+const getUserResume = async function (request, response) {
+    try {
+        const { userId, resumeId } = request.query
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist, please register" })
         }
         const cv = await resume.findById(resumeId);
-        if(!cv){
-            return response.status(400).json({message: "Resume with Id does not exist"})
+        if (!cv) {
+            return response.status(400).json({ message: "Resume with Id does not exist" })
         }
 
-        return response.status(200).json({message: "Resume retrieved successfully", cv})        
+        return response.status(200).json({ message: "Resume retrieved successfully", cv })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 
 }
 
-const createPdf = async function(request,response){
-        try{
-        const {userId} = request.query
-        const {html} = request.body;
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "User does not exist, please register"})
+const createPdf = async function (request, response) {
+    try {
+        const { userId } = request.query
+        const { html } = request.body;
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist, please register" })
         }
-        pdf.create(html,{
-            childProcessOptions:{
-                env:{
-                    OPENSSL_CONF:'/dev/null'
+        pdf.create(html, {
+            childProcessOptions: {
+                env: {
+                    OPENSSL_CONF: '/dev/null'
                 }
             }
-        }).toBuffer((err,buffer)=>{
-            if(err){
+        }).toBuffer((err, buffer) => {
+            if (err) {
                 console.error(err)
-                return response.status(500).json({message: "Error Generating Pdf, Please Try Again Later"})
+                return response.status(500).json({ message: "Error Generating Pdf, Please Try Again Later" })
             }
             response.type("pdf");
-            return response.end(buffer,"binary");
-        }) 
+            return response.end(buffer, "binary");
+        })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 
 }
 
-const updateUserResume = async function(request,response){
-        try{
-        const {userId,resumeId} = request.query
-        const user = await User.findById({_id: userId})
-        if(!user){
-            return response.status(400).json({message: "User does not exist, please register"})
+const updateUserResume = async function (request, response) {
+    try {
+        const { userId, resumeId } = request.query
+        const user = await User.findById({ _id: userId })
+        if (!user) {
+            return response.status(400).json({ message: "User does not exist, please register" })
         }
-        const {error, value} = resumeUpdateSchema.validate(request.body)
-        if(error){
-            return response.status(400).json({Error: error.details[0].message})
+        const { error, value } = resumeUpdateSchema.validate(request.body)
+        if (error) {
+            return response.status(400).json({ Error: error.details[0].message })
         }
-        const cv = await resume.findByIdAndUpdate(resumeId,{...value},{new:true});
-        if(!cv){
-            return response.status(400).json({message: "Resume with Id does not exist"})
+        const cv = await resume.findByIdAndUpdate(resumeId, { ...value }, { new: true });
+        if (!cv) {
+            return response.status(400).json({ message: "Resume with Id does not exist" })
         }
 
-        return response.status(200).json({message: "Resume Updated successfully", cv})        
+        return response.status(200).json({ message: "Resume Updated successfully", cv })
     }
-    catch(err){
+    catch (err) {
         console.error(err)
-        return response.status(500).json({message: "Server error, try again later!"})
+        return response.status(500).json({ message: "Server error, try again later!" })
     }
 
 }
 
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
-    commentPost, getComments, deleteComments, likePost, dislikePost,
+    commentPost, getComments, deleteComments, likePost,
     verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
     getAllBlogs, resumeBuilder, updateNumOfReads, konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,
     getUserResumes,

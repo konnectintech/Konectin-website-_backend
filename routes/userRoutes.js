@@ -3,7 +3,7 @@ const router = require("express").Router()
 const {register, login, getUser,
         makeBlog, deleteBlog, getPost,
         commentPost, deleteComments, getComments,
-        likePost, dislikePost,
+        likePost,
         verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword,
         resetPassword, getAllBlogs, resumeBuilder, updateNumOfReads,
         konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,getUserResumes,
@@ -39,7 +39,6 @@ router.put('/updateCommentReply', verifyUserToken, isEmailVerified, updateCommen
 router.delete('/deleteComment', verifyUserToken, isEmailVerified, deleteComments)
 router.delete('/deleteCommentReply', verifyUserToken, isEmailVerified, deleteCommentReply)
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost)
-router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost)
 router.post("/resume", resumeBuilder)
 router.get("/getResumes", getUserResumes)
 router.get("/getResume", getUserResume)

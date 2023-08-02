@@ -1,3 +1,4 @@
+const { string } = require("joi");
 const mongoose = require("mongoose");
 
 const likeSchema = mongoose.Schema(
@@ -5,10 +6,11 @@ const likeSchema = mongoose.Schema(
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "users",
+            required:true
         },
-        postId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "posts",
+        blogId: {
+            type:String,
+            required:true
         },
     },
     { timestamps: true }
