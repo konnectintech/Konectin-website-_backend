@@ -3,17 +3,28 @@ const mongoose = require("mongoose");
 
 const likeSchema = mongoose.Schema(
     {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
-            required:true
-        },
         blogId: {
             type:String,
             required:true
         },
+        likes:{
+            users: [{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "users",
+                required:true
+            }],
+            count:{
+                type:Number,
+                default:0
+            }
+        }
+
     },
     { timestamps: true }
 );
+likeSchema.pre('save',function(next){
+    this.likes.count = this.likes.users.length;
+    next();
+})
 
 module.exports = mongoose.model("likes", likeSchema);

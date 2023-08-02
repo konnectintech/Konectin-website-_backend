@@ -530,26 +530,50 @@ const deleteCommentReply = async (request, response) => {
     }
 }
 
-// endpoint to like a blog post
+// endpoint to response a blog post
 const likePost = async (request, response) => {
     try {
         const { blogId, userId } = request.query
         const user = await User.findById({ _id: userId })
-
         if (!user) {
             return response.status(400).json({ message: "User not found" })
         }
 
-        const userLike = await Like.findOneAndDelete({ userId, blogId: blogId })
-        if (!userLike) {
-            await Like.create({
-                userId,
+        let blogLike = await Like.findOne({ blogId: blogId })
+        if (!blogLike) {
+            blogLike = await Like.create({
                 blogId
             })
+            blogLike.likes.users.push(userId)
+            blogLike.save()
             return response.status(200).json({ message: "Blog Liked successfully" })
-        } else {
-            return response.status(200).json({ message: "Blog Unliked successfully" })
+        } else if (blogLike) {
+            if (!blogLike.likes.users.includes(userId)) {
+                blogLike.likes.users.push(userId)
+                blogLike.save()
+                return response.status(200).json({ message: "Blog Liked successfully" })
+
+            } else {
+                const userIndex = blogLike.likes.users.indexOf(userId);
+                blogLike.likes.users.splice(userIndex, 1);
+                blogLike.save();
+                return response.status(200).json({ message: "Blog Unliked successfully" })
+            }
         }
+
+
+    }
+    catch (err) {
+        console.error(err)
+        return response.status(500).json({ message: "Server error, try again later!" })
+    }
+}
+//endpoint to get response count for a blog post
+const getLikes = async (request, response) => {
+    try {
+        const { blogId } = request.query
+        let blogLikes = await Like.findOne({ blogId: blogId });
+        return response.status(200).json({ data: blogLikes, message: "Likes fetched successfully" })
 
 
     }
@@ -754,7 +778,7 @@ const updateUserResume = async function (request, response) {
 
 module.exports = {
     register, login, getUser, makeBlog, deleteBlog, getPost,
-    commentPost, getComments, deleteComments, likePost,
+    commentPost, getComments, deleteComments, likePost, getLikes,
     verifyEmailAddress, requestEmailToken, googleSignin, forgetPassword, resetPassword,
     getAllBlogs, resumeBuilder, updateNumOfReads, konectinInternshipMail, subscribeNewsLetter, unsubscribeNewsLetter,
     getUserResumes,
