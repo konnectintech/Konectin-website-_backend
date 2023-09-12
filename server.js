@@ -1,43 +1,51 @@
-const express = require("express")
-const cors = require("cors")
-const mongoose = require("mongoose")
-mongoose.set('strictQuery', true)
-require('dotenv').config()
-const logger = require('morgan')
-const userRoutes = require('./routes/userRoutes')
-const adminRoutes = require('./routes/adminRoutes')
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', true);
+require('dotenv').config();
+const logger = require('morgan');
+const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const expressFileUpload = require('express-fileupload');
 
-const port = process.env.PORT
+const { generatePasswordOTP } = require('./helpers/passwordToken');
 
-const app = express()
+const port = process.env.PORT;
 
-process.env.NODE_ENV === "development"
-?   mongoose
-        .connect(process.env.MONGO_DB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        })
-        .then(() => console.log("Local DB connected successfully"))
-        .catch((err) => {console.log(err)})
-: mongoose
-        .connect(process.env.MONGO_DB_URI_CLOUD)
-        .then(() => {console.log("Cloud DB connected successfully")})
-        .catch((err) => {console.log({err})})
+const app = express();
 
-app.use(cors())
-app.use((logger('dev')))
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
-app.use(expressFileUpload({limits:{fileSize:5 * 1024 * 1024}}))
+process.env.NODE_ENV === 'development'
+  ? mongoose
+      .connect(process.env.MONGO_DB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then(() => console.log('Local DB connected successfully'))
+      .catch((err) => {
+        console.log(err);
+      })
+  : mongoose
+      .connect(process.env.MONGO_DB_URI_CLOUD)
+      .then(() => {
+        console.log('Cloud DB connected successfully');
+      })
+      .catch((err) => {
+        console.log({ err });
+      });
+
+app.use(cors());
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(expressFileUpload({ limits: { fileSize: 5 * 1024 * 1024 } }));
 
 app.get('/', (request, response) => {
-    response.json({message: "Welcome to Konectin!"})
-})
+  response.json({ message: 'Welcome to Konectin!' });
+});
 
-app.use('/user', userRoutes)
-app.use('/admin', adminRoutes)
+app.use('/user', userRoutes);
+app.use('/admin', adminRoutes);
 
 app.listen(port, () => {
-    console.log(`Server running on port: ${port}`)
-})
+  console.log(`Server running on port: ${port}`);
+});
