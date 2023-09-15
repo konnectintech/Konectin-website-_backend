@@ -18,6 +18,7 @@ const {
   resumeSchema,
   resumeUpdateSchema,
 } = require('../helpers/resumeValidate');
+const { ResetPasswordEmail } = require('../utils/resetPasswordEmail');
 
 // endpoint for allowing a user to sign up
 const register = async (request, response) => {
@@ -211,10 +212,7 @@ const forgetPassword = async (request, response) => {
     }
     const token = await generatePasswordOTP(user._id);
     const subject = 'Konectin Technical - Reset password';
-    const msg = `Use this code to reset the password to your Konectin account. It expires in 10 minutes.
-			<h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
-			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
-		`;
+    const msg = ResetPasswordEmail(token);
     await transporter(email, subject, msg);
     return response.status(200).json({
       message: 'Please check email for the code to reset your password',

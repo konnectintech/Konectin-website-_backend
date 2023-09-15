@@ -8,8 +8,6 @@ const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const expressFileUpload = require('express-fileupload');
 
-const { generatePasswordOTP } = require('./helpers/passwordToken');
-
 const port = process.env.PORT;
 
 const app = express();
