@@ -13,7 +13,7 @@ const resume = require('../models/resume.model');
 const intern = require('../models/internshipModel');
 const newsletter = require('../models/newsletter');
 const pdf = require('html-pdf');
-const tmp = require('tmp');
+require('dotenv').config();
 const {
   resumeSchema,
   resumeUpdateSchema,
@@ -778,15 +778,26 @@ const createPdf = async function (request, response) {
         .status(400)
         .json({ message: 'User does not exist, please register' });
     }
-    pdf
-      .create(html, {
+    if (process.env.NODE_ENV === "production") {
+      pdf.create(html)
+        .toBuffer((err, buffer) => {
+          if (err) {
+            console.error(err);
+            return response
+              .status(500)
+              .json({ message: 'Error Generating Pdf, Please Try Again Later' });
+          }
+          response.type('pdf');
+          return response.end(buffer, 'binary');
+        });
+    } else {
+      pdf.create(html, {
         childProcessOptions: {
           env: {
             OPENSSL_CONF: '/dev/null',
           },
         },
-      })
-      .toBuffer((err, buffer) => {
+      }).toBuffer((err, buffer) => {
         if (err) {
           console.error(err);
           return response
@@ -796,6 +807,7 @@ const createPdf = async function (request, response) {
         response.type('pdf');
         return response.end(buffer, 'binary');
       });
+    }
   } catch (err) {
     console.error(err);
     return response
