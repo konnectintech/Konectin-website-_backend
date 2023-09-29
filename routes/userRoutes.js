@@ -45,7 +45,7 @@ router.post('/resetPassword', resetPassword);
 router.get('/getUser', getUser);
 router.post('/makeBlog', verifyUserToken, isEmailVerified, makeBlog);
 router.delete('/deleteBlog', verifyUserToken, isEmailVerified, deleteBlog);
-router.get('/getBlog', verifyUserToken, isEmailVerified, getPost);
+router.get('/getBlog', getPost);
 router.get('/getAllBlogs', getAllBlogs);
 router.post('/commentPost', /*verifyUserToken,*/ isEmailVerified, commentPost);
 router.delete(

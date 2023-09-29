@@ -379,13 +379,8 @@ const deleteBlog = async (request, response) => {
 //endpoint to get all blog post of a particular user
 const getPost = async (request, response) => {
   try {
-    const userId = request.query.userId;
-    const user = await User.findById({ _id: userId });
-    if (!user) {
-      return response.status(400).json({ message: 'User does not exist' });
-    }
-
-    const blogPost = await Blog.find({ userId: user._id });
+    const blogId = request.query.blogId
+    const blogPost = await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId)
     return response
       .status(200)
       .json({ message: 'Blog posts fetched successfully', posts: blogPost });
