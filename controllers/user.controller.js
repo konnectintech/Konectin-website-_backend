@@ -13,6 +13,7 @@ const resume = require('../models/resume.model');
 const intern = require('../models/internshipModel');
 const newsletter = require('../models/newsletter');
 const pdf = require('html-pdf');
+const hubspotClient = require("../config/hubspot");
 require('dotenv').config();
 const {
   resumeSchema,
@@ -429,9 +430,14 @@ const updateNumOfReads = async (request, response) => {
 //endpoint to get all blogs in the database
 const getAllBlogs = async (request, response) => {
   try {
-    const blogs = await Blog.find().exec();
+    const blogs = await hubspotClient.apiRequest({
+      method:'GET',
+      path:'/content/api/v2/blog-posts'
+    })
+    // const blogs = await Blog.find().exec();
     return response.status(200).json({ message: 'All blog posts', blogs });
   } catch (err) {
+    console.error(err)
     return response
       .status(500)
       .json({ message: 'Server error, try again later' });
