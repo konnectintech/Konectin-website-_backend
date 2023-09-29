@@ -28,6 +28,7 @@ const {
   updateUserResume,
   createPdf,
   verifyOtp,
+  logOut,
 } = require('../controllers/user.controller');
 
 const { verifyUserToken } = require('../helpers/jsonwebtoken');
@@ -65,5 +66,6 @@ router.put('/updateNumOfReads', updateNumOfReads);
 router.post('/internshipMail', konectinInternshipMail);
 router.post('/subscribeMail', subscribeNewsLetter);
 router.post('/unsubscribeMail', unsubscribeNewsLetter);
+router.delete('/logout', logOut);
 
 module.exports = router;

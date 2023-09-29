@@ -838,6 +838,19 @@ const updateUserResume = async function (request, response) {
   }
 };
 
+const logOut = async function (request, response) {
+  try {
+    return response
+    .status(400)
+    .json({ message: 'In development' });
+  } catch (err) {
+    console.error(err);
+    return response
+      .status(500)
+      .json({ message: 'Server error, try again later!' });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -866,4 +879,5 @@ module.exports = {
   getUserResume,
   updateUserResume,
   createPdf,
+  logOut,
 };
