@@ -430,10 +430,7 @@ const updateNumOfReads = async (request, response) => {
 //endpoint to get all blogs in the database
 const getAllBlogs = async (request, response) => {
   try {
-    const blogs = await hubspotClient.apiRequest({
-      method:'GET',
-      path:'/content/api/v2/blog-posts'
-    })
+    const blogs = await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getPage()
     // const blogs = await Blog.find().exec();
     return response.status(200).json({ message: 'All blog posts', blogs });
   } catch (err) {
