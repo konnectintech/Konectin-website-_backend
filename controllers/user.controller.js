@@ -1,25 +1,25 @@
-const User = require('../models/user.model');
-const Blog = require('../models/blog.model');
-const Comment = require('../models/comment.model');
-const Like = require('../models/like.model');
-const { passwordCompare, passwordHash } = require('../helpers/bcrypt');
-const { transporter } = require('../config/email');
-const { generateRegisterOTP } = require('../helpers/registerToken');
-const { generatePasswordOTP } = require('../helpers/passwordToken');
-const registerOTP = require('../models/registerOTP');
-const { jwtSign } = require('../helpers/jsonwebtoken');
-const passwordOTP = require('../models/passwordOTP');
-const resume = require('../models/resume.model');
-const intern = require('../models/internshipModel');
-const newsletter = require('../models/newsletter');
-const pdf = require('html-pdf');
+const User = require("../models/user.model");
+const Blog = require("../models/blog.model");
+const Comment = require("../models/comment.model");
+const Like = require("../models/like.model");
+const { passwordCompare, passwordHash } = require("../helpers/bcrypt");
+const { transporter } = require("../config/email");
+const { generateRegisterOTP } = require("../helpers/registerToken");
+const { generatePasswordOTP } = require("../helpers/passwordToken");
+const registerOTP = require("../models/registerOTP");
+const { jwtSign } = require("../helpers/jsonwebtoken");
+const passwordOTP = require("../models/passwordOTP");
+const resume = require("../models/resume.model");
+const intern = require("../models/internshipModel");
+const newsletter = require("../models/newsletter");
+const pdf = require("html-pdf");
 const hubspotClient = require("../config/hubspot");
-require('dotenv').config();
+require("dotenv").config();
 const {
   resumeSchema,
   resumeUpdateSchema,
-} = require('../helpers/resumeValidate');
-const { ResetPasswordEmail } = require('../utils/resetPasswordEmail');
+} = require("../helpers/resumeValidate");
+const { ResetPasswordEmail } = require("../utils/resetPasswordEmail");
 
 // endpoint for allowing a user to sign up
 const register = async (request, response) => {
@@ -28,11 +28,11 @@ const register = async (request, response) => {
     if (!fullname && !email & !password) {
       return response
         .status(400)
-        .json({ message: 'Please fill all required fields' });
+        .json({ message: "Please fill all required fields" });
     }
     const userExists = await User.findOne({ email: email });
     if (userExists) {
-      return response.status(401).json({ message: 'User already exists' });
+      return response.status(401).json({ message: "User already exists" });
     }
 
     const hashedPassword = await passwordHash(password);
@@ -43,7 +43,7 @@ const register = async (request, response) => {
       picture: profilePhoto,
     });
     const token = await generateRegisterOTP(user._id);
-    const subject = 'Konectin Technical - Email Verification';
+    const subject = "Konectin Technical - Email Verification";
     const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
 			<h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
@@ -53,12 +53,12 @@ const register = async (request, response) => {
 
     return response
       .status(201)
-      .json({ message: 'User created successfully', user });
+      .json({ message: "User created successfully", user });
   } catch (err) {
     console.log(err.message);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -66,19 +66,18 @@ const verifyEmailAddress = async (request, response) => {
   try {
     const { OTP } = request.body;
     const userId = request.query.userId;
-    console.log(OTP);
     const token = await registerOTP.findOne({ userId: userId, OTP: OTP });
     if (!token) {
-      return response.status(400).json({ message: 'User does not exists' });
+      return response.status(400).json({ message: "User does not exists" });
     }
     const user = await User.findOne({ userId: userId });
     if (!user) {
-      return response.status(400).json({ message: 'User does not exists' });
+      return response.status(400).json({ message: "User does not exists" });
     }
 
     if (token.expiresIn < new Date().getTime) {
       return new response.status(400).json({
-        message: 'Token has expired, please request a new one',
+        message: "Token has expired, please request a new one",
       });
     }
 
@@ -91,12 +90,12 @@ const verifyEmailAddress = async (request, response) => {
 
     return response
       .status(200)
-      .json({ message: 'Email verified successfully' });
+      .json({ message: "Email verified successfully" });
   } catch (err) {
     console.log(err.message);
     return response
       .status(500)
-      .json({ message: 'Some error occured, try again later!' });
+      .json({ message: "Some error occured, try again later!" });
   }
 };
 
@@ -109,10 +108,10 @@ const requestEmailToken = async (request, response) => {
     if (!user) {
       return response
         .status(400)
-        .json({ message: 'Please sign up before requesting a new token' });
+        .json({ message: "Please sign up before requesting a new token" });
     }
     const token = await generateRegisterOTP(user._id);
-    const subject = 'Konectin Technical - OTP Code Request';
+    const subject = "Konectin Technical - OTP Code Request";
     const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
 			<h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
@@ -120,11 +119,11 @@ const requestEmailToken = async (request, response) => {
     await transporter(email, subject, msg);
     return response
       .status(200)
-      .json({ message: 'Check your email for the verification code' });
+      .json({ message: "Check your email for the verification code" });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Some error occured, try again later!' });
+      .json({ message: "Some error occured, try again later!" });
   }
 };
 
@@ -135,15 +134,15 @@ const login = async (request, response) => {
     if (!email && !password) {
       return response
         .status(400)
-        .json({ message: 'Please fill all required fields' });
+        .json({ message: "Please fill all required fields" });
     }
     const user = await User.findOne({ email: email });
     if (!user) {
-      return response.status(400).json({ message: 'User does not exist' });
+      return response.status(400).json({ message: "User does not exist" });
     }
     const passwordMatch = await passwordCompare(password, user.password);
     if (!passwordMatch) {
-      return response.status(400).json({ message: 'Incorrect password' });
+      return response.status(400).json({ message: "Incorrect password" });
     }
 
     const payload = {
@@ -154,14 +153,14 @@ const login = async (request, response) => {
     const token = jwtSign(payload);
 
     return response.status(200).json({
-      message: 'User logged in successfully!',
+      message: "User logged in successfully!",
       token: token,
       data: payload,
     });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -169,7 +168,7 @@ const login = async (request, response) => {
 const googleSignin = async (req, res) => {
   const { displayName, email } = req.body;
 
-  const password = 'googlesignup';
+  const password = "googlesignup";
 
   const user = User.findOne({ email }).exec();
   const token = jwtSign(payload);
@@ -179,7 +178,7 @@ const googleSignin = async (req, res) => {
       email: email,
       fullname: displayName,
       password: password,
-      typeOfUser: 'Google',
+      typeOfUser: "Google",
     }).save();
 
     const payload = {
@@ -189,13 +188,13 @@ const googleSignin = async (req, res) => {
     };
 
     return response.status(200).json({
-      message: 'User logged in successfully!',
+      message: "User logged in successfully!",
       data: user,
       token: token,
     });
   } else {
     return response.status(200).json({
-      message: 'User logged in successfully!',
+      message: "User logged in successfully!",
       data: user,
       token: token,
     });
@@ -209,19 +208,19 @@ const forgetPassword = async (request, response) => {
     const user = await User.findOne({ email: email });
 
     if (!user) {
-      return response.status(400).json({ message: 'Please sign-up first' });
+      return response.status(400).json({ message: "Please sign-up first" });
     }
     const token = await generatePasswordOTP(user._id);
-    const subject = 'Konectin Technical - Reset password';
+    const subject = "Konectin Technical - Reset password";
     const msg = ResetPasswordEmail(token);
     await transporter(email, subject, msg);
     return response.status(200).json({
-      message: 'Please check email for the code to reset your password',
+      message: "Please check email for the code to reset your password",
     });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Some error occured, try again later' });
+      .json({ message: "Some error occured, try again later" });
     console.log(err);
   }
 };
@@ -232,28 +231,28 @@ const verifyOtp = async (request, response) => {
     const { OTP } = request.body;
 
     if (!OTP) {
-      return response.status(400).json({ message: 'Please provide OTP' });
+      return response.status(400).json({ message: "Please provide OTP" });
     }
 
     // Check if the OTP exists and is valid
     const token = await passwordOTP.findOne({ OTP: OTP });
 
     if (!token) {
-      return response.status(400).json({ message: 'Invalid OTP' });
+      return response.status(400).json({ message: "Invalid OTP" });
     }
 
-    if (token.expiresIn < Date.now()) {
+    if (token.expiresIn.getTime() < new Date().getTime()) {
       return response
         .status(400)
-        .json({ message: 'The OTP has expired, please request a new one' });
+        .json({ message: "The OTP has expired, please request a new one" });
     }
     // OTP is valid
-    return response.status(200).json({ message: 'OTP verified successfully' });
+    return response.status(200).json({ message: "OTP verified successfully" });
   } catch (err) {
     console.error(err);
     return response
       .status(500)
-      .json({ message: 'Some error occurred, try again later' });
+      .json({ message: "Some error occurred, try again later" });
   }
 };
 
@@ -262,30 +261,30 @@ const resetPassword = async (request, response) => {
   try {
     const { OTP, password, confirmPassword, email } = request.body;
     if (!password || !confirmPassword || !OTP || !email) {
-      return response.status(400).json({ message: 'Please fill all fields' });
+      return response.status(400).json({ message: "Please fill all fields" });
     }
 
     if (password !== confirmPassword) {
-      return response.status(400).json({ message: 'Passwords do not match' });
+      return response.status(400).json({ message: "Passwords do not match" });
     }
 
     const token = await passwordOTP.findOne({ OTP: OTP });
 
     if (!token) {
-      return response.status(400).json({ message: 'Invalid or expired token' });
+      return response.status(400).json({ message: "Invalid or expired token" });
     }
 
     if (token.expiresIn < Date.now()) {
       return response
         .status(400)
-        .json({ message: 'The token has expired, please request a new one' });
+        .json({ message: "The token has expired, please request a new one" });
     }
 
     // Fetch the user's email from the database
-    const user = await User.findById(token.userId).select('email').exec();
+    const user = await User.findById(token.userId).select("email").exec();
 
     if (!user || user.email !== email) {
-      return response.status(400).json({ message: 'Invalid email address' });
+      return response.status(400).json({ message: "Invalid email address" });
     }
 
     const hashedPassword = await passwordHash(password);
@@ -297,12 +296,12 @@ const resetPassword = async (request, response) => {
     ).exec();
     return response
       .status(200)
-      .json({ message: 'Password updated successfully, please login' });
+      .json({ message: "Password updated successfully, please login" });
   } catch (err) {
     console.log(err.message);
     return response
       .status(500)
-      .json({ message: 'Some error occured, try again later' });
+      .json({ message: "Some error occured, try again later" });
   }
 };
 
@@ -312,15 +311,15 @@ const getUser = async (request, response) => {
     const userId = request.query.userId;
     const user = await User.findById({ _id: userId });
     if (!user) {
-      return response.status(400).json({ message: 'No such user exists' });
+      return response.status(400).json({ message: "No such user exists" });
     }
     return response
       .status(200)
-      .json({ message: 'User profile fetched successfully', user });
+      .json({ message: "User profile fetched successfully", user });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -331,18 +330,18 @@ const makeBlog = async (request, response) => {
     const userId = request.query.userId;
     const user = await User.findById({ _id: userId });
     if (!user) {
-      return response.status(400).json({ message: 'User not found' });
+      return response.status(400).json({ message: "User not found" });
     }
     const post = new Blog({
       userId: userId,
       post: blog,
     });
     await post.save();
-    return response.status(201).json({ message: 'Blog uploaded successfully' });
+    return response.status(201).json({ message: "Blog uploaded successfully" });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -355,12 +354,12 @@ const deleteBlog = async (request, response) => {
     const blog = await Blog.findById({ _id: blogId });
 
     if (!user) {
-      return response.status(400).json({ message: 'User does not exist' });
+      return response.status(400).json({ message: "User does not exist" });
     }
     if (!blog) {
       return response
         .status(400)
-        .json({ message: 'Blog post does not exists' });
+        .json({ message: "Blog post does not exists" });
     }
     await Blog.findByIdAndDelete({ _id: blogId });
     await Comment.deleteMany({ postId: blogId });
@@ -368,27 +367,28 @@ const deleteBlog = async (request, response) => {
 
     return response
       .status(200)
-      .json({ message: 'Blog post deleted succesfully' });
+      .json({ message: "Blog post deleted succesfully" });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
 //endpoint to get all blog post of a particular user
 const getPost = async (request, response) => {
   try {
-    const blogId = request.query.blogId
-    const blogPost = await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId)
+    const blogId = request.query.blogId;
+    const blogPost =
+      await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId);
     return response
       .status(200)
-      .json({ message: 'Blog posts fetched successfully', posts: blogPost });
+      .json({ message: "Blog posts fetched successfully", posts: blogPost });
   } catch (err) {
     console.log(err.message);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -398,7 +398,7 @@ const updateNumOfReads = async (request, response) => {
     const blog = await Blog.findById({ _id: blogId });
 
     if (!blog) {
-      return response.status(400).json({ message: 'Blog post not found' });
+      return response.status(400).json({ message: "Blog post not found" });
     }
 
     const userHasRead = blog.userIP.includes(request.ip);
@@ -408,31 +408,32 @@ const updateNumOfReads = async (request, response) => {
       const updatedBlog = await blog.updateOne({ $inc: { numOfReads: 1 } });
       return response
         .status(200)
-        .json({ message: 'Number of reads updated', updatedBlog });
+        .json({ message: "Number of reads updated", updatedBlog });
     } else {
       return response
         .status(200)
-        .json({ message: 'Number of reads not updated' });
+        .json({ message: "Number of reads not updated" });
     }
   } catch (err) {
     console.log(err.message);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later' });
+      .json({ message: "Server error, try again later" });
   }
 };
 
 //endpoint to get all blogs in the database
 const getAllBlogs = async (request, response) => {
   try {
-    const blogs = await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getPage()
+    const blogs =
+      await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getPage();
     // const blogs = await Blog.find().exec();
-    return response.status(200).json({ message: 'All blog posts', blogs });
+    return response.status(200).json({ message: "All blog posts", blogs });
   } catch (err) {
-    console.error(err)
+    console.error(err);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later' });
+      .json({ message: "Server error, try again later" });
   }
 };
 
@@ -448,10 +449,10 @@ const commentPost = async (request, response) => {
     const user = await User.findById({ _id: userId });
 
     if (!post) {
-      return response.status(400).json({ message: 'Post not found!' });
+      return response.status(400).json({ message: "Post not found!" });
     }
     if (!user) {
-      return response.status(400).json({ message: 'User not found!' });
+      return response.status(400).json({ message: "User not found!" });
     }
 
     const newComment = new Comment({
@@ -468,14 +469,14 @@ const commentPost = async (request, response) => {
     });
     await post.save();
     return response.status(200).json({
-      message: 'Comment posted successfully',
+      message: "Comment posted successfully",
       comment: newComment.comment,
     });
   } catch (err) {
     console.log(err.message);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -485,7 +486,7 @@ const getComments = async (request, response) => {
     const blogId = request.query.blogId;
     const blog = await Blog.findById({ _id: blogId });
     if (!blog) {
-      return response.status(400).json({ message: 'Blog post not found' });
+      return response.status(400).json({ message: "Blog post not found" });
     }
 
     const comments = await Comment.find({ postId: blog._id }).sort({
@@ -493,11 +494,11 @@ const getComments = async (request, response) => {
     });
     return response
       .status(200)
-      .json({ message: 'Comments fetched successfully', comments: comments });
+      .json({ message: "Comments fetched successfully", comments: comments });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -513,13 +514,13 @@ const deleteComments = async (request, response) => {
     const comment = await Comment.findById({ _id: commentId });
 
     if (!user) {
-      return response.status(400).json({ message: 'User not found!' });
+      return response.status(400).json({ message: "User not found!" });
     }
     if (!blog) {
-      return response.status(400).json({ message: 'Blog post not found!' });
+      return response.status(400).json({ message: "Blog post not found!" });
     }
     if (!comment) {
-      return response.status(400).json({ message: 'Comment not found!' });
+      return response.status(400).json({ message: "Comment not found!" });
     }
     let notInComment = true;
 
@@ -528,17 +529,17 @@ const deleteComments = async (request, response) => {
         notInComment = false;
         blog.comments.splice(index, 1);
         blog.save();
-        return response.status(200).json({ message: 'Comment deleted!' });
+        return response.status(200).json({ message: "Comment deleted!" });
       }
     });
     if (notInComment) {
-      return response.status(400).json({ message: 'Comment not found!' });
+      return response.status(400).json({ message: "Comment not found!" });
     }
     await Comment.findByIdAndDelete(commentId);
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -550,17 +551,17 @@ const likePost = async (request, response) => {
     const blog = await Blog.findById({ _id: blogId });
 
     if (!user) {
-      return response.status(400).json({ message: 'User not found' });
+      return response.status(400).json({ message: "User not found" });
     }
     if (!blog) {
-      return response.status(400).json({ message: 'Blog post not found' });
+      return response.status(400).json({ message: "Blog post not found" });
     }
 
     const ifLikeExists = await Like.findOne({ userId, postId: blogId });
     if (ifLikeExists) {
       return response
         .status(400)
-        .json({ message: 'You already liked this post' });
+        .json({ message: "You already liked this post" });
     }
     const like = new Like({
       userId: userId,
@@ -570,11 +571,11 @@ const likePost = async (request, response) => {
     const postLikes = await Like.find({ postId: blogId }).count();
     blog.likes = postLikes;
     await blog.save();
-    return response.status(200).json({ message: 'Post liked successfully' });
+    return response.status(200).json({ message: "Post liked successfully" });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -588,7 +589,7 @@ const dislikePost = async (request, response) => {
     const user = await User.findById({ _id: userId });
 
     if (!blog) {
-      return response.status(400), json({ message: 'Blog post not found' });
+      return response.status(400), json({ message: "Blog post not found" });
     }
     await Like.deleteOne({ postId: blogId, userId });
     const postLikes = await Like.find({ postId: blogId }).count();
@@ -596,14 +597,13 @@ const dislikePost = async (request, response) => {
     await blog.save();
     return response
       .status(200)
-      .json({ message: 'Blog post disliked successfully' });
+      .json({ message: "Blog post disliked successfully" });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
-
 
 const resumeBuilder = async (request, response) => {
   try {
@@ -612,7 +612,7 @@ const resumeBuilder = async (request, response) => {
     if (!user) {
       return response
         .status(400)
-        .json({ message: 'User does not exist, please register' });
+        .json({ message: "User does not exist, please register" });
     }
     const { error, value } = resumeSchema.validate(request.body);
     if (error) {
@@ -625,12 +625,12 @@ const resumeBuilder = async (request, response) => {
     await cv.save();
     return response
       .status(201)
-      .json({ message: 'Resume created successfully', cv });
+      .json({ message: "Resume created successfully", cv });
   } catch (err) {
     console.error(err);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -638,29 +638,29 @@ const konectinInternshipMail = async (request, response) => {
   try {
     const { email } = request.body;
     if (!email) {
-      return response.status(400).json({ message: 'Your email is required' });
+      return response.status(400).json({ message: "Your email is required" });
     }
     const find = await intern.findOne({ email: email });
     if (find) {
-      return response.status(400).json({ message: 'You already subscribed' });
+      return response.status(400).json({ message: "You already subscribed" });
     }
     const internship = new intern({
       email: email,
     });
     await internship.save();
-    const subject = 'Konectin Technical - Konectin Internship';
+    const subject = "Konectin Technical - Konectin Internship";
     const msg = `This email is to signify that you have requested to be notified when the internship service launch.
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
     await transporter(email, subject, msg);
     return response.status(200).json({
       message:
-        'You will be notified accordingly, please check your email for a vverification message',
+        "You will be notified accordingly, please check your email for a vverification message",
     });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -668,27 +668,27 @@ const subscribeNewsLetter = async (request, response) => {
   try {
     const { email } = request.body;
     if (!email) {
-      return response.status(400).json({ message: 'Your email is required' });
+      return response.status(400).json({ message: "Your email is required" });
     }
     const user = await newsletter.findOne({ email: email });
 
     if (user) {
-      return response.status(400).json({ message: 'You already subscribed' });
+      return response.status(400).json({ message: "You already subscribed" });
     }
     const news = new newsletter({
       email: email,
     });
     await news.save();
-    const subject = 'Konectin Technical';
+    const subject = "Konectin Technical";
     const msg = `This email is to signify that you have successfully subscribed to our newsletter.
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
     await transporter(email, subject, msg);
-    return response.status(200).json({ message: 'Subscribed successfully' });
+    return response.status(200).json({ message: "Subscribed successfully" });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -700,21 +700,21 @@ const unsubscribeNewsLetter = async (request, response) => {
     if (!user) {
       return response
         .status(400)
-        .json({ message: 'You need to be subscribed first' });
+        .json({ message: "You need to be subscribed first" });
     }
     await user.deleteOne();
-    const subject = 'Konectin Technical';
+    const subject = "Konectin Technical";
     const msg = `This email is to signify that you have successfully unsubscribed from our newsletter.
 			<p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
     await transporter(email, subject, msg);
     return response.status(200).json({
-      message: 'You have successfully unsubscribed from the mailing list.',
+      message: "You have successfully unsubscribed from the mailing list.",
     });
   } catch (err) {
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -725,18 +725,18 @@ const getUserResumes = async function (request, response) {
     if (!user) {
       return response
         .status(400)
-        .json({ message: 'User does not exist, please register' });
+        .json({ message: "User does not exist, please register" });
     }
     cvs = await resume.find({ userId: userId });
 
     return response
       .status(200)
-      .json({ message: 'Resumes retrieved successfully', cvs });
+      .json({ message: "Resumes retrieved successfully", cvs });
   } catch (err) {
     console.error(err);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -747,23 +747,23 @@ const getUserResume = async function (request, response) {
     if (!user) {
       return response
         .status(400)
-        .json({ message: 'User does not exist, please register' });
+        .json({ message: "User does not exist, please register" });
     }
     const cv = await resume.findById(resumeId);
     if (!cv) {
       return response
         .status(400)
-        .json({ message: 'Resume with Id does not exist' });
+        .json({ message: "Resume with Id does not exist" });
     }
 
     return response
       .status(200)
-      .json({ message: 'Resume retrieved successfully', cv });
+      .json({ message: "Resume retrieved successfully", cv });
   } catch (err) {
     console.error(err);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -775,29 +775,31 @@ const createPdf = async function (request, response) {
     if (!user) {
       return response
         .status(400)
-        .json({ message: 'User does not exist, please register' });
+        .json({ message: "User does not exist, please register" });
     }
-      pdf.create(html, {
+    pdf
+      .create(html, {
         childProcessOptions: {
           env: {
-            OPENSSL_CONF: '/dev/null',
+            OPENSSL_CONF: "/dev/null",
           },
         },
-      }).toBuffer((err, buffer) => {
+      })
+      .toBuffer((err, buffer) => {
         if (err) {
           console.error(err);
           return response
             .status(500)
-            .json({ message: 'Error Generating Pdf, Please Try Again Later' });
+            .json({ message: "Error Generating Pdf, Please Try Again Later" });
         }
-        response.type('pdf');
-        return response.end(buffer, 'binary');
+        response.type("pdf");
+        return response.end(buffer, "binary");
       });
   } catch (err) {
     console.error(err);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -808,7 +810,7 @@ const updateUserResume = async function (request, response) {
     if (!user) {
       return response
         .status(400)
-        .json({ message: 'User does not exist, please register' });
+        .json({ message: "User does not exist, please register" });
     }
     const { error, value } = resumeUpdateSchema.validate(request.body);
     if (error) {
@@ -822,30 +824,28 @@ const updateUserResume = async function (request, response) {
     if (!cv) {
       return response
         .status(400)
-        .json({ message: 'Resume with Id does not exist' });
+        .json({ message: "Resume with Id does not exist" });
     }
 
     return response
       .status(200)
-      .json({ message: 'Resume Updated successfully', cv });
+      .json({ message: "Resume Updated successfully", cv });
   } catch (err) {
     console.error(err);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
 const logOut = async function (request, response) {
   try {
-    return response
-    .status(400)
-    .json({ message: 'In development' });
+    return response.status(400).json({ message: "In development" });
   } catch (err) {
     console.error(err);
     return response
       .status(500)
-      .json({ message: 'Server error, try again later!' });
+      .json({ message: "Server error, try again later!" });
   }
 };
 
