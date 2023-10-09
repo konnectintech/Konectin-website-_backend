@@ -75,7 +75,7 @@ const verifyEmailAddress = async (request, response) => {
       return response.status(400).json({ message: "User does not exists" });
     }
 
-    if (token.expiresIn < new Date().getTime) {
+    if (token.expiresIn.getTime() < Date.now()) {
       return new response.status(400).json({
         message: "Token has expired, please request a new one",
       });
@@ -240,8 +240,7 @@ const verifyOtp = async (request, response) => {
     if (!token) {
       return response.status(400).json({ message: "Invalid OTP" });
     }
-
-    if (token.expiresIn.getTime() < new Date().getTime()) {
+    if (token.expiresIn.getTime() < Date.now()) {
       return response
         .status(400)
         .json({ message: "The OTP has expired, please request a new one" });
@@ -849,6 +848,39 @@ const logOut = async function (request, response) {
   }
 };
 
+const microsoftLogin = async function(request,response){
+    const {name,username:email} = request.body
+    if(!name && !email){
+      return response.status(400).json({message: "Please fill all required fields" })
+    }
+    try {
+      
+    } catch (error) {
+      console.error(error)
+      return response.status(500).json({message:error.message})
+    }
+    let user = await User.findOne({email,typeOfUser:"Microsoft"});
+    if(user){
+      const payload = {_id:user._id,fullname:user.fullname,email:user.email}
+      const token = jwtSign(payload);
+      return response.status(200).json({
+        message:"User logged in successfully!",
+        token:token,
+        data:payload
+      })
+    }
+    user = await User.create({fullname:name,email:email,password:null,typeOfUser:"Microsoft"});
+    const payload = {
+      _id:user._id,
+      fullname:user.fullname,
+      email:user.email
+    }
+    const token = jwtSign(payload)
+    user.token = token
+    return response.status(200).json({message:"User logged in successfully",token,data:payload})
+
+}
+
 module.exports = {
   register,
   login,
@@ -878,4 +910,5 @@ module.exports = {
   updateUserResume,
   createPdf,
   logOut,
+  microsoftLogin
 };

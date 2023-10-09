@@ -12,7 +12,7 @@ const passwordOTPSchema = new mongoose.Schema({
     },
     expiresIn: {
         type: Date,
-        default: new Date().getTime() + 600000,
+        default: Date.now() + 600000,
     },
 }, {timestamps: true})
 

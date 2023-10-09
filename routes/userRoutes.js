@@ -29,6 +29,7 @@ const {
   createPdf,
   verifyOtp,
   logOut,
+  microsoftLogin,
 } = require('../controllers/user.controller');
 
 const { verifyUserToken } = require('../helpers/jsonwebtoken');
@@ -39,6 +40,7 @@ router.post('/verifyEmail', verifyEmailAddress);
 router.post('/requestEmail', requestEmailToken);
 router.post('/googleSignIn', googleSignin);
 router.post('/login', login);
+router.post('/microsoft/login', microsoftLogin);
 router.post('/verify-otp', verifyOtp);
 router.post('/forgotPassword', forgetPassword);
 router.post('/resetPassword', resetPassword);

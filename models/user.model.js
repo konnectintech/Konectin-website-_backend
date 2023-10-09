@@ -10,8 +10,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     password: {
-        type: String,
-        required: true
+        type: String
     },
     picture: {
         type: String
@@ -22,7 +21,7 @@ const userSchema = new mongoose.Schema({
     },
     typeOfUser: {
         type: String,
-        enum: ["Regular", "Google"],
+        enum: ["Regular", "Google","Microsoft"],
         default: "Regular"
     }
 }, {timestamps: true})
