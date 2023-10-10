@@ -12,8 +12,7 @@ const registerOTPSchema = new mongoose.Schema({
         required: true
     },
     expiresIn: {
-        type: Date,
-        default: moment().add(10, 'minutes'),
+        type: Date
     },
 }, {timestamps: true})
 

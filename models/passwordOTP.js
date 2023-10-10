@@ -13,7 +13,6 @@ const passwordOTPSchema = new mongoose.Schema({
     },
     expiresIn: {
         type: Date,
-        default: moment().add(10, 'minutes'),
     },
 }, { timestamps: true })
 
