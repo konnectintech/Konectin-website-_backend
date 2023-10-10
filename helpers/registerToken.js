@@ -9,6 +9,7 @@ const generateRegisterOTP = async (userId) => {
   const token = new RegisterOTP({
     userId: userId,
     OTP: random,
+    expiresIn: moment().add(10, 'minutes'),
   });
   await token.save();
   return random;

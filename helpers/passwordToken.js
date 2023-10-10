@@ -9,6 +9,7 @@ const generatePasswordOTP = async (userId) => {
   const token = new passwordOTP({
     userId: userId,
     OTP: random,
+    expiresIn: moment().add(10, 'minutes'),
   });
   await token.save();
   return random;
