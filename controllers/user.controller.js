@@ -76,6 +76,7 @@ const verifyEmailAddress = async (request, response) => {
     if (!user) {
       return response.status(400).json({ message: "User does not exists" });
     }
+    console.log(moment(token.expiresIn),moment());
     if (moment(token.expiresIn) < moment()) {
       return response.status(400).json({
         message: "Token has expired, please request a new one",
