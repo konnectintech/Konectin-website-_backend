@@ -7,6 +7,10 @@ const logger = require('morgan');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const expressFileUpload = require('express-fileupload');
+const moment = require("moment-timezone")
+
+// set the default timezone to West African Standard Time
+moment.tz.setDefault("Africa/Lagos");
 
 const port = process.env.PORT;
 
@@ -14,22 +18,22 @@ const app = express();
 
 process.env.NODE_ENV === 'development'
   ? mongoose
-      .connect(process.env.MONGO_DB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
-      .then(() => console.log('Local DB connected successfully'))
-      .catch((err) => {
-        console.log(err);
-      })
+    .connect(process.env.MONGO_DB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => console.log('Local DB connected successfully'))
+    .catch((err) => {
+      console.log(err);
+    })
   : mongoose
-      .connect(process.env.MONGO_DB_URI_CLOUD)
-      .then(() => {
-        console.log('Cloud DB connected successfully');
-      })
-      .catch((err) => {
-        console.log({ err });
-      });
+    .connect(process.env.MONGO_DB_URI_CLOUD)
+    .then(() => {
+      console.log('Cloud DB connected successfully');
+    })
+    .catch((err) => {
+      console.log({ err });
+    });
 
 app.use(cors());
 app.use(logger('dev'));

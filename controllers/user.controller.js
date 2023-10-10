@@ -14,6 +14,8 @@ const intern = require("../models/internshipModel");
 const newsletter = require("../models/newsletter");
 const pdf = require("html-pdf");
 const hubspotClient = require("../config/hubspot");
+const moment = require("moment-timezone");
+
 require("dotenv").config();
 const {
   resumeSchema,
@@ -74,8 +76,7 @@ const verifyEmailAddress = async (request, response) => {
     if (!user) {
       return response.status(400).json({ message: "User does not exists" });
     }
-    console.log(Date(token.expiresIn.getTime()),Date(Date.now()))
-    if (token.expiresIn.getTime() < Date.now()) {
+    if (moment(token.expiresIn) < moment()) {
       return response.status(400).json({
         message: "Token has expired, please request a new one",
       });
@@ -240,7 +241,7 @@ const verifyOtp = async (request, response) => {
     if (!token) {
       return response.status(400).json({ message: "Invalid OTP" });
     }
-    if (token.expiresIn.getTime() < Date.now()) {
+    if (moment(token.expiresIn)<moment()) {
       return response
         .status(400)
         .json({ message: "The OTP has expired, please request a new one" });

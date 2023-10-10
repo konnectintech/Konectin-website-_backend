@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const moment = require("moment-timezone")
 
 const registerOTPSchema = new mongoose.Schema({
     userId: {
@@ -12,7 +13,7 @@ const registerOTPSchema = new mongoose.Schema({
     },
     expiresIn: {
         type: Date,
-        default: Date.now() + 600000,
+        default: moment().add(10, 'minutes'),
     },
 }, {timestamps: true})
 
