@@ -220,6 +220,7 @@ const forgetPassword = async (request, response) => {
       message: "Please check email for the code to reset your password",
     });
   } catch (err) {
+    console.log(err)
     return response
       .status(500)
       .json({ message: "Some error occured, try again later" });
@@ -242,6 +243,7 @@ const verifyOtp = async (request, response) => {
     if (!token) {
       return response.status(400).json({ message: "Invalid OTP" });
     }
+    console.log(moment(token.expiresIn),moment())
     if (moment(token.expiresIn)<moment()) {
       return response
         .status(400)
