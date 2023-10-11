@@ -89,16 +89,20 @@ const resumeSchema = new mongoose.Schema({
         },
     }],
     education: [{
-        schoolName: { type: String,required:false },
-        degree: { type: String,required:false },
-        country: { type: String,required:false },
-        city: { type: String,required:false },
-        state: { type: String,required:false },
-        graduated: { type: Boolean, required:false },
-        graduationMonth: { type: String,required:false },
-        graduationYear: { type: String,required:false },
+        schoolName: { type: String, required: false },
+        degree: { type: String, required: false },
+        country: { type: String, required: false },
+        city: { type: String, required: false },
+        state: { type: String, required: false },
+        graduated: { type: Boolean, required: false },
+        graduationMonth: { type: String, required: false },
+        graduationYear: { type: String, required: false },
     }],
-    skills: [{ type: String,required:false }]
+    skills: [{ type: String, required: false }],
+    isCompleted: {
+        type: Boolean,
+        default: false
+    }
 })
 
 module.exports = mongoose.model("ResumeBuilder", resumeSchema)

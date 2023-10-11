@@ -76,7 +76,7 @@ const verifyEmailAddress = async (request, response) => {
     if (!user) {
       return response.status(400).json({ message: "User does not exists" });
     }
-    console.log(moment(token.expiresIn),moment());
+    console.log(moment(token.expiresIn), moment());
     if (moment(token.expiresIn) < moment()) {
       return response.status(400).json({
         message: "Token has expired, please request a new one",
@@ -243,8 +243,8 @@ const verifyOtp = async (request, response) => {
     if (!token) {
       return response.status(400).json({ message: "Invalid OTP" });
     }
-    console.log(moment(token.expiresIn),moment())
-    if (moment(token.expiresIn)<moment()) {
+    console.log(moment(token.expiresIn), moment())
+    if (moment(token.expiresIn) < moment()) {
       return response
         .status(400)
         .json({ message: "The OTP has expired, please request a new one" });
@@ -772,7 +772,7 @@ const getUserResume = async function (request, response) {
 
 const createPdf = async function (request, response) {
   try {
-    const { userId } = request.query;
+    const { userId, resumeId } = request.query;
     const { html } = request.body;
     const user = await User.findById({ _id: userId });
     if (!user) {
@@ -780,6 +780,7 @@ const createPdf = async function (request, response) {
         .status(400)
         .json({ message: "User does not exist, please register" });
     }
+    resume.findByIdAndUpdate(resumeId, { isCompleted: true })
     pdf
       .create(html, {
         childProcessOptions: {
@@ -852,36 +853,36 @@ const logOut = async function (request, response) {
   }
 };
 
-const microsoftLogin = async function(request,response){
-    const {name,username:email} = request.body
-    if(!name && !email){
-      return response.status(400).json({message: "Please fill all required fields" })
-    }
-    try {
-      
-    } catch (error) {
-      console.error(error)
-      return response.status(500).json({message:error.message})
-    }
-    let user = await User.findOne({email,typeOfUser:"Microsoft"});
-    if(user){
-      const payload = {_id:user._id,fullname:user.fullname,email:user.email}
-      const token = jwtSign(payload);
-      return response.status(200).json({
-        message:"User logged in successfully!",
-        token:token,
-        data:payload
-      })
-    }
-    user = await User.create({fullname:name,email:email,password:null,typeOfUser:"Microsoft"});
-    const payload = {
-      _id:user._id,
-      fullname:user.fullname,
-      email:user.email
-    }
-    const token = jwtSign(payload)
-    user.token = token
-    return response.status(200).json({message:"User logged in successfully",token,data:payload})
+const microsoftLogin = async function (request, response) {
+  const { name, username: email } = request.body
+  if (!name && !email) {
+    return response.status(400).json({ message: "Please fill all required fields" })
+  }
+  try {
+
+  } catch (error) {
+    console.error(error)
+    return response.status(500).json({ message: error.message })
+  }
+  let user = await User.findOne({ email, typeOfUser: "Microsoft" });
+  if (user) {
+    const payload = { _id: user._id, fullname: user.fullname, email: user.email }
+    const token = jwtSign(payload);
+    return response.status(200).json({
+      message: "User logged in successfully!",
+      token: token,
+      data: payload
+    })
+  }
+  user = await User.create({ fullname: name, email: email, password: null, typeOfUser: "Microsoft" });
+  const payload = {
+    _id: user._id,
+    fullname: user.fullname,
+    email: user.email
+  }
+  const token = jwtSign(payload)
+  user.token = token
+  return response.status(200).json({ message: "User logged in successfully", token, data: payload })
 
 }
 
