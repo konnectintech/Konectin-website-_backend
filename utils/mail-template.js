@@ -17,14 +17,14 @@ const Default = (title, content, signature) => {
           ><o:PixelsPerInch>96</o:PixelsPerInch
           ><o:AllowPNG /></o:OfficeDocumentSettings></xml
     ><![endif]-->
-    <!--[if !mso]><!-->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter&amp;family=Work+Sans:wght@700&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@100;200;300;400;500;600;700;800;900"
       rel="stylesheet"
       type="text/css"
     />
+    <!--[if !mso]><!-->
     <link
-      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@100;200;300;400;500;600;700;800;900"
+      href="https://fonts.googleapis.com/css2?family=Inter&amp;family=Work+Sans:wght@700&amp;display=swap"
       rel="stylesheet"
       type="text/css"
     />

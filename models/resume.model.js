@@ -1,64 +1,104 @@
 const mongoose = require('mongoose')
 
 const resumeSchema = new mongoose.Schema({
-    userId:{
+    userId: {
         type: mongoose.Types.ObjectId,
     },
     basicInfo: {
         firstName: {
-            type: String
+            type: String,
+            required: false
         },
         lastName: {
-            type: String
+            type: String,
+            required: false
         },
         email: {
-            type: String
+            type: String,
+            required: false
         },
         profileSummary: {
-            type: String
+            type: String,
+            required: false
         },
         phoneNumber: {
-            type: String
+            type: String,
+            required: false
         },
         country: {
-            type: String
+            type: String,
+            required: false
         },
         city: {
-            type: String
+            type: String,
+            required: false
         },
         state: {
-            type: String
+            type: String,
+            required: false
         },
         zipCode: {
-            type: String
+            type: String,
+            required: false
         },
         profession: {
             type: String,
+            required: false,
         }
     },
     jobExperience: [{
-        jobTitle: {type: String},
-        company: {type: String},
-        country: {type: String},
-        city: {type: String},
-        state: {type: String},
-        startMonth: {type: String},
-        startYear: {type: String},
-        endMonth: {type: String},
-        endYear: {type: String},
-        workDesc: {type: String},
+        jobTitle: {
+            type: String,
+            required: false
+        },
+        company: {
+            type: String,
+            required: false
+        },
+        country: {
+            type: String,
+            required: false
+        },
+        city: {
+            type: String,
+            required: false
+        },
+        state: {
+            type: String,
+            required: false
+        },
+        startMonth: {
+            type: String,
+            required: false
+        },
+        startYear: {
+            type: String,
+            required: false
+        },
+        endMonth: {
+            type: String,
+            required: false
+        },
+        endYear: {
+            type: String,
+            required: false
+        },
+        workDesc: {
+            type: String,
+            required: false
+        },
     }],
     education: [{
-        schoolName: {type: String},
-        degree: {type: String},
-        country: {type: String},
-        city: {type: String},
-        state: {type: String},
-        graduated: {type: Boolean},
-        graduationMonth: {type: String},
-        graduationYear: {type: String},
+        schoolName: { type: String,required:false },
+        degree: { type: String,required:false },
+        country: { type: String,required:false },
+        city: { type: String,required:false },
+        state: { type: String,required:false },
+        graduated: { type: Boolean, required:false },
+        graduationMonth: { type: String,required:false },
+        graduationYear: { type: String,required:false },
     }],
-    skills: [{type: String}]
+    skills: [{ type: String,required:false }]
 })
 
 module.exports = mongoose.model("ResumeBuilder", resumeSchema)
