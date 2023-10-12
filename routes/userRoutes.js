@@ -56,7 +56,7 @@ router.delete(
   isEmailVerified,
   deleteComments
 );
-router.get('/getComments', isEmailVerified, getComments);
+router.get('/getComments', getComments);
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost);
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost);
 router.post('/resume', resumeBuilder);

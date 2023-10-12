@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 const Blog = require("../models/blog.model");
-const Comment = require("../models/comment.model");
+const {Comment} = require("../models/comment.model");
 const Like = require("../models/like.model");
 const { passwordCompare, passwordHash } = require("../helpers/bcrypt");
 const { transporter } = require("../config/email");
@@ -487,18 +487,14 @@ const commentPost = async (request, response) => {
 const getComments = async (request, response) => {
   try {
     const blogId = request.query.blogId;
-    const blog = await Blog.findById({ _id: blogId });
-    if (!blog) {
-      return response.status(400).json({ message: "Blog post not found" });
-    }
-
-    const comments = await Comment.find({ postId: blog._id }).sort({
+    const comments = await Comment.find({ blogId: blogId }).sort({
       createdAt: -1,
     });
     return response
       .status(200)
       .json({ message: "Comments fetched successfully", comments: comments });
   } catch (err) {
+    console.error(err)
     return response
       .status(500)
       .json({ message: "Server error, try again later!" });
