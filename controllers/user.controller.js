@@ -1,6 +1,6 @@
 const User = require("../models/user.model");
 const Blog = require("../models/blog.model");
-const {Comment} = require("../models/comment.model");
+const { Comment } = require("../models/comment.model");
 const Like = require("../models/like.model");
 const { passwordCompare, passwordHash } = require("../helpers/bcrypt");
 const { transporter } = require("../config/email");
@@ -445,32 +445,21 @@ const commentPost = async (request, response) => {
   try {
     const { comment } = request.body;
     const userId = request.query.userId;
-    const postId = request.query.postId;
+    const blogId = request.query.blogId;
 
-    const comment1 = await Comment.findOne({ postId });
-    const post = await Blog.findById({ _id: postId });
     const user = await User.findById({ _id: userId });
 
-    if (!post) {
-      return response.status(400).json({ message: "Post not found!" });
-    }
     if (!user) {
       return response.status(400).json({ message: "User not found!" });
     }
 
     const newComment = new Comment({
       userId: userId,
-      postId: postId,
+      blogId: blogId,
       comment: comment,
     });
     await newComment.save();
 
-    post.comments.push({
-      commentId: newComment._id,
-      comment: comment,
-      user: user._id,
-    });
-    await post.save();
     return response.status(200).json({
       message: "Comment posted successfully",
       comment: newComment.comment,
