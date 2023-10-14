@@ -34,6 +34,9 @@ const resumeSchema = new mongoose.Schema({
         },
         profession: {
             type: String,
+        },
+        phoneCode: {
+            type: String,
         }
     },
     jobExperience: [{
