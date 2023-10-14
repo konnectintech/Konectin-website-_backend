@@ -82,9 +82,8 @@ const resumeSchema = new mongoose.Schema({
         graduationYear: { type: String },
     }],
     skills: [{ type: String }],
-    isCompleted: {
-        type: Boolean,
-        default: false
+    currentStage: {
+        type: Number
     }
 })
 
