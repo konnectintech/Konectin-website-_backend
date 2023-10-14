@@ -603,13 +603,17 @@ const resumeBuilder = async (request, response) => {
         .json({ message: "User does not exist, please register" });
     }
     const { error, value } = resumeSchema.validate(request.body);
+	  
     if (error) {
       return response.status(400).json({ Error: error.details[0].message });
     }
+	  
     const cv = new resume({
       userId,
+      currentStage: 1,
       ...value,
     });
+	  
     await cv.save();
     return response
       .status(201)
