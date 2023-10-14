@@ -765,7 +765,7 @@ const createPdf = async function (request, response) {
         .status(400)
         .json({ message: "User does not exist, please register" });
     }
-    resume.findByIdAndUpdate(resumeId, { isCompleted: true })
+    resume.findByIdAndUpdate(resumeId, { currentStage: 6 })
     pdf
       .create(html, {
         childProcessOptions: {

@@ -41,7 +41,7 @@ const resumeSchema = Joi.object({
     currentEditedEducation: Joi.number().optional(),
     bio: Joi.string().optional().empty(""),
     selectedTemplate: Joi.string().optional().empty(""),
-    isCompleted: Joi.boolean(),
+    currentStage: Joi.number(),
 })
 // const resumeUpdateSchema = Joi.object({
 //     basicInfo: Joi.object({
