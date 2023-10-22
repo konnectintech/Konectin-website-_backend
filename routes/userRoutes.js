@@ -30,6 +30,7 @@ const {
   verifyOtp,
   logOut,
   microsoftLogin,
+  likeComment
 } = require('../controllers/user.controller');
 
 const { verifyUserToken } = require('../helpers/jsonwebtoken');
@@ -57,6 +58,7 @@ router.delete(
   deleteComments
 );
 router.get('/getComments', getComments);
+router.post('/likeComment', verifyUserToken, isEmailVerified, likeComment);
 router.post('/likePost', verifyUserToken, isEmailVerified, likePost);
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, dislikePost);
 router.post('/resume', resumeBuilder);

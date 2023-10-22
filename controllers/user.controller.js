@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const Blog = require("../models/blog.model");
 const { Comment } = require("../models/comment.model");
-const Like = require("../models/like.model");
+const BlogLike = require("../models/likeBlog.model");
 const { passwordCompare, passwordHash } = require("../helpers/bcrypt");
 const { transporter } = require("../config/email");
 const { generateRegisterOTP } = require("../helpers/registerToken");
@@ -15,6 +15,7 @@ const newsletter = require("../models/newsletter");
 const pdf = require("html-pdf");
 const hubspotClient = require("../config/hubspot");
 const moment = require("moment-timezone");
+const CommentLike = require("../models/likeComment.model")
 
 require("dotenv").config();
 const {
@@ -22,6 +23,7 @@ const {
   resumeUpdateSchema,
 } = require("../helpers/resumeValidate");
 const { ResetPasswordEmail } = require("../utils/resetPasswordEmail");
+const { unlikeComment, likeComment: like } = require("../utils/commentLike");
 
 // endpoint for allowing a user to sign up
 const register = async (request, response) => {
@@ -366,7 +368,7 @@ const deleteBlog = async (request, response) => {
     }
     await Blog.findByIdAndDelete({ _id: blogId });
     await Comment.deleteMany({ postId: blogId });
-    await Like.deleteMany({ postId: blogId });
+    await BlogLike.deleteMany({ postId: blogId });
 
     return response
       .status(200)
@@ -489,7 +491,41 @@ const getComments = async (request, response) => {
       .json({ message: "Server error, try again later!" });
   }
 };
+// endpoint to like a comment
 
+const likeComment = async (req, res) => {
+  try {
+    const { commentId, userId } = req.query;
+    const user = await User.findById({ _id: userId });
+    const comment = await Comment.findById({ _id: commentId });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+    if (!comment) {
+      return res.status(400).json({ message: "Comment not found" });
+    }
+
+    const likeExists = await CommentLike.findOne({ userId, commentId: commentId });
+    if (likeExists) {
+      const success = await unlikeComment(commentId, user.id)
+      if (success) {
+        return res
+          .status(200)
+          .json({ message: "Comment unliked successfully" });
+      }
+    }
+    const success = await like(commentId, user.id)
+    if (success) {
+      return res.status(200).json({ message: "Comment liked successfully" });
+    }
+  } catch (err) {
+    console.error(err)
+    return res
+      .status(500)
+      .json({ message: "Server error, try again later!" });
+  }
+}
 // endpoint to delete a comment
 const deleteComments = async (request, response) => {
   try {
@@ -545,18 +581,18 @@ const likePost = async (request, response) => {
       return response.status(400).json({ message: "Blog post not found" });
     }
 
-    const ifLikeExists = await Like.findOne({ userId, postId: blogId });
+    const ifLikeExists = await BlogLike.findOne({ userId, postId: blogId });
     if (ifLikeExists) {
       return response
         .status(400)
         .json({ message: "You already liked this post" });
     }
-    const like = new Like({
+    const like = new BlogLike({
       userId: userId,
       postId: blogId,
     });
     await like.save();
-    const postLikes = await Like.find({ postId: blogId }).count();
+    const postLikes = await BlogLike.find({ postId: blogId }).count();
     blog.likes = postLikes;
     await blog.save();
     return response.status(200).json({ message: "Post liked successfully" });
@@ -572,15 +608,15 @@ const dislikePost = async (request, response) => {
     const blogId = request.query.blogId;
     const userId = request.query.userId;
 
-    const like = await Like.findOne({ postId: blogId, userId });
+    const like = await BlogLike.findOne({ postId: blogId, userId });
     const blog = await Blog.findById({ _id: blogId });
     const user = await User.findById({ _id: userId });
 
     if (!blog) {
       return response.status(400), json({ message: "Blog post not found" });
     }
-    await Like.deleteOne({ postId: blogId, userId });
-    const postLikes = await Like.find({ postId: blogId }).count();
+    await BlogLike.deleteOne({ postId: blogId, userId });
+    const postLikes = await BlogLike.find({ postId: blogId }).count();
     blog.likes = postLikes;
     await blog.save();
     return response
@@ -880,6 +916,7 @@ module.exports = {
   getPost,
   commentPost,
   getComments,
+  likeComment,
   deleteComments,
   likePost,
   dislikePost,

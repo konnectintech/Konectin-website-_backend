@@ -1,9 +1,9 @@
 const { string } = require("joi");
 const mongoose = require("mongoose");
 
-const likeSchema = mongoose.Schema(
+const likeCommentSchema = mongoose.Schema(
     {
-        blogId: {
+        commentId: {
             type:String,
             required:true
         },
@@ -22,9 +22,9 @@ const likeSchema = mongoose.Schema(
     },
     { timestamps: true }
 );
-likeSchema.pre('save',function(next){
+likeCommentSchema.pre('save',function(next){
     this.likes.count = this.likes.users.length;
     next();
 })
 
-module.exports = mongoose.model("likes", likeSchema);
+module.exports = mongoose.model("commentLikes", likeCommentSchema);

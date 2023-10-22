@@ -34,6 +34,10 @@ const commentSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        likes: {
+            type: Number,
+            default: 0
+        },
         reply:[
             {
                 type:mongoose.Schema.Types.ObjectId,
