@@ -57,23 +57,6 @@ exports.deletePost = async (req, res) => {
 };
 
 //endpoint to get all blog post of a particular user
-exports.getPost = async (req, res) => {
-    try {
-        const blogId = req.query.blogId;
-        const blogPost =
-            await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId);
-        return res
-            .status(200)
-            .json({ message: "Blog posts fetched successfully", posts: blogPost });
-    } catch (err) {
-        console.log(err.message);
-        return res
-            .status(500)
-            .json({ message: "Server error, try again later!" });
-    }
-};
-
-
 exports.getPosts = async (req, res) => {
     try {
         const blogs =
@@ -88,7 +71,24 @@ exports.getPosts = async (req, res) => {
     }
 };
 
-// endpoint to comment on a post
+exports.getPost = async (req, res) => {
+    try {
+        const blogId = req.query.blogId;
+        const blogPost =
+            await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId);
+        return res
+            .status(200)
+            .json({ message: "Blog post fetched successfully", posts: blogPost });
+    } catch (err) {
+        console.log(err.message);
+        if(err.message.includes("404")){
+            return res.status(404).json({ message: "Blog post not found" })
+        }
+        return res
+            .status(500)
+            .json({ message: "Server error, try again later!" });
+    }
+};
 
 
 exports.likePost = async (req, res) => {
