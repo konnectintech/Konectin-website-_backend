@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 mongoose.set('strictQuery', true);
 require('dotenv').config();
 const logger = require('morgan');
-const userRoutes = require('./routes/userRoutes');
-const adminRoutes = require('./routes/adminRoutes');
+const userRoutes = require("./routes");
+const adminRoutes = require("./routes/admin")
 const expressFileUpload = require('express-fileupload');
 const moment = require("moment-timezone")
 
@@ -46,7 +46,7 @@ app.get('/', (request, response) => {
 });
 
 app.use('/user', userRoutes);
-app.use('/admin', adminRoutes);
+app.use('/admin',adminRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port: ${port}`);
