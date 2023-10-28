@@ -9,6 +9,11 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  ZIP_NAME: 'konectin-backend.zip'
+  # NODE_VERSION: '18.x'
+  # AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_EDC64E0CA82C4467AB1022B86EBA0FF3 }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,11 +30,14 @@ jobs:
         run: |
           npm install
 
+      - name: Zip artifact to Upload
+        run: zip -r ${{ env.ZIP_NAME }} .
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: node-app
-          path: .
+          path: ./${{ env.ZIP_NAME }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,4 +59,4 @@ jobs:
           app-name: 'konectin-backend'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_EDC64E0CA82C4467AB1022B86EBA0FF3 }}
-          package: .
+          package: ./${{ env.ZIP_NAME }}
