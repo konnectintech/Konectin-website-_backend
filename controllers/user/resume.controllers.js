@@ -133,24 +133,9 @@ exports.createPdf = async function (req, res) {
                 .json({ message: "User does not exist, please register" });
         }
         resume.findByIdAndUpdate(resumeId, { currentStage: 6 })
-        pdf
-            .create(html, {
-                childProcessOptions: {
-                    env: {
-                        OPENSSL_CONF: "/dev/null",
-                    },
-                },
-            })
-            .toBuffer((err, buffer) => {
-                if (err) {
-                    console.error(err);
-                    return res
-                        .status(500)
-                        .json({ message: "Error Generating Pdf, Please Try Again Later" });
-                }
-                res.type("pdf");
-                return res.end(buffer, "binary");
-            });
+        const buffer = await createPdf(html);
+        res.type("pdf");
+        return res.end(buffer, "binary");
     } catch (err) {
         console.error(err);
         return res
