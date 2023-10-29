@@ -4,7 +4,7 @@ const pdf = require("html-pdf");
 require("dotenv").config();
 
 const { resumeSchema, resumeUpdateSchema } = require("../../helpers/resumeValidate");
-
+const { createPdf } = require("../../helpers/puppeteer");
 
 exports.resumeBuilder = async (req, res) => {
     try {
