@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 
 exports.createPdf = async (html = undefined) => {
     //create browser instance
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({ headless: "new", args: ["--no-sandbox"] });
 
     // create new page
     const page = await browser.newPage();
