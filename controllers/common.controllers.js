@@ -1,6 +1,8 @@
 const { transporter } = require("../config/email");
+const { internSubSchema } = require("../helpers/internSubscriptionValidate");
 const intern = require("../models/internshipModel");
 const newsletter = require("../models/newsletter");
+const internSubscription = require("../models/internSubscription.model");
 
 require("dotenv").config();
 
@@ -87,3 +89,28 @@ exports.unsubscribeNewsLetter = async (req, res) => {
       .json({ message: "Server error, try again later!" });
   }
 };
+
+exports.subscribeIntern = async (req, res) => {
+  const userId = req.query.userId;
+  const body = req.body
+  try {
+    const intern = await internSubscription.findOne({ userId: userId });
+    if(intern){
+      return res.status(400).json({ message: "You already subscribed" });
+    }
+    const { error, value } = internSubSchema.validate(body)
+    console.log(value)
+    if (error) {
+      return res.status(400).json({ Error: error.details[0].message });
+    }
+
+    const data = await internSubscription.create({userId: userId,...value})
+    return res.status(201).json({ message: "Subscribed successfully",data });
+  } catch (err) {
+    console.error(err)
+    return res
+    .status(500)
+    .json({ message: "Server error, try again later!" });
+  }
+
+}

@@ -19,9 +19,9 @@ const verifyUserToken = (request, response, next) => {
         const authHeader = request.headers.token
         let result;
         if(authHeader) {
-            const token = authHeader.split(" ")[1]
+            // const token = authHeader.split(" ")[1]
+            const token = authHeader
             result = jwtVerify(token)
-
             if(!result){
                 return response.status(400).json({message: "Please login again"})
             }
