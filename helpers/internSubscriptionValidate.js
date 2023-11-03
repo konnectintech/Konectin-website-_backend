@@ -10,7 +10,7 @@ const internSubSchema = Joi.object({
         gender: Joi.string().optional(),
         ageRange: Joi.string().optional(),
     }),
-    upload:Joi.array().items(Joi.string()),
+    upload:Joi.string(),
     education: Joi.object({
         name: Joi.string().optional(),
         options: Joi.object().optional(),

@@ -3,6 +3,11 @@ const { internSubSchema } = require("../helpers/internSubscriptionValidate");
 const intern = require("../models/internshipModel");
 const newsletter = require("../models/newsletter");
 const internSubscription = require("../models/internSubscription.model");
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  secure: true
+});
 
 require("dotenv").config();
 
@@ -113,4 +118,51 @@ exports.subscribeIntern = async (req, res) => {
     .json({ message: "Server error, try again later!" });
   }
 
+}
+
+exports.updateSubscribeIntern = async (req, res) => {
+  const userId = req.query.userId;
+  const update = req.body
+  try {
+    const intern = await internSubscription.findOne({ userId: userId });
+    if(!intern){
+      return res.status(404).json({ message: "Not Found" });
+    }
+    const { error, value } = internSubSchema.validate(update)
+
+    if (error) {
+      return res.status(400).json({ Error: error.details[0].message });
+    }
+
+    const data = await internSubscription.findOneAndUpdate({userId: userId},value)
+    return res.status(201).json({ message: "Updated successfully",data });
+  } catch (err) {
+    console.error(err)
+    return res
+    .status(500)
+    .json({ message: "Server error, try again later!" });
+  }
+
+}
+
+
+exports.uploadFile = async (req,res)=>{
+  const file = req.files.file;
+  if(!file){
+    return res.status(400).json({ message: "Please upload a file" });
+  }
+  const options = {
+    unique_filename: true,
+    overwrite: true,
+  };
+  
+  try {
+
+    // Upload the image
+    const result = await cloudinary.uploader.upload(file.tempFilePath, options);
+    return res.status(200).json({messgae:"File Uploaded Successfully",data:{url:result.secure_url}})
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
 }

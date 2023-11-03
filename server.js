@@ -39,7 +39,7 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(expressFileUpload({ limits: { fileSize: 5 * 1024 * 1024 } }));
+app.use(expressFileUpload({ limits: { fileSize: 5 * 1024 * 1024 },useTempFiles: true }));
 
 app.get('/', (request, response) => {
   response.json({ message: 'Welcome to Konectin!' });
