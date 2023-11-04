@@ -9,5 +9,6 @@ router.get('/getComments', comment.getComments);
 router.get('/getComment', comment.getComment);
 router.patch('/updateComment', comment.updateComment);
 router.post('/likeComment', verifyUserToken, isEmailVerified, comment.likeComment);
+router.post('/replyComment', verifyUserToken, isEmailVerified, comment.replyComment);
 
 module.exports = router;

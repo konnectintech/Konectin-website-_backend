@@ -30,7 +30,14 @@ exports.getComments = async (req, res) => {
 exports.getComment = async (req, res) => {
     try {
         const commentId = req.query.commentId;
-        const comments = await Comment.findById(commentId).populate("likes", "_id fullname email typeOfUser");
+        const comments = await Comment.findById(commentId).populate("likes", "_id fullname email typeOfUser").populate({
+            path: "reply",
+            select:"comment",
+            populate: {
+                path: "userId",
+                select: "_id fullname email typeOfUser",
+            },
+        });
         return res
             .status(200)
             .json({ message: "Comment fetched successfully", comments: comments });
@@ -46,7 +53,7 @@ exports.updateComment = async (req, res) => {
     try {
         const commentId = req.query.commentId;
         const { comment } = req.body;
-        const comments = await Comment.findByIdAndUpdate(commentId,{comment}).populate("likes", "_id fullname email typeOfUser");
+        const comments = await Comment.findByIdAndUpdate(commentId, { comment },{new:true}).populate("likes", "_id fullname email typeOfUser");
         return res
             .status(200)
             .json({ message: "Comment fetched successfully", comments: comments });
@@ -164,3 +171,23 @@ exports.commentPost = async (req, res) => {
             .json({ message: "Server error, try again later!" });
     }
 };
+
+exports.replyComment = async (req, res) => {
+    const commentId = req.query.commentId;
+    const userId = req.query.userId
+    const { comment: text } = req.body
+    try {
+        const comment = await Comment.findById(commentId)
+        if (!comment) {
+            return res.status(404).json({ message: "Not Found" });
+        }
+        const reply = await Comment.create({ userId: userId, blogId: comment.blogId, comment: text })
+        comment.reply.push(reply)
+        comment.save()
+        return res.status(200).json({ message: "Comment replied successfully", data: reply })
+    } catch (error) {
+        console.error(error.message)
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+
+}

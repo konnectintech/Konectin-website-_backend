@@ -43,7 +43,7 @@ const commentSchema = new mongoose.Schema(
         reply:[
             {
                 type:mongoose.Schema.Types.ObjectId,
-                ref:"comment_reply"
+                ref:"comment"
             }
         ]
     },
