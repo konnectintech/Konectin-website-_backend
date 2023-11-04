@@ -12,5 +12,6 @@ router.post('/likePost', verifyUserToken, isEmailVerified, post.likePost);
 router.delete('/dislikePost', verifyUserToken, isEmailVerified, post.dislikePost);
 
 router.put('/updateNumOfReads', post.updateNumOfReads);
+router.put('/updateNumOfShares', post.updateNumOfShares);
 
 module.exports = router;

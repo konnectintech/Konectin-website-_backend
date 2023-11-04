@@ -30,11 +30,11 @@ const blogSchema = new mongoose.Schema(
         ],
         numOfReads: {
             type: Number,
-            default:0
+            default: 0
         },
         numOfShares: {
             type: Number,
-            default:0
+            default: 0
         },
         readingTime: {
             type: String
@@ -42,7 +42,7 @@ const blogSchema = new mongoose.Schema(
         image: {
             type: String,
         },
-        userIP:[{
+        userIP: [{
             type: String
         }]
     },

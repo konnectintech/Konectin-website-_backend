@@ -81,7 +81,7 @@ exports.getPost = async (req, res) => {
             .json({ message: "Blog post fetched successfully", posts: blogPost });
     } catch (err) {
         console.log(err.message);
-        if(err.message.includes("404")){
+        if (err.message.includes("404")) {
             return res.status(404).json({ message: "Blog post not found" })
         }
         return res
@@ -153,27 +153,38 @@ exports.dislikePost = async (req, res) => {
 };
 
 exports.updateNumOfReads = async (req, res) => {
+    let blog;
     try {
+
         const blogId = req.query.blogId;
-        const blog = await Blog.findById({ _id: blogId });
-
+        blog = await Blog.findOne({ blogId })
         if (!blog) {
-            return res.status(400).json({ message: "Blog post not found" });
-        }
-
-        const userHasRead = blog.userIP.includes(req.ip);
-        if (!userHasRead) {
-            blog.userIP.push(req.ip); // add user's IP address to readBy array
-            await blog.save();
-            const updatedBlog = await blog.updateOne({ $inc: { numOfReads: 1 } });
-            return res
-                .status(200)
-                .json({ message: "Number of reads updated", updatedBlog });
+            blog = await Blog.create({ blogId, numOfReads: 1 })
         } else {
-            return res
-                .status(200)
-                .json({ message: "Number of reads not updated" });
+            blog = await Blog.updateOne({ blogId }, { $inc: { numOfReads: 1 } }, { new: true })
         }
+        return res.status(200).json({ message: "Number of shares updated", data: blog })
+
+
+        // const blog = await Blog.findById({ _id: blogId });
+
+        // if (!blog) {
+        //     return res.status(400).json({ message: "Blog post not found" });
+        // }
+
+        // const userHasRead = blog.userIP.includes(req.ip);
+        // if (!userHasRead) {
+        //     blog.userIP.push(req.ip); // add user's IP address to readBy array
+        //     await blog.save();
+        //     const updatedBlog = await blog.updateOne({ $inc: { numOfReads: 1 } });
+        //     return res
+        //         .status(200)
+        //         .json({ message: "Number of reads updated", updatedBlog });
+        // } else {
+        //     return res
+        //         .status(200)
+        //         .json({ message: "Number of reads not updated" });
+        // }
     } catch (err) {
         console.log(err.message);
         return res
@@ -181,3 +192,23 @@ exports.updateNumOfReads = async (req, res) => {
             .json({ message: "Server error, try again later" });
     }
 };
+
+exports.updateNumOfShares = async (req, res) => {
+    const { blogId } = req.query
+    let blog;
+    try {
+        blog = await Blog.findOne({ blogId })
+        if (!blog) {
+            blog = await Blog.create({ blogId, numOfShares: 1 })
+        } else {
+            blog = await Blog.updateOne({ blogId }, { $inc: { numOfShares: 1 } }, { new: true })
+        }
+        return res.status(200).json({ message: "Number of shares updated", data: blog })
+
+    } catch (error) {
+        console.error(error.message)
+        return res
+            .status(500)
+            .json({ message: "Server error, try again later" });
+    }
+}
