@@ -14,28 +14,27 @@ const jwtVerify = (token) => {
     }
 }
 
-const verifyUserToken = (request, response, next) => {
+const verifyUserToken = (req, res, next) => {
     try {
-        const authHeader = request.headers.token
-        let result;
+        const authHeader = req.headers.authorization
+        let user;
         if(authHeader) {
-            // const token = authHeader.split(" ")[1]
-            const token = authHeader
-            result = jwtVerify(token)
-            if(!result){
-                return response.status(400).json({message: "Please login again"})
+            const token = authHeader.split(" ")[1]
+            user = jwtVerify(token)
+            if(!user){
+                return res.status(400).json({message: "Please login again"})
             }
             else{
-                request.decoded = result;
+                req.user = user;
                 next()
             }
         }
         else{
-            return response.status(400).json({message: "An access token is required to proceed, please login to get one"})
+            return res.status(400).json({message: "An access token is required to proceed, please login to get one"})
         }
     }
     catch(err) {
-        return response.status(500).json({message: "An error occured", Error: err})
+        return res.status(500).json({message: "An error occured", Error: err})
     }
 }
 
