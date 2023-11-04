@@ -15,7 +15,7 @@ exports.getComments = async (req, res) => {
         const blogId = req.query.blogId;
         const comments = await Comment.find({ blogId: blogId }).sort({
             createdAt: -1,
-        });
+        }).populate("likes", "_id fullname email typeOfUser");
         return res
             .status(200)
             .json({ message: "Comments fetched successfully", comments: comments });
@@ -41,7 +41,7 @@ exports.likeComment = async (req, res) => {
             return res.status(400).json({ message: "Comment not found" });
         }
 
-        const likeExists = await CommentLike.findOne({ userId, commentId: commentId });
+        const likeExists = comment.likes.includes(userId)
         if (likeExists) {
             const success = await unlikeComment(commentId, user.id)
             if (success) {

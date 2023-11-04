@@ -34,10 +34,12 @@ const commentSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        likes: {
-            type: Number,
-            default: 0
-        },
+        likes: [
+            {
+                type:mongoose.Schema.Types.ObjectId,
+                ref:"users"
+            }
+        ],
         reply:[
             {
                 type:mongoose.Schema.Types.ObjectId,
