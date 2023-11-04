@@ -26,8 +26,39 @@ exports.getComments = async (req, res) => {
             .json({ message: "Server error, try again later!" });
     }
 };
-// endpoint to like a comment
 
+exports.getComment = async (req, res) => {
+    try {
+        const commentId = req.query.commentId;
+        const comments = await Comment.findById(commentId).populate("likes", "_id fullname email typeOfUser");
+        return res
+            .status(200)
+            .json({ message: "Comment fetched successfully", comments: comments });
+    } catch (err) {
+        console.error(err)
+        return res
+            .status(500)
+            .json({ message: "Server error, try again later!" });
+    }
+};
+
+exports.updateComment = async (req, res) => {
+    try {
+        const commentId = req.query.commentId;
+        const { comment } = req.body;
+        const comments = await Comment.findByIdAndUpdate(commentId,{comment}).populate("likes", "_id fullname email typeOfUser");
+        return res
+            .status(200)
+            .json({ message: "Comment fetched successfully", comments: comments });
+    } catch (err) {
+        console.error(err)
+        return res
+            .status(500)
+            .json({ message: "Server error, try again later!" });
+    }
+};
+
+// endpoint to like a comment
 exports.likeComment = async (req, res) => {
     try {
         const { commentId, userId } = req.query;

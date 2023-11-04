@@ -6,6 +6,8 @@ const { isEmailVerified } = require('../../helpers/isEmailVerified');
 router.post('/commentPost', verifyUserToken, isEmailVerified, comment.commentPost);
 router.delete('/deleteComment', verifyUserToken, isEmailVerified, comment.deleteComments);
 router.get('/getComments', comment.getComments);
+router.get('/getComment', comment.getComment);
+router.patch('/updateComment', comment.updateComment);
 router.post('/likeComment', verifyUserToken, isEmailVerified, comment.likeComment);
 
 module.exports = router;
