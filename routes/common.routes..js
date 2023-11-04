@@ -6,7 +6,7 @@ const { verifyUserToken } = require('../helpers/jsonwebtoken');
 router.post('/internshipMail', common.konectinInternshipMail);
 router.post('/subscribeMail', common.subscribeNewsLetter);
 router.post('/unsubscribeMail', common.unsubscribeNewsLetter);
-router.post('/subscribeIntern', verifyUserToken, isEmailVerified, common.subscribeIntern)
+router.post('/subscribeIntern', isEmailVerified, common.subscribeIntern)
 router.patch('/subscribeIntern', isEmailVerified, common.updateSubscribeIntern)
 router.post('/uploadFile', common.uploadFile);
 
