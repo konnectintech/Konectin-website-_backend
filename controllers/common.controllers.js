@@ -147,7 +147,7 @@ exports.updateSubscribeIntern = async (req, res) => {
 
 
 exports.uploadFile = async (req,res)=>{
-  const file = req.files.file;
+  const file = req.file;
   if(!file){
     return res.status(400).json({ message: "Please upload a file" });
   }
