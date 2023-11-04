@@ -158,7 +158,6 @@ exports.uploadFile = async (req,res) => {
   };
   
   try {
-
     // Upload the image
     const result = await cloudinary.uploader.upload(file.tempFilePath, options);
     return res.status(200).json({messgae:"File Uploaded Successfully",data:{url:result.secure_url}})
