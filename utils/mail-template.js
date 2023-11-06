@@ -479,7 +479,7 @@ const Default = (title, content, signature) => {
                                             color: #ffffff;
                                           "
                                           rel="noopener"
-                                          >www.konectin.com</a
+                                          >www.konectin.org</a
                                         >
                                         -
                                         <a
