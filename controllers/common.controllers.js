@@ -104,7 +104,6 @@ exports.subscribeIntern = async (req, res) => {
       return res.status(400).json({ message: "You already subscribed" });
     }
     const { error, value } = internSubSchema.validate(body)
-    console.log(value)
     if (error) {
       return res.status(400).json({ Error: error.details[0].message });
     }

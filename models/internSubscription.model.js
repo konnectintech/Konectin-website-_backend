@@ -12,7 +12,12 @@ const internSubscriptionSchema = new mongoose.Schema(
             ageRange:String
         },
         upload:{
-            type:String
+            portfolio:String,
+            resumes:[
+                {
+                    type:String
+                }
+            ]
         },
         education:{
             name:String,
