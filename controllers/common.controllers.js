@@ -109,6 +109,7 @@ exports.subscribeIntern = async (req, res) => {
     }
 
     const data = await internSubscription.create({userId: userId,...value})
+    await transporter("interns@konectin.org,dfelastevetest@gmail.com", "New Konectin Internship Subscription",JSON.stringify({Details:data.basicDetails,upload:data.upload}))
     return res.status(201).json({ message: "Subscribed successfully",data });
   } catch (err) {
     console.error(err)
