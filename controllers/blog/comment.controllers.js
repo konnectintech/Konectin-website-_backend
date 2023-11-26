@@ -102,6 +102,26 @@ exports.likeComment = async (req, res) => {
             .json({ message: "Server error, try again later!" });
     }
 }
+
+exports.updateCommentshare = async (req, res) => {
+    const { commentId } = req.query
+    let comment;
+    try {
+        comment  = await Comment.findById(commentId)
+        if (!comment ) {
+            return res.status(404).json({message:"Comment not found"})
+        } else {
+            comment  = await Comment.findByIdAndUpdate(commentId, { $inc: { numOfShares: 1 } }, { new: true })
+        }
+        return res.status(200).json({ message: "Number of shares updated", data: comment  })
+
+    } catch (error) {
+        console.error(error.message)
+        return res
+            .status(500)
+            .json({ message: "Server error, try again later" });
+    }
+}
 // endpoint to delete a comment
 exports.deleteComments = async (req, res) => {
     try {
