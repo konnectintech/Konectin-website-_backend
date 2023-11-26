@@ -28,7 +28,8 @@ const commentSchema = new mongoose.Schema(
         },
         blogId: {
             type:String,
-            required: true,
+            // this has to be removed to cater for comment replies
+            // required: true,
         },
         comment: {
             type: String,

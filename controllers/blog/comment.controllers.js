@@ -30,7 +30,7 @@ exports.getComments = async (req, res) => {
 exports.getComment = async (req, res) => {
     try {
         const commentId = req.query.commentId;
-        const comments = await Comment.findById(commentId).populate("likes", "_id fullname email typeOfUser").populate({
+        const comment = await Comment.findById(commentId).populate("likes", "_id fullname email typeOfUser").populate({
             path: "reply",
             select:"comment",
             populate: {
@@ -38,9 +38,12 @@ exports.getComment = async (req, res) => {
                 select: "_id fullname email typeOfUser",
             },
         });
+        if(!comment){
+            return res.status(404).json({message:"Comment not found"})
+        }
         return res
             .status(200)
-            .json({ message: "Comment fetched successfully", comments: comments });
+            .json({ message: "Comment fetched successfully", comment: comment });
     } catch (err) {
         console.error(err)
         return res
@@ -103,37 +106,30 @@ exports.likeComment = async (req, res) => {
 exports.deleteComments = async (req, res) => {
     try {
         const userId = req.query.userId;
-        const blogId = req.query.blogId;
         const commentId = req.query.commentId;
 
         const user = await User.findById({ _id: userId });
-        const blog = await Blog.findById({ _id: blogId });
         const comment = await Comment.findById({ _id: commentId });
 
         if (!user) {
             return res.status(400).json({ message: "User not found!" });
         }
-        if (!blog) {
-            return res.status(400).json({ message: "Blog post not found!" });
-        }
         if (!comment) {
             return res.status(400).json({ message: "Comment not found!" });
         }
-        let notInComment = true;
 
-        blog.comments.forEach((comment, index) => {
-            if (comment.commentId == commentId) {
-                notInComment = false;
-                blog.comments.splice(index, 1);
-                blog.save();
-                return res.status(200).json({ message: "Comment deleted!" });
-            }
-        });
-        if (notInComment) {
-            return res.status(400).json({ message: "Comment not found!" });
+        // check if the comment is a replied comment
+        if(!comment.blogId){
+            const parentComment = await Comment.findOne({"$reply._id":commentId})
+            const index = parentComment.reply.indexOf(commentId)
+            parentComment.reply.splice(index,1)
+            await parentComment.save()
         }
+        // delete the comment
         await Comment.findByIdAndDelete(commentId);
+        return res.status(200).json({message:"Comment deleted"})
     } catch (err) {
+        console.error(err)
         return res
             .status(500)
             .json({ message: "Server error, try again later!" });
@@ -181,7 +177,7 @@ exports.replyComment = async (req, res) => {
         if (!comment) {
             return res.status(404).json({ message: "Not Found" });
         }
-        const reply = await Comment.create({ userId: userId, blogId: comment.blogId, comment: text })
+        const reply = await Comment.create({ userId: userId, comment: text })
         comment.reply.push(reply)
         comment.save()
         return res.status(200).json({ message: "Comment replied successfully", data: reply })
