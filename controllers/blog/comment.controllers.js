@@ -1,7 +1,7 @@
 const User = require("../../models/user.model");
 const Blog = require("../../models/blog.model");
 const { Comment } = require("../../models/comment.model");
-const CommentLike = require("../../models/likeComment.model")
+// const CommentLike = require("../../models/likeComment.model")
 
 require("dotenv").config();
 

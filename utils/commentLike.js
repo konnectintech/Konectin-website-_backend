@@ -1,11 +1,11 @@
-const CommentLike = require("../models/likeComment.model")
+// const CommentLike = require("../models/likeComment.model")
 const { Comment } = require("../models/comment.model")
 exports.likeComment = async (commentId, userId) => {
     const comment = await Comment.findById({ _id: commentId });
     if (!comment.likes) {
         comment.likes = []
         comment.likes.push(userId)
-        comment.save()
+        await comment.save()
     } else {
         comment.likes.push(userId)
         await comment.save()

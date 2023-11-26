@@ -9,9 +9,9 @@ router.get('/getAllBlogs', post.getPosts);
 router.delete('/deleteBlog', verifyUserToken, isEmailVerified, post.deletePost);
 
 router.post('/likePost', verifyUserToken, isEmailVerified, post.likePost);
-router.delete('/dislikePost', verifyUserToken, isEmailVerified, post.dislikePost);
 
 router.put('/updateNumOfReads', post.updateNumOfReads);
+router.get('/getBlogActions', post.getBlogActions);
 router.put('/updateNumOfShares', post.updateNumOfShares);
 
 module.exports = router;

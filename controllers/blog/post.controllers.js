@@ -3,7 +3,7 @@ const Blog = require("../../models/blog.model");
 const { Comment } = require("../../models/comment.model");
 const BlogLike = require("../../models/likeBlog.model");
 const hubspotClient = require("../../config/hubspot");
-
+const { unlikeBlog, likeBlog: like } = require("../../utils/postLike");
 
 exports.createPost = async (req, res) => {
     try {
@@ -20,6 +20,7 @@ exports.createPost = async (req, res) => {
         await post.save();
         return res.status(201).json({ message: "Blog uploaded successfully" });
     } catch (err) {
+        console.error(err)
         return res
             .status(500)
             .json({ message: "Server error, try again later!" });
@@ -50,6 +51,7 @@ exports.deletePost = async (req, res) => {
             .status(200)
             .json({ message: "Blog post deleted succesfully" });
     } catch (err) {
+        consol.error(err)
         return res
             .status(500)
             .json({ message: "Server error, try again later!" });
@@ -74,11 +76,19 @@ exports.getPosts = async (req, res) => {
 exports.getPost = async (req, res) => {
     try {
         const blogId = req.query.blogId;
-        const blogPost =
-            await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId);
-        return res
-            .status(200)
-            .json({ message: "Blog post fetched successfully", posts: blogPost });
+        const blogPost = await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId);
+        if(blogPost){
+            //check if the blogPost Id stored in database, else create one
+            const blog = await Blog.findById({ _id: blogId });
+            if(!blog){
+                await Blog.create({
+                    _id:blogId
+                })
+            }
+            return res
+                .status(200)
+                .json({ message: "Blog post fetched successfully", posts: blogPost });
+        }
     } catch (err) {
         console.log(err.message);
         if (err.message.includes("404")) {
@@ -104,66 +114,39 @@ exports.likePost = async (req, res) => {
             return res.status(400).json({ message: "Blog post not found" });
         }
 
-        const ifLikeExists = await BlogLike.findOne({ userId, postId: blogId });
+        const ifLikeExists = blog.likes.includes(userId);
         if (ifLikeExists) {
+            const success = await unlikeBlog(blogId, user.id);
             return res
-                .status(400)
-                .json({ message: "You already liked this post" });
+                .status(200)
+                .json({ message: "Blog unliked successfully" });
         }
-        const like = new BlogLike({
-            userId: userId,
-            postId: blogId,
-        });
-        await like.save();
-        const postLikes = await BlogLike.find({ postId: blogId }).count();
-        blog.likes = postLikes;
-        await blog.save();
-        return res.status(200).json({ message: "Post liked successfully" });
+        const success = await like(blogId, user.id);
+        if (success) {
+            return res.status(200).json({ message: "Blog liked successfully" });
+        }
+
     } catch (err) {
+        console.error(err)
         return res
             .status(500)
             .json({ message: "Server error, try again later!" });
     }
 };
 
-exports.dislikePost = async (req, res) => {
-    try {
-        const blogId = req.query.blogId;
-        const userId = req.query.userId;
-
-        const like = await BlogLike.findOne({ postId: blogId, userId });
-        const blog = await Blog.findById({ _id: blogId });
-        const user = await User.findById({ _id: userId });
-
-        if (!blog) {
-            return res.status(400), json({ message: "Blog post not found" });
-        }
-        await BlogLike.deleteOne({ postId: blogId, userId });
-        const postLikes = await BlogLike.find({ postId: blogId }).count();
-        blog.likes = postLikes;
-        await blog.save();
-        return res
-            .status(200)
-            .json({ message: "Blog post disliked successfully" });
-    } catch (err) {
-        return res
-            .status(500)
-            .json({ message: "Server error, try again later!" });
-    }
-};
 
 exports.updateNumOfReads = async (req, res) => {
     let blog;
     try {
 
         const blogId = req.query.blogId;
-        blog = await Blog.findOne({ blogId })
+        blog = await Blog.findById(blogId)
         if (!blog) {
-            blog = await Blog.create({ blogId, numOfReads: 1 })
+            return res.status(404).json({message:"Blog not found"})
         } else {
-            blog = await Blog.updateOne({ blogId }, { $inc: { numOfReads: 1 } }, { new: true })
+            blog = await Blog.findByIdAndUpdate(blogId, { $inc: { numOfReads: 1 } }, { new: true })
         }
-        return res.status(200).json({ message: "Number of shares updated", data: blog })
+        return res.status(200).json({ message: "Number of reads updated", data: blog })
 
 
         // const blog = await Blog.findById({ _id: blogId });
@@ -193,15 +176,33 @@ exports.updateNumOfReads = async (req, res) => {
     }
 };
 
+exports.getBlogActions= async (req, res) => {
+    let blog;
+    try {
+        const blogId = req.query.blogId;
+        blog = await Blog.findById(blogId)
+        if (!blog) {
+            // blog = await Blog.create({ blogId, numOfReads: 1 })
+            return res.status(404).json({message:"Blog post not found"})
+        }
+        return res.status(200).json({ message: "Blog actions", data: {views:blog.numOfReads,shares:blog.numOfShares} })
+    } catch (err) {
+        console.log(err.message);
+        return res
+            .status(500)
+            .json({ message: "Server error, try again later" });
+    }
+};
+
 exports.updateNumOfShares = async (req, res) => {
     const { blogId } = req.query
     let blog;
     try {
-        blog = await Blog.findOne({ blogId })
+        blog = await Blog.findById(blogId)
         if (!blog) {
-            blog = await Blog.create({ blogId, numOfShares: 1 })
+            return res.status(404).json({message:"Blog not found"})
         } else {
-            blog = await Blog.updateOne({ blogId }, { $inc: { numOfShares: 1 } }, { new: true })
+            blog = await Blog.findByIdAndUpdate(blogId, { $inc: { numOfShares: 1 } }, { new: true })
         }
         return res.status(200).json({ message: "Number of shares updated", data: blog })
 
