@@ -192,7 +192,7 @@ exports.getBlogActions= async (req, res) => {
             // blog = await Blog.create({ blogId, numOfReads: 1 })
             return res.status(404).json({message:"Blog post not found"})
         }
-        return res.status(200).json({ message: "Blog actions", data: {views:blog.numOfReads,shares:blog.numOfShares,likes:blog.likes.length} })
+        return res.status(200).json({ message: "Blog actions", data: {views:blog.numOfReads,shares:blog.numOfShares,likes:blog.likes} })
     } catch (err) {
         console.log(err.message);
         return res
