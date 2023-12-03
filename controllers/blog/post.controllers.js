@@ -137,14 +137,21 @@ exports.likePost = async (req, res) => {
 
 exports.updateNumOfReads = async (req, res) => {
     let blog;
+    const ipAddress = req.socket.remoteAddress
     try {
-
         const blogId = req.query.blogId;
         blog = await Blog.findById(blogId)
         if (!blog) {
             return res.status(404).json({message:"Blog not found"})
         } else {
-            blog = await Blog.findByIdAndUpdate(blogId, { $inc: { numOfReads: 1 } }, { new: true })
+            if(blog.userIP.includes(ipAddress)){
+                console.log("Already read")
+                return res.status(200).json({ message: "Number of reads updated", data: blog })
+            }else{
+                blog = await Blog.findByIdAndUpdate(blogId, { $inc: { numOfReads: 1 } }, { new: true })
+                blog.userIP.push(ipAddress)
+                await blog.save()
+            }
         }
         return res.status(200).json({ message: "Number of reads updated", data: blog })
 
