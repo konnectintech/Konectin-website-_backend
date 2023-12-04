@@ -178,7 +178,7 @@ exports.commentPost = async (req, res) => {
 
         return res.status(200).json({
             message: "Comment posted successfully",
-            comment: newComment.comment,
+            comment: newComment,
         });
     } catch (err) {
         console.log(err.message);
