@@ -7,8 +7,6 @@ require("dotenv").config();
 
 const { unlikeComment, likeComment: like } = require("../../utils/commentLike");
 
-
-
 // endpoint to get all comments under a post
 exports.getComments = async (req, res) => {
     try {
@@ -175,7 +173,6 @@ exports.commentPost = async (req, res) => {
             comment: comment,
         });
         await newComment.save();
-        console.log(newComment)
 
         return res.status(200).json({
             message: "Comment posted successfully",
@@ -201,7 +198,6 @@ exports.replyComment = async (req, res) => {
         const reply = await Comment.create({ userId: userId, comment: text })
         comment.reply.push(reply)
         comment.save()
-        console.log(reply)
         return res.status(200).json({ message: "Comment replied successfully", data: reply })
     } catch (error) {
         console.error(error.message)
