@@ -1,12 +1,12 @@
-const { transporter } = require("../config/email");
+const transporter = require("../config/email");
 const { internSubSchema } = require("../helpers/internSubscriptionValidate");
 const intern = require("../models/internshipModel");
 const newsletter = require("../models/newsletter");
 const internSubscription = require("../models/internSubscription.model");
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
-  secure: true
+  secure: true,
 });
 
 require("dotenv").config();
@@ -35,9 +35,7 @@ exports.konectinInternshipMail = async (req, res) => {
         "You will be notified accordingly, please check your email for a vverification message",
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
 
@@ -63,9 +61,7 @@ exports.subscribeNewsLetter = async (req, res) => {
     await transporter(email, subject, msg);
     return res.status(200).json({ message: "Subscribed successfully" });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
 
@@ -89,80 +85,83 @@ exports.unsubscribeNewsLetter = async (req, res) => {
       message: "You have successfully unsubscribed from the mailing list.",
     });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
 
 exports.subscribeIntern = async (req, res) => {
   const userId = req.query.userId;
-  const body = req.body
+  const body = req.body;
   try {
     const intern = await internSubscription.findOne({ userId: userId });
-    if(intern){
+    if (intern) {
       return res.status(400).json({ message: "You already subscribed" });
     }
-    const { error, value } = internSubSchema.validate(body)
+    const { error, value } = internSubSchema.validate(body);
     if (error) {
       return res.status(400).json({ Error: error.details[0].message });
     }
 
-    const data = await internSubscription.create({userId: userId,...value})
-    await transporter("interns@konectin.org,dfelastevetest@gmail.com", "New Konectin Internship Subscription",JSON.stringify({Details:data.basicDetails,upload:data.upload}))
-    return res.status(201).json({ message: "Subscribed successfully",data });
+    const data = await internSubscription.create({ userId: userId, ...value });
+    await transporter(
+      "interns@konectin.org,dfelastevetest@gmail.com",
+      "New Konectin Internship Subscription",
+      JSON.stringify({ Details: data.basicDetails, upload: data.upload })
+    );
+    return res.status(201).json({ message: "Subscribed successfully", data });
   } catch (err) {
-    console.error(err)
-    return res
-    .status(500)
-    .json({ message: "Server error, try again later!" });
+    console.error(err);
+    return res.status(500).json({ message: "Server error, try again later!" });
   }
-
-}
+};
 
 exports.updateSubscribeIntern = async (req, res) => {
   const userId = req.query.userId;
-  const update = req.body
+  const update = req.body;
   try {
     const intern = await internSubscription.findOne({ userId: userId });
-    if(!intern){
+    if (!intern) {
       return res.status(404).json({ message: "Not Found" });
     }
-    const { error, value } = internSubSchema.validate(update)
+    const { error, value } = internSubSchema.validate(update);
 
     if (error) {
       return res.status(400).json({ Error: error.details[0].message });
     }
 
-    const data = await internSubscription.findOneAndUpdate({userId: userId},value)
-    return res.status(201).json({ message: "Updated successfully",data });
+    const data = await internSubscription.findOneAndUpdate(
+      { userId: userId },
+      value
+    );
+    return res.status(201).json({ message: "Updated successfully", data });
   } catch (err) {
-    console.error(err)
-    return res
-    .status(500)
-    .json({ message: "Server error, try again later!" });
+    console.error(err);
+    return res.status(500).json({ message: "Server error, try again later!" });
   }
+};
 
-}
-
-
-exports.uploadFile = async (req,res) => {
+exports.uploadFile = async (req, res) => {
   const file = req.files.file;
-	
-  if(!file){
+
+  if (!file) {
     return res.status(400).json({ message: "Please upload a file" });
   }
   const options = {
     unique_filename: true,
     overwrite: true,
   };
-  
+
   try {
     // Upload the image
     const result = await cloudinary.uploader.upload(file.tempFilePath, options);
-    return res.status(200).json({messgae:"File Uploaded Successfully",data:{url:result.secure_url}})
+    return res
+      .status(200)
+      .json({
+        messgae: "File Uploaded Successfully",
+        data: { url: result.secure_url },
+      });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: error.message });
   }
-}
+};

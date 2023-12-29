@@ -1,9 +1,9 @@
-const nodemailer = require('nodemailer');
-const { template } = require('../utils/mail-template');
-require('dotenv').config();
+const nodemailer = require("nodemailer");
+const { template } = require("../utils/mail-template");
+require("dotenv").config();
 
 const nm = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   port: 465,
   secure: true,
   auth: {
