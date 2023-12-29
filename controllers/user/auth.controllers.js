@@ -3,7 +3,7 @@ const { passwordCompare, passwordHash } = require("../../helpers/bcrypt");
 const transporter = require("../../config/email");
 const { generateRegisterOTP } = require("../../helpers/registerToken");
 const { generatePasswordOTP } = require("../../helpers/passwordToken");
-const registerOTP = require("../../models/registerOTP");
+const RegisterOTP = require("../../models/registerOTP");
 const { jwtSign } = require("../../helpers/jsonwebtoken");
 const passwordOTP = require("../../models/passwordOTP");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
@@ -14,14 +14,16 @@ require("dotenv").config();
 exports.register = async (req, res) => {
   try {
     const { fullname, email, password, profilePhoto } = req.body;
-    if (!fullname && !email & !password) {
+    if (!fullname && !email && !password) {
       return res
         .status(400)
         .json({ message: "Please fill all required fields" });
     }
+
     const userExists = await User.findOne({ email: email });
+
     if (userExists) {
-      return res.status(401).json({ message: "User already exists" });
+      return res.status(409).json({ message: "User already exists" });
     }
 
     const hashedPassword = await passwordHash(password);
@@ -49,7 +51,6 @@ exports.register = async (req, res) => {
 
     return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
-    console.log(err.message);
     return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
@@ -57,24 +58,26 @@ exports.register = async (req, res) => {
 exports.verifyEmailAddress = async (req, res) => {
   try {
     const { OTP } = req.body;
-    const userId = req.query.userId;
-    const token = await registerOTP.findOne({ userId: userId, OTP: OTP });
+    const email = req.query.email;
+    const token = await RegisterOTP.findOne({ OTP: OTP });
+
     if (!token) {
-      return res.status(400).json({ message: "User does not exists" });
+      return res.status(404).json({ message: "otp does not exist" });
     }
-    const user = await User.findOne({ userId: userId });
+    const user = await User.findOne({ email: email });
+
     if (!user) {
-      return res.status(400).json({ message: "User does not exists" });
+      return res.status(404).json({ message: "User does not exist" });
     }
-    console.log(moment(token.expiresIn), moment());
-    if (moment(token.expiresIn) < moment()) {
+
+    if (token.expiresIn < new Date()) {
       return res.status(400).json({
-        message: "Token has expired, please req a new one",
+        message: "Token has expired, please request a new one",
       });
     }
 
     await User.findByIdAndUpdate(
-      { _id: userId },
+      { _id: user._id },
       { $set: { isEmailVerified: true } },
       { new: true }
     ).exec();
