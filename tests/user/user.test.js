@@ -7,6 +7,7 @@ const { StatusCodes } = require("http-status-codes");
 const { createOTP } = require("../factories/otp.factory");
 const { v4 } = require("uuid");
 const randomOTP = v4();
+const User = require("../../models/user.model");
 
 describe("Auth Routes", () => {
   describe("user registration", () => {
@@ -86,7 +87,12 @@ describe("Auth Routes", () => {
         .post("/user/verifyemail")
         .send({ OTP: otp.OTP })
         .query({ email: user.email });
+
+      //check if isEmailVerified: true
+      const isUserVerified = await User.findOne({ email: user.email });
+
       expect(response.status).toEqual(StatusCodes.OK);
+      expect(isUserVerified.isEmailVerified).toEqual(true);
       expect(response.body.message).toEqual("Email verified successfully");
     });
 
