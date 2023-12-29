@@ -102,7 +102,7 @@ exports.login = async (req, res) => {
     }
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(400).json({ message: "User does not exist" });
+      return res.status(404).json({ message: "User does not exist" });
     }
     const passwordMatch = await passwordCompare(password, user.password);
     if (!passwordMatch) {
@@ -128,10 +128,10 @@ exports.login = async (req, res) => {
 
 exports.getUser = async (req, res) => {
   try {
-    const userId = req.query.userId;
-    const user = await User.findById({ _id: userId });
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
     if (!user) {
-      return res.status(400).json({ message: "No such user exists" });
+      return res.status(404).json({ message: "No such user exists" });
     }
     return res
       .status(200)
