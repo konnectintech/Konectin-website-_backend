@@ -3,6 +3,7 @@
 KONECTIN is an application that takes away the hassle of job searching. It connects you to top level recruiters and makes job hunting fun and stress free
 
 Lead Backend Developer - <b>Akinloluwa Olumuyide</b>
+Contributors - <b>Jeanne d'Arc NYIRAMWIZA</b>
 
 ## Backend Server URL
 <link>https://konectin-backend-hj09.onrender.com</link>
@@ -22,3 +23,16 @@ Lead Backend Developer - <b>Akinloluwa Olumuyide</b>
 
 3. Start the local server: <br>
 <code> npm run dev </code>
+
+## Testing
+
+### Prerequisites
+Before running the tests, ensure that you have Node.js and npm installed on your machine
+
+### Running Tests
+
+`npm run test`
+
+### Writing Tests
+
+Tests are written using Jest and Supertest. The test files are typically located in the `tests` directory. 
