@@ -2,11 +2,15 @@ const request = require("supertest");
 const { app } = require("../../server");
 const { createUser } = require("../factories/user.factory");
 const { createResume } = require("../factories/resume.factory");
-const { ResumeBuilder } = require("../../models/resume.model");
+const ResumeBuilder = require("../../models/resume.model");
 const { faker } = require("@faker-js/faker");
-const { passwordHash } = require("../../helpers/bcrypt");
 const { StatusCodes } = require("http-status-codes");
+const jwt = require("jsonwebtoken");
 const existingUserId = "5f4cc8f7e5a7de2a393a2a8b";
+
+const jwtSign = (payload) => {
+  return jwt.sign(payload, "K12345", { expiresIn: "1h" });
+};
 
 describe("Resume Routes", () => {
   describe("USER CREATES A RESUME", () => {
@@ -142,7 +146,6 @@ describe("Resume Routes", () => {
 
       const resume1 = await createResume({ userId: user._id });
       const resume2 = await createResume({ userId: user._id });
-
       const cvs = [resume1, resume2];
 
       const response = await request(app).get(`/user/getResumes/${user._id}`);
@@ -193,6 +196,53 @@ describe("Resume Routes", () => {
 
       expect(response.status).toEqual(StatusCodes.NOT_FOUND);
       expect(response.body.message).toEqual("Resume with Id does not exist");
+    });
+  });
+
+  describe("DELETE A RESUME", () => {
+    it("should delete a resume if authenticated", async () => {
+      const user = await createUser();
+      const token = jwtSign({ userId: user._id });
+
+      const resume = await createResume({ userId: user._id });
+
+      const response = await request(app)
+        .delete(`/user/resume/${resume._id}`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(response.status).toEqual(StatusCodes.OK);
+      expect(response.body.message).toEqual(
+        "Resume has been deleted successfully"
+      );
+      // Check if the resume is not found in the database
+      await expect(ResumeBuilder.findById(resume._id)).resolves.toBeNull();
+    });
+
+    it("should return an error if the resume is not found", async () => {
+      const user = await createUser();
+      const token = jwtSign({ userId: user._id });
+      const response = await request(app)
+        .delete(`/user/resume/${existingUserId}`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(StatusCodes.NOT_FOUND);
+      expect(response.body.message).toEqual("CV not found");
+    });
+
+    it("should return an error if a user is not authenticated", async () => {
+      const user = await createUser();
+      const user1 = await createUser();
+      const token = jwtSign({ userId: user._id });
+
+      const resume = await createResume({ userId: user1._id });
+
+      const response = await request(app)
+        .delete(`/user/resume/${resume._id}`)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(StatusCodes.UNAUTHORIZED);
+      expect(response.body.message).toEqual(
+        "Unauthorized: You are not the owner of this CV"
+      );
     });
   });
 });

@@ -8,5 +8,6 @@ router.get("/getResumes/:userId", resume.getUserResumes);
 router.get("/getResume/:resumeId", resume.getUserResume);
 router.put("/updateResume", resume.updateUserResume);
 router.post("/createPdf", verifyUserToken, resume.createPdf);
+router.delete("/resume/:resumeId", verifyUserToken, resume.delete);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const {
   resumeUpdateSchema,
 } = require("../../helpers/resumeValidate");
 const { createPdf } = require("../../helpers/puppeteer");
+const { ObjectId } = require("mongodb");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -120,5 +121,31 @@ exports.createPdf = async function (req, res) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error, try again later!" });
+  }
+};
+exports.delete = async (req, res) => {
+  try {
+    const resumeId = req.params.resumeId;
+    const { user } = req;
+
+    const cv = await ResumeBuilder.findById(resumeId);
+
+    if (!cv) {
+      return res.status(404).json({ message: "CV not found" });
+    }
+
+    if (cv.userId.toString() !== new ObjectId(user.userId).toString()) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: You are not the owner of this CV" });
+    }
+
+    await ResumeBuilder.deleteOne({ _id: cv._id });
+
+    return res
+      .status(200)
+      .json({ message: "Resume has been deleted successfully" });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };

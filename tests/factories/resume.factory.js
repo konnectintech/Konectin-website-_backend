@@ -1,7 +1,5 @@
 const { createUser } = require("./user.factory");
 const ResumeBuilder = require("../../models/resume.model");
-const { faker } = require("@faker-js/faker");
-const { v4 } = require("uuid");
 
 const createResume = async (resumeData = {}) => {
   const user = await createUser();
