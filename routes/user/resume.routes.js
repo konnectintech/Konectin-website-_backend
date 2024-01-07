@@ -1,12 +1,12 @@
-const router = require('express').Router();
+const router = require("express").Router();
 const resume = require("../../controllers/user/resume.controllers");
-const { verifyUserToken } = require('../../helpers/jsonwebtoken');
-const { isEmailVerified } = require('../../helpers/isEmailVerified');
+const { verifyUserToken } = require("../../helpers/jsonwebtoken");
+const { isEmailVerified } = require("../../helpers/isEmailVerified");
 
-router.post('/resume', resume.resumeBuilder);
-router.get('/getResumes', resume.getUserResumes);
-router.get('/getResume', resume.getUserResume);
-router.put('/updateResume', resume.updateUserResume);
-router.post('/createPdf',verifyUserToken, resume.createPdf);
+router.post("/resume", resume.resumeBuilder);
+router.get("/getResumes/:userId", resume.getUserResumes);
+router.get("/getResume/:resumeId", resume.getUserResume);
+router.put("/updateResume", resume.updateUserResume);
+router.post("/createPdf", verifyUserToken, resume.createPdf);
 
 module.exports = router;

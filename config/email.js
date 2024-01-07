@@ -3,9 +3,9 @@ const { template } = require("../utils/mail-template");
 require("dotenv").config();
 
 const nm = nodemailer.createTransport({
-  service: "gmail",
-  port: 465,
-  secure: true,
+  host: "sandbox.smtp.mailtrap.io",
+  port: 2525,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,

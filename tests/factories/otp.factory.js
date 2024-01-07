@@ -7,18 +7,16 @@ const randomOTP = v4();
 const createOTP = async (otpData = {}) => {
   const user = await createUser();
 
-  const defaultOTPData = {
+  const defaultOTPData = new RegisterOTP({
     userId: user._id,
     OTP: randomOTP,
     expiresIn: faker.date.soon(),
-  };
+    ...otpData,
+  });
 
-  const finalOTPData = { ...defaultOTPData, ...otpData };
+  await defaultOTPData.save();
 
-  const otp = new RegisterOTP(finalOTPData);
-  await otp.save();
-
-  return otp;
+  return defaultOTPData;
 };
 
 module.exports = { createOTP };
