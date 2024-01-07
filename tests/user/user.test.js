@@ -39,7 +39,7 @@ describe("Auth Routes", () => {
       );
     });
 
-    it("should return an error if some one the fields is missing", async () => {
+    it("should return an error if one of the fields is missing", async () => {
       const userData = {
         picture: faker.image.avatar(),
         isEmailVerified: false,

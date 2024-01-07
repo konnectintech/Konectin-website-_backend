@@ -1,6 +1,6 @@
 const User = require("../../models/user.model");
 const { passwordCompare, passwordHash } = require("../../helpers/bcrypt");
-const transporter = require("../../config/email");
+const { transporter } = require("../../config/email");
 const { generateRegisterOTP } = require("../../helpers/registerToken");
 const { generatePasswordOTP } = require("../../helpers/passwordToken");
 const RegisterOTP = require("../../models/registerOTP");
@@ -51,7 +51,7 @@ exports.register = async (req, res) => {
 
     return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
