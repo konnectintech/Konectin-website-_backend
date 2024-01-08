@@ -4,7 +4,9 @@ const resumeSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Types.ObjectId,
   },
-
+  cloudinaryUrl: {
+    type: String,
+  },
   basicInfo: {
     firstName: {
       type: String,
