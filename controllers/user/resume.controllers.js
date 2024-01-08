@@ -1,6 +1,5 @@
 const User = require("../../models/user.model");
 const ResumeBuilder = require("../../models/resume.model");
-const pdf = require("html-pdf");
 require("dotenv").config();
 
 const {
@@ -8,6 +7,8 @@ const {
   resumeUpdateSchema,
 } = require("../../helpers/resumeValidate");
 const { createPdf } = require("../../helpers/puppeteer");
+const path = require("path");
+const os = require("os");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -107,7 +108,6 @@ exports.updateUserResume = async function (req, res) {
 exports.createPdf = async function (req, res) {
   try {
     const resumeId = req.params.resumeId;
-    const { user } = req;
 
     const cv = await ResumeBuilder.findById(resumeId);
 
@@ -115,35 +115,29 @@ exports.createPdf = async function (req, res) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== user._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+    const documentsPath = path.join(os.homedir(), "Downloads");
+
+    const outputPath = path.join(documentsPath, `${cv._id}.pdf`);
+    const url = "https://pptr.dev/"; //THIS LINK WILL BE REPLACED BY THE PAGE FOR GETTING THE CV
+
+    // Generate a PDF from the page content
+    try {
+      await createPdf(url, outputPath);
+
+      // Send the file as an attachment
+      res.download(outputPath, `${cv._id}.pdf`, (err) => {
+        if (err) {
+          console.error("Error during file download:", err);
+          res.status(500).json({ error: "Error during file download" });
+        } else {
+          fs.unlinkSync(outputPath);
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-    const { error, value } = resumeUpdateSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ Error: error.details[0].message });
-    }
-
-    // Update the found CV directly
-    cv.set({ currentStage: 6 });
-    await cv.save();
-    // const buffer = await createPdf(cv);
-    // res.type("pdf");
-    // return res.end(buffer, "binary");
-    // Create PDF buffer
-    const pdfBuffer = await createPdf(cv);
-
-    // Set response headers for PDF
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=generated_pdf.pdf"
-    );
-
-    // Send the PDF buffer as the response
-    res.send(pdfBuffer);
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 exports.delete = async (req, res) => {

@@ -16,6 +16,7 @@ const objectId = Joi.extend((joi) => ({
 }));
 
 const resumeSchema = Joi.object({
+  cloudinaryUrl: Joi.string().email().optional().empty(""),
   userId: objectId.objectId().optional(),
   basicInfo: Joi.object({
     firstName: Joi.string(),
