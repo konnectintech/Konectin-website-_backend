@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 const existingUserId = "5f4cc8f7e5a7de2a393a2a8b";
 
 const jwtSign = (payload) => {
-  return jwt.sign(payload, "K12345", { expiresIn: "1h" });
+  return jwt.sign(payload, "K12345", { expiresIn: "24h" });
 };
 
 describe("Resume Routes", () => {
@@ -202,8 +202,7 @@ describe("Resume Routes", () => {
   describe("DELETE A RESUME", () => {
     it("should delete a resume if authenticated", async () => {
       const user = await createUser();
-      const token = jwtSign({ userId: user._id });
-
+      const token = jwtSign({ _id: user._id });
       const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
@@ -219,7 +218,7 @@ describe("Resume Routes", () => {
 
     it("should return an error if the resume is not found", async () => {
       const user = await createUser();
-      const token = jwtSign({ userId: user._id });
+      const token = jwtSign({ _id: user._id });
       const response = await request(app)
         .delete(`/user/resume/${existingUserId}`)
         .set("Authorization", `Bearer ${token}`);
@@ -231,7 +230,7 @@ describe("Resume Routes", () => {
     it("should return an error if a user is not authenticated", async () => {
       const user = await createUser();
       const user1 = await createUser();
-      const token = jwtSign({ userId: user._id });
+      const token = jwtSign({ _id: user._id });
 
       const resume = await createResume({ userId: user1._id });
 
@@ -240,8 +239,46 @@ describe("Resume Routes", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(StatusCodes.UNAUTHORIZED);
-      expect(response.body.message).toEqual(
-        "Unauthorized: You are not the owner of this CV"
+      expect(response.body.message).toEqual("Unauthorized");
+    });
+  });
+
+  describe("UPDATE RESUME", () => {
+    it("should update the resume if the user is authenticated", async () => {
+      const user = await createUser();
+      const token = jwtSign({ _id: user._id });
+
+      const resume = await createResume({ userId: user._id });
+
+      const updateResumeDto = {
+        jobExperience: [
+          {
+            jobTitle: "Backend Engineer",
+            company: "KonectIn",
+            country: "Angola",
+          },
+        ],
+      };
+
+      const response = await request(app)
+        .put(`/user/updateResume/${resume._id}`)
+        .send(updateResumeDto)
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toEqual(StatusCodes.OK);
+      expect(response.body.message).toEqual("Resume Updated successfully");
+      expect(response.body.cv.userId.toString()).toEqual(user._id.toString());
+      expect(response.body.cv.jobExperience[0].jobTitle).toEqual(
+        updateResumeDto.jobExperience[0].jobTitle
+      );
+      expect(response.body.cv.jobExperience[0].jobTitle).toEqual(
+        updateResumeDto.jobExperience[0].jobTitle
+      );
+      expect(response.body.cv.jobExperience[0].company).toEqual(
+        updateResumeDto.jobExperience[0].company
+      );
+      expect(response.body.cv.jobExperience[0].country).toEqual(
+        updateResumeDto.jobExperience[0].country
       );
     });
   });

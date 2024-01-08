@@ -16,7 +16,7 @@ const objectId = Joi.extend((joi) => ({
 }));
 
 const resumeSchema = Joi.object({
-  userId: objectId.objectId().required(),
+  userId: objectId.objectId().optional(),
   basicInfo: Joi.object({
     firstName: Joi.string(),
     lastName: Joi.string(),

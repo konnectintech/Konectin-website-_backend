@@ -6,7 +6,7 @@ const { isEmailVerified } = require("../../helpers/isEmailVerified");
 router.post("/resume", resume.resumeBuilder);
 router.get("/getResumes/:userId", resume.getUserResumes);
 router.get("/getResume/:resumeId", resume.getUserResume);
-router.put("/updateResume", resume.updateUserResume);
+router.put("/updateResume/:resumeId", verifyUserToken, resume.updateUserResume);
 router.post("/createPdf", verifyUserToken, resume.createPdf);
 router.delete("/resume/:resumeId", verifyUserToken, resume.delete);
 

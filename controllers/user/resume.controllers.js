@@ -8,7 +8,6 @@ const {
   resumeUpdateSchema,
 } = require("../../helpers/resumeValidate");
 const { createPdf } = require("../../helpers/puppeteer");
-const { ObjectId } = require("mongodb");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -34,8 +33,7 @@ exports.resumeBuilder = async (req, res) => {
     await cv.save();
     return res.status(201).json({ message: "Resume created successfully", cv });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 exports.getUserResumes = async function (req, res) {
@@ -53,8 +51,7 @@ exports.getUserResumes = async function (req, res) {
       .status(200)
       .json({ message: "Resumes retrieved successfully", cvs });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -70,57 +67,83 @@ exports.getUserResume = async function (req, res) {
       .status(200)
       .json({ message: "Resume retrieved successfully", cv });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 exports.updateUserResume = async function (req, res) {
   try {
-    const { userId, resumeId } = req.query;
-    const user = await User.findById({ _id: userId });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: "User does not exist, please register" });
+    const resumeId = req.params.resumeId;
+    const { user } = req;
+
+    const cv = await ResumeBuilder.findById(resumeId);
+
+    if (!cv) {
+      return res.status(404).json({ message: "CV not found" });
     }
+
+    if (cv.userId.toString() !== user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const { error, value } = resumeUpdateSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ Error: error.details[0].message });
     }
-    const cv = await resume.findByIdAndUpdate(
-      resumeId,
-      { ...value },
-      { new: true }
-    );
-    if (!cv) {
-      return res.status(400).json({ message: "Resume with Id does not exist" });
-    }
 
-    return res.status(200).json({ message: "Resume Updated successfully", cv });
+    // Update the found CV directly
+    cv.set({ ...value });
+    await cv.save();
+
+    return res.status(200).json({
+      message: "Resume Updated successfully",
+      cv,
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 exports.createPdf = async function (req, res) {
   try {
-    const { userId, resumeId } = req.query;
-    const { html } = req.body;
-    const user = await User.findById({ _id: userId });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: "User does not exist, please register" });
+    const resumeId = req.params.resumeId;
+    const { user } = req;
+
+    const cv = await ResumeBuilder.findById(resumeId);
+
+    if (!cv) {
+      return res.status(404).json({ message: "CV not found" });
     }
-    resume.findByIdAndUpdate(resumeId, { currentStage: 6 });
-    const buffer = await createPdf(html);
-    res.type("pdf");
-    return res.end(buffer, "binary");
+
+    if (cv.userId.toString() !== user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { error, value } = resumeUpdateSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ Error: error.details[0].message });
+    }
+
+    // Update the found CV directly
+    cv.set({ currentStage: 6 });
+    await cv.save();
+    // const buffer = await createPdf(cv);
+    // res.type("pdf");
+    // return res.end(buffer, "binary");
+    // Create PDF buffer
+    const pdfBuffer = await createPdf(cv);
+
+    // Set response headers for PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=generated_pdf.pdf"
+    );
+
+    // Send the PDF buffer as the response
+    res.send(pdfBuffer);
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 exports.delete = async (req, res) => {
@@ -134,10 +157,8 @@ exports.delete = async (req, res) => {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== new ObjectId(user.userId).toString()) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized: You are not the owner of this CV" });
+    if (cv.userId.toString() !== user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     await ResumeBuilder.deleteOne({ _id: cv._id });
