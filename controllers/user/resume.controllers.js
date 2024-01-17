@@ -76,7 +76,7 @@ exports.getUserResume = async function (req, res) {
     }
 
     // Convert cv.userId to string for comparison
-    if (cv.userId.toString() !== userId.toString()) {
+    if (cv.userId.toString() !== userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -92,13 +92,13 @@ exports.updateUserResume = async function (req, res) {
   try {
     const { resumeId, userId } = req.query;
 
-    const cv = await ResumeBuilder.findById(resumeId);
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== userId.toString()) {
+    if (cv.userId.toString() !== userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -122,9 +122,9 @@ exports.updateUserResume = async function (req, res) {
 
 exports.createPdf = async function (req, res) {
   try {
-    const resumeId = req.params.resumeId;
+    const { resumeId } = req.query;
 
-    const cv = await ResumeBuilder.findById(resumeId);
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
@@ -162,13 +162,13 @@ exports.delete = async (req, res) => {
   try {
     const { resumeId, userId } = req.query;
 
-    const cv = await ResumeBuilder.findById(resumeId);
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== userId.toString()) {
+    if (cv.userId.toString() !== userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
