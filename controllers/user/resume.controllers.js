@@ -9,10 +9,11 @@ const {
 const { createPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
+const cloudinaryUpload = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const { userId } = req.query;
     const user = await User.findById(userId);
     if (!user) {
       return res
@@ -39,14 +40,22 @@ exports.resumeBuilder = async (req, res) => {
 };
 exports.getUserResumes = async function (req, res) {
   try {
-    const { userId } = req.params;
+    const { userId } = req.query;
     const user = await User.findById({ _id: userId });
     if (!user) {
       return res
         .status(404)
         .json({ message: "User does not exist, please register" });
     }
+
     const cvs = await ResumeBuilder.find({ userId: userId });
+    // Convert cv.userId to string for comparison
+
+    for (var i = 0; i < cvs.length; i++) {
+      if (cvs[i].userId.toString() !== userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    }
 
     return res
       .status(200)
@@ -58,10 +67,17 @@ exports.getUserResumes = async function (req, res) {
 
 exports.getUserResume = async function (req, res) {
   try {
-    const { resumeId } = req.params;
+    const { resumeId, userId } = req.query;
+
     const cv = await ResumeBuilder.findById({ _id: resumeId });
+
     if (!cv) {
       return res.status(404).json({ message: "Resume with Id does not exist" });
+    }
+
+    // Convert cv.userId to string for comparison
+    if (cv.userId.toString() !== userId) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     return res
@@ -74,16 +90,15 @@ exports.getUserResume = async function (req, res) {
 
 exports.updateUserResume = async function (req, res) {
   try {
-    const resumeId = req.params.resumeId;
-    const { user } = req;
+    const { resumeId, userId } = req.query;
 
-    const cv = await ResumeBuilder.findById(resumeId);
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== user._id) {
+    if (cv.userId.toString() !== userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -107,30 +122,32 @@ exports.updateUserResume = async function (req, res) {
 
 exports.createPdf = async function (req, res) {
   try {
-    const resumeId = req.params.resumeId;
+    const { resumeId } = req.query;
 
-    const cv = await ResumeBuilder.findById(resumeId);
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    const documentsPath = path.join(os.homedir(), "Downloads");
-
-    const outputPath = path.join(documentsPath, `${cv._id}.pdf`);
-    const url = "https://pptr.dev/"; //THIS LINK WILL BE REPLACED BY THE PAGE FOR GETTING THE CV
+    const url = "https://pptr.dev/"; // Replace with the actual URL for generating the CV
 
     // Generate a PDF from the page content
     try {
-      await createPdf(url, outputPath);
+      const pdfBuffer = await createPdf(url);
 
-      // Send the file as an attachment
-      res.download(outputPath, `${cv._id}.pdf`, (err) => {
+      // Upload the PDF to Cloudinary
+      const cloudinaryUrl = await cloudinaryUpload(pdfBuffer);
+
+      // Update the database with the Cloudinary URL
+      cv.cloudinaryUrl = cloudinaryUrl;
+      await cv.save();
+
+      // Send the Cloudinary URL for download
+      res.download(cv.cloudinaryUrl, `${cv._id}.pdf`, (err) => {
         if (err) {
           console.error("Error during file download:", err);
           res.status(500).json({ error: "Error during file download" });
-        } else {
-          fs.unlinkSync(outputPath);
         }
       });
     } catch (error) {
@@ -140,18 +157,18 @@ exports.createPdf = async function (req, res) {
     res.status(500).json({ error: error.message });
   }
 };
+
 exports.delete = async (req, res) => {
   try {
-    const resumeId = req.params.resumeId;
-    const { user } = req;
+    const { resumeId, userId } = req.query;
 
-    const cv = await ResumeBuilder.findById(resumeId);
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== user._id) {
+    if (cv.userId.toString() !== userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
