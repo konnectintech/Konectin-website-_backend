@@ -6,8 +6,11 @@ exports.createPdf = async (url, outputPath) => {
 
   // Navigate to the specified URL
   await page.goto(url, { waitUntil: "domcontentloaded" });
+
   // Generate a PDF from the page content
-  await page.pdf({ path: outputPath, format: "A4" });
+  const pdfBuffer = await page.pdf({ format: "A4" });
 
   await browser.close();
+
+  return pdfBuffer;
 };

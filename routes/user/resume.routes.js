@@ -3,10 +3,10 @@ const resume = require("../../controllers/user/resume.controllers");
 const { verifyUserToken } = require("../../helpers/jsonwebtoken");
 
 router.post("/resume", resume.resumeBuilder);
-router.get("/getResumes/:userId", resume.getUserResumes);
-router.get("/getResume/:resumeId", resume.getUserResume);
-router.put("/updateResume/:resumeId", verifyUserToken, resume.updateUserResume);
-router.post("/createPdf/:resumeId", resume.createPdf);
-router.delete("/resume/:resumeId", verifyUserToken, resume.delete);
+router.get("/getResumes", verifyUserToken, resume.getUserResumes);
+router.get("/getResume", verifyUserToken, resume.getUserResume);
+router.put("/updateResume", verifyUserToken, resume.updateUserResume);
+router.post("/createPdf", verifyUserToken, resume.createPdf);
+router.delete("/resume", verifyUserToken, resume.delete);
 
 module.exports = router;
