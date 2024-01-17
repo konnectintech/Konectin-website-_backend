@@ -41,7 +41,7 @@ exports.resumeBuilder = async (req, res) => {
 exports.getUserResumes = async function (req, res) {
   try {
     const { userId } = req.query;
-    const user = await User.findById(userId);
+    const user = await User.findById({ _id: userId });
     if (!user) {
       return res
         .status(404)
@@ -67,17 +67,16 @@ exports.getUserResumes = async function (req, res) {
 
 exports.getUserResume = async function (req, res) {
   try {
-    const { resumeId } = req.query;
-    const { user } = req;
+    const { resumeId, userId } = req.query;
 
-    const cv = await ResumeBuilder.findById(resumeId);
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res.status(404).json({ message: "Resume with Id does not exist" });
     }
 
     // Convert cv.userId to string for comparison
-    if (cv.userId.toString() !== user._id) {
+    if (cv.userId.toString() !== userId.toString()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -91,8 +90,7 @@ exports.getUserResume = async function (req, res) {
 
 exports.updateUserResume = async function (req, res) {
   try {
-    const { resumeId } = req.query;
-    const { user } = req;
+    const { resumeId, userId } = req.query;
 
     const cv = await ResumeBuilder.findById(resumeId);
 
@@ -100,7 +98,7 @@ exports.updateUserResume = async function (req, res) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== user._id) {
+    if (cv.userId.toString() !== userId.toString()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -162,8 +160,7 @@ exports.createPdf = async function (req, res) {
 
 exports.delete = async (req, res) => {
   try {
-    const { resumeId } = req.query;
-    const { user } = req;
+    const { resumeId, userId } = req.query;
 
     const cv = await ResumeBuilder.findById(resumeId);
 
@@ -171,7 +168,7 @@ exports.delete = async (req, res) => {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    if (cv.userId.toString() !== user._id) {
+    if (cv.userId.toString() !== userId.toString()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 

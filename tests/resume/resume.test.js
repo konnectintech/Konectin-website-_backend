@@ -178,15 +178,17 @@ describe("Resume Routes", () => {
   });
 
   describe("GET ONE RESUME", () => {
-    it("should get a use  resume by id", async () => {
+    it("should get a user  resume by id", async () => {
       const user = await createUser();
       const token = jwtSign({ _id: user._id });
       const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
         .get("/user/getResume")
-        .query({ resumeId: resume.id.toString() })
+        .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
+
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual("Resume retrieved successfully");
       expect(response.body.cv._id.toString()).toEqual(resume._id.toString());
@@ -217,6 +219,7 @@ describe("Resume Routes", () => {
       const response = await request(app)
         .delete("/user/resume")
         .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual(
@@ -248,10 +251,11 @@ describe("Resume Routes", () => {
       const response = await request(app)
         .delete("/user/resume")
         .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(StatusCodes.UNAUTHORIZED);
-      expect(response.body.message).toEqual("Unauthorized");
+      expect(response.body.message).toEqual("Invalid access token");
     });
   });
 
@@ -275,6 +279,7 @@ describe("Resume Routes", () => {
       const response = await request(app)
         .put("/user/updateResume")
         .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
         .send(updateResumeDto)
         .set("Authorization", `Bearer ${token}`);
 
