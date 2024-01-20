@@ -144,6 +144,8 @@ exports.updateNumOfReads = async (req, res) => {
         if (!blog) {
             return res.status(404).json({message:"Blog not found"})
         } else {
+            console.log(ipAddress)
+            console.log(blog.userIP)
             if(blog.userIP.includes(ipAddress)){
                 console.log("Already read")
                 return res.status(200).json({ message: "Number of reads updated", data: blog })
