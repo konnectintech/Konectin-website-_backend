@@ -8,16 +8,28 @@ const { jwtSign } = require("../../helpers/jsonwebtoken");
 const passwordOTP = require("../../models/passwordOTP");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
+const { registerSchema } = require("../../helpers/validator");
+const logger = require("../../utils/logger");
 
 require("dotenv").config();
 
 exports.register = async (req, res) => {
+  logger("In user registration handler")
   try {
     const { fullname, email, password, profilePhoto } = req.body;
     if (!fullname && !email && !password) {
       return res
         .status(400)
         .json({ message: "Please fill all required fields" });
+    }
+    const { error, _ } = registerSchema.validate(req.body)
+    if (error) {
+      const errorMssg = error.details[0].message
+      return res.status(422).json({
+        status: false,
+        message: "Kindly provide valid details",
+        error: errorMssg
+      })
     }
 
     const userExists = await User.findOne({ email: email });
@@ -82,6 +94,8 @@ exports.verifyEmailAddress = async (req, res) => {
       { new: true }
     ).exec();
     await user.save();
+
+    await RegisterOTP.deleteMany({userId: user._id})
 
     return res.status(200).json({ message: "Email verified successfully" });
   } catch (err) {
