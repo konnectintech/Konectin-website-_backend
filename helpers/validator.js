@@ -108,9 +108,14 @@ const registerSchema = Joi.object({
     password: Joi.string().required(),
 });
 
+const coverLetterSchema = Joi.object({
+    letter: Joi.string().min(255).required(),
+});
+
 const resumeUpdateSchema = resumeSchema;
 module.exports = {
     resumeSchema,
     resumeUpdateSchema,
     registerSchema,
+    coverLetterSchema,
 };
