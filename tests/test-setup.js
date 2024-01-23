@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const { server } = require("./../server");
+const awsMock = require("aws-sdk-mock");
 
 let mongod;
 
@@ -17,6 +18,7 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
+  awsMock.restore();
   const collections = mongoose.connection.collections;
   for (const key in collections) {
     const collection = collections[key];

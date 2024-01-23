@@ -9,7 +9,8 @@ const {
 const { createPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
-const cloudinaryUpload = require("../../helpers/cloudinary");
+const { uploadFile, downloadFile } = require("../../helpers/aws");
+const fs = require("fs");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -129,26 +130,45 @@ exports.createPdf = async function (req, res) {
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
+    //create the cv as pdf
+    const pdfBuffer = await createPdf();
 
-    const url = "https://pptr.dev/"; // Replace with the actual URL for generating the CV
+    const tmpFolderPath = path.join(__dirname, "tmp");
+    await fs.promises.mkdir(tmpFolderPath, { recursive: true });
 
-    // Generate a PDF from the page content
+    // Save the CV PDF to a local file in the 'tmp' folder before its upload to aws 3
+    const pdfFilePath = path.join(tmpFolderPath, `${cv.id}.pdf`);
+    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
+
     try {
-      const pdfBuffer = await createPdf(url);
+      // // Upload the local PDF file to AWS S3
+      const cloudinaryUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
 
-      // Upload the PDF to Cloudinary
-      const cloudinaryUrl = await cloudinaryUpload(pdfBuffer);
-
-      // Update the database with the Cloudinary URL
+      // // Update the database with the Cloudinary URL
       cv.cloudinaryUrl = cloudinaryUrl;
       await cv.save();
 
-      // Send the Cloudinary URL for download
-      res.download(cv.cloudinaryUrl, `${cv._id}.pdf`, (err) => {
-        if (err) {
-          console.error("Error during file download:", err);
-          res.status(500).json({ error: "Error during file download" });
-        }
+      // Optionally, you can remove the local PDF file after uploading
+    } catch (error) {
+      res.status(500).json(error.message);
+    }
+
+    const downloadsFolderPath = path.join(os.homedir(), "Downloads");
+
+    await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
+
+    try {
+      await downloadFile(
+        path.join(
+          downloadsFolderPath,
+          `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
+        ),
+        cv.id
+      );
+      // Delete the 'tmp' folder and its contents after successful download
+      await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+      res.json({
+        message: "Your CV has been downloaded. Check your downloads folder",
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
