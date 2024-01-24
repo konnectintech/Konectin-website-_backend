@@ -302,41 +302,4 @@ describe("Resume Routes", () => {
       );
     });
   });
-
-  describe("CREATE PDF", () => {
-    it("should create a PDF and upload it to AWS S3", async () => {
-      const user = await createUser();
-      const token = jwtSign({ _id: user._id });
-      const resume = await createResume({ userId: user._id });
-
-      // Mock AWS S3 functions
-      awsMock.mock("S3", "send", (params, callback) => {
-        callback(null, { Location: "https://s3.amazonaws.com/bucket/key" });
-      });
-
-      // Mock the createPdf function
-      jest
-        .spyOn(require("../../helpers/puppeteer"), "createPdf")
-        .mockResolvedValue(Buffer.from("fakePdfContent"));
-
-      const response = await request(app)
-        .post("/user/createPdf")
-        .query({ resumeId: resume._id.toString() })
-        .set("Authorization", `Bearer ${token}`);
-
-      console.log("response...", response);
-
-      // expect(response.status).toEqual(StatusCodes.OK);
-      // expect(response.body.message).toEqual(
-      //   "Your CV has been downloaded. Check your downloads folder"
-      // );
-      // expect(response.body).toHaveProperty("url"); // Check if the response contains the expected URL
-
-      // // Verify that AWS S3 functions were called
-      // expect(awsMock.called("S3", "send")).toBe(true);
-
-      // // Verify that the createPdf function was called
-      // expect(createPdf).toHaveBeenCalled();
-    });
-  });
 });

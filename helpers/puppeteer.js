@@ -6,6 +6,7 @@ exports.createPdf = async () => {
 
   // Navigate to the specified URL
   await page.goto(process.env.GET_CV_BY_ID_FRONT_END_URL, {
+    //GET_CV_BY_ID_FRONT_END_URL should equal to the endpoint to display the resume by id
     waitUntil: "domcontentloaded",
   });
 
