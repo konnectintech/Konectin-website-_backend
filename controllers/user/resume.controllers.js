@@ -130,31 +130,20 @@ exports.createPdf = async function (req, res) {
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
-    //create the cv as pdf
+
+    // Remove the option of uploading the CV to AWS S3
+
+    // Create the CV as a PDF
     const pdfBuffer = await createPdf();
 
     const tmpFolderPath = path.join(__dirname, "tmp");
     await fs.promises.mkdir(tmpFolderPath, { recursive: true });
 
-    // Save the CV PDF to a local file in the 'tmp' folder before its upload to aws 3
+    // Save the CV PDF to a local file in the 'tmp' folder
     const pdfFilePath = path.join(tmpFolderPath, `${cv.id}.pdf`);
     await fs.promises.writeFile(pdfFilePath, pdfBuffer);
 
-    try {
-      // // Upload the local PDF file to AWS S3
-      const cloudinaryUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
-
-      // // Update the database with the Cloudinary URL
-      cv.cloudinaryUrl = cloudinaryUrl;
-      await cv.save();
-
-      // Optionally, you can remove the local PDF file after uploading
-    } catch (error) {
-      res.status(500).json(error.message);
-    }
-
     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
-
     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
 
     try {
@@ -167,6 +156,7 @@ exports.createPdf = async function (req, res) {
       );
       // Delete the 'tmp' folder and its contents after successful download
       await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+
       res.json({
         message: "Your CV has been downloaded. Check your downloads folder",
       });
