@@ -6,7 +6,7 @@ const {
   resumeSchema,
   resumeUpdateSchema,
 } = require("../../helpers/resumeValidate");
-const { createPdf } = require("../../helpers/puppeteer");
+const { createDownloadPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
@@ -125,14 +125,14 @@ exports.createPdf = async function (req, res) {
   try {
     const { resumeId } = req.query;
 
-    const cv = await ResumeBuilder.findById({ _id: resumeId });
+    const resume = await ResumeBuilder.findById({ _id: resumeId });
 
-    if (!cv) {
-      return res.status(404).json({ message: "CV not found" });
+    if (!resume) {
+      return res.status(404).json({ message: "Resume not found" });
     }
     
-    // Create the CV as a PDF
-    const pdfBuffer = await createPdf();
+    // Create the Resume as a PDF
+    const pdfBuffer = await createDownloadPdf();
 
     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
@@ -140,12 +140,12 @@ exports.createPdf = async function (req, res) {
     // Save the CV PDF to a local file in the 'downloads' folder
     const pdfFilePath = path.join(
       downloadsFolderPath,
-      `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
+      `${resume.basicInfo.firstName}_${resume.basicInfo.lastName}_Resume.pdf`
     );
     await fs.promises.writeFile(pdfFilePath, pdfBuffer);
 
     res.json({
-      message: "Your CV has been downloaded. Check your downloads folder",
+      message: "Your Resume has been downloaded. Check your downloads folder",
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
