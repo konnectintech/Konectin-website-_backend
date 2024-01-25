@@ -4,6 +4,7 @@ KONECTIN is an application that takes away the hassle of job searching. It conne
 
 Lead Backend Developer - <b>Akinloluwa Olumuyide</b>
 Contributors - <b>Jeanne d'Arc NYIRAMWIZA</b>
+Contributors - <b>Jeanne d'Arc NYIRAMWIZA</b>
 
 ## Backend Server URL
 <link>https://konectin-backend-hj09.onrender.com</link>
