@@ -9,7 +9,6 @@ const {
 const { createPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
-const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
 
 exports.resumeBuilder = async (req, res) => {
@@ -131,38 +130,22 @@ exports.createPdf = async function (req, res) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    // Remove the option of uploading the CV to AWS S3
-
     // Create the CV as a PDF
     const pdfBuffer = await createPdf();
-
-    const tmpFolderPath = path.join(__dirname, "tmp");
-    await fs.promises.mkdir(tmpFolderPath, { recursive: true });
-
-    // Save the CV PDF to a local file in the 'tmp' folder
-    const pdfFilePath = path.join(tmpFolderPath, `${cv.id}.pdf`);
-    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
 
     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
 
-    try {
-      await downloadFile(
-        path.join(
-          downloadsFolderPath,
-          `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
-        ),
-        cv.id
-      );
-      // Delete the 'tmp' folder and its contents after successful download
-      await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+    // Save the CV PDF to a local file in the 'downloads' folder
+    const pdfFilePath = path.join(
+      downloadsFolderPath,
+      `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
+    );
+    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
 
-      res.json({
-        message: "Your CV has been downloaded. Check your downloads folder",
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+    res.json({
+      message: "Your CV has been downloaded. Check your downloads folder",
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
