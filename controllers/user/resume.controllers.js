@@ -9,6 +9,7 @@ const {
 const { createPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
+const fs = require("fs");
 const cloudinaryUpload = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
@@ -129,30 +130,23 @@ exports.createPdf = async function (req, res) {
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
+    
+    // Create the CV as a PDF
+    const pdfBuffer = await createPdf();
 
-    const url = "https://pptr.dev/"; // Replace with the actual URL for generating the CV
+    const downloadsFolderPath = path.join(os.homedir(), "Downloads");
+    await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
 
-    // Generate a PDF from the page content
-    try {
-      const pdfBuffer = await createPdf(url);
+    // Save the CV PDF to a local file in the 'downloads' folder
+    const pdfFilePath = path.join(
+      downloadsFolderPath,
+      `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
+    );
+    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
 
-      // Upload the PDF to Cloudinary
-      const cloudinaryUrl = await cloudinaryUpload(pdfBuffer);
-
-      // Update the database with the Cloudinary URL
-      cv.cloudinaryUrl = cloudinaryUrl;
-      await cv.save();
-
-      // Send the Cloudinary URL for download
-      res.download(cv.cloudinaryUrl, `${cv._id}.pdf`, (err) => {
-        if (err) {
-          console.error("Error during file download:", err);
-          res.status(500).json({ error: "Error during file download" });
-        }
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+    res.json({
+      message: "Your CV has been downloaded. Check your downloads folder",
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
