@@ -11,7 +11,7 @@ describe('Get user info', () => {
     });
 
     const res = await request(app)
-      .get('/user/getUserInfo')
+      .get('/user/v2/getUserInfo')
       .query({ email: user.email });
 
     expect(res.status).toBe(200);
@@ -20,7 +20,7 @@ describe('Get user info', () => {
 
   it('should return 404 if user not found', async () => {
     const res = await request(app)
-      .get('/user/getUserInfo')
+      .get('/user/v2/getUserInfo')
       .query({ email: 'none@example.com' });
     
     expect(res.status).toBe(404); 
@@ -42,7 +42,7 @@ describe('Get notification settings', () => {
     let userId = user._id
 
     const res = await request(app)
-      .get(`/user/getNotificationSettings?userId=${userId}`)
+      .get(`/user/v2/getNotificationSettings?userId=${userId}`)
 
       expect(res.status).toBe(200);
       expect(res.body.emails).toEqual(user.notificationSettings.emails);
@@ -64,7 +64,7 @@ describe('Update user', () => {
     const update = { fullname: 'Jane' };
     
     const res = await request(app)
-      .put(`/user/updateUser?userId=${userId}`) 
+      .put(`/user/v2/updateUser?userId=${userId}`) 
       .send(update);
 
     expect(res.body.fullname).toBe('Jane');
@@ -92,7 +92,7 @@ describe('Update socials', () => {
     };
 
     const res = await request(app)
-      .put(`/user/updateUser?userId=${userId}`)
+      .put(`/user/v2/updateUser?userId=${userId}`)
       .send(update);
 
     expect(res.body.socials.github).toBe('https://github.com/jane');
