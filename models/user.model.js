@@ -23,7 +23,34 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["Regular", "Google","Microsoft"],
         default: "Regular"
-    }
+    },
+    notificationSettings: {
+        emails: {
+          type: Boolean,
+          default: true
+        },
+        pushNotifications: {
+          type: Boolean,
+          default: true
+        }
+    },
+    socials: {
+        github: {
+          type: String
+        },
+        facebook: {
+          type: String
+        },
+        instagram: {
+          type: String
+        },
+        linkedin: {
+          type: String
+        },
+        medium: {
+          type: String
+        }
+      }
 }, {timestamps: true})
 
 module.exports = mongoose.model('users', userSchema)
