@@ -9,8 +9,7 @@ const {
 const { createPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
-const { uploadFile, downloadFile } = require("../../helpers/aws");
-const fs = require("fs");
+const cloudinaryUpload = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -131,34 +130,25 @@ exports.createPdf = async function (req, res) {
       return res.status(404).json({ message: "CV not found" });
     }
 
-    // Remove the option of uploading the CV to AWS S3
+    const url = "https://pptr.dev/"; // Replace with the actual URL for generating the CV
 
-    // Create the CV as a PDF
-    const pdfBuffer = await createPdf();
-
-    const tmpFolderPath = path.join(__dirname, "tmp");
-    await fs.promises.mkdir(tmpFolderPath, { recursive: true });
-
-    // Save the CV PDF to a local file in the 'tmp' folder
-    const pdfFilePath = path.join(tmpFolderPath, `${cv.id}.pdf`);
-    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
-
-    const downloadsFolderPath = path.join(os.homedir(), "Downloads");
-    await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
-
+    // Generate a PDF from the page content
     try {
-      await downloadFile(
-        path.join(
-          downloadsFolderPath,
-          `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
-        ),
-        cv.id
-      );
-      // Delete the 'tmp' folder and its contents after successful download
-      await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+      const pdfBuffer = await createPdf(url);
 
-      res.json({
-        message: "Your CV has been downloaded. Check your downloads folder",
+      // Upload the PDF to Cloudinary
+      const cloudinaryUrl = await cloudinaryUpload(pdfBuffer);
+
+      // Update the database with the Cloudinary URL
+      cv.cloudinaryUrl = cloudinaryUrl;
+      await cv.save();
+
+      // Send the Cloudinary URL for download
+      res.download(cv.cloudinaryUrl, `${cv._id}.pdf`, (err) => {
+        if (err) {
+          console.error("Error during file download:", err);
+          res.status(500).json({ error: "Error during file download" });
+        }
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
