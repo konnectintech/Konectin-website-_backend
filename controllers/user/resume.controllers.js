@@ -10,6 +10,7 @@ const { createPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
+const cloudinaryUpload = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -129,7 +130,7 @@ exports.createPdf = async function (req, res) {
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
-
+    
     // Create the CV as a PDF
     const pdfBuffer = await createPdf();
 
