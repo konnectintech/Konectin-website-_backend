@@ -6,7 +6,7 @@ router.post("/resume", resume.resumeBuilder);
 router.get("/getResumes", verifyUserToken, resume.getUserResumes);
 router.get("/getResume", verifyUserToken, resume.getUserResume);
 router.put("/updateResume", verifyUserToken, resume.updateUserResume);
-router.post("/v2/createPdf", verifyUserToken, resume.createPdf);
+router.post("/v2/createPdf", verifyUserToken, resume.downloadPDF);
 router.delete("/resume", verifyUserToken, resume.delete);
 
 module.exports = router;
