@@ -121,7 +121,7 @@ exports.updateUserResume = async function (req, res) {
   }
 };
 
-exports.createPdf = async function (req, res) {
+exports.downloadPDF = async function (req, res) {
   try {
     const { resumeId } = req.query;
     const { resumeHtml } = req.body;
