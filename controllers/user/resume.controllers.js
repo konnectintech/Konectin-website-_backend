@@ -107,51 +107,76 @@ exports.updateUserResume = async function (req, res) {
     if (error) {
       return res.status(400).json({ Error: error.details[0].message });
     }
-
+    const updated = await ResumeBuilder.findByIdAndUpdate(resumeId, { ...value }, { new: true });
     // Update the found CV directly
-    cv.set({ ...value });
-    await cv.save();
+    // cv.set({ ...value });
+    // await cv.save();
 
     return res.status(200).json({
       message: "Resume Updated successfully",
-      cv,
+      updated,
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
 };
 
+// exports.createPdf = async function (req, res) {
+//   try {
+//     const { resumeHtml } = req.body;
+//     const { resumeId } = req.query;
+
+//     const resume = await ResumeBuilder.findById({ _id: resumeId });
+
+//     if (!resume) {
+//       return res.status(404).json({ message: "Resume not found" });
+//     }
+
+//     // Create the CV as a PDF
+//     const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
+
+//     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
+//     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
+
+//     // Save the CV PDF to a local file in the 'downloads' folder
+//     const pdfFilePath = path.join(
+//       downloadsFolderPath,
+//       `${resume.basicInfo.firstName}_${resume.basicInfo.lastName}_Resume.pdf`
+//     );
+//     await fs.promises.writeFile(pdfFilePath, pdfBuffer);
+
+//     res.json({
+//       message: "Your Resume has been downloaded. Check your downloads folder",
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 exports.createPdf = async function (req, res) {
   try {
-    const { resumeHtml } = req.body;
     const { resumeId } = req.query;
-
-    const resume = await ResumeBuilder.findById({ _id: resumeId });
-    
-    if (!resume) {
+    const { resumeHtml } = req.body;
+    const resume = await ResumeBuilder.findById(resumeId);
+    if (resume) {
+      await ResumeBuilder.findByIdAndUpdate(resumeId, { currentStage: 6 })
+    } else {
       return res.status(404).json({ message: "Resume not found" });
     }
-
-    // Create the CV as a PDF
-    const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
-
-    const downloadsFolderPath = path.join(os.homedir(), "Downloads");
-    await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
-
-    // Save the CV PDF to a local file in the 'downloads' folder
-    const pdfFilePath = path.join(
-      downloadsFolderPath,
-      `${resume.basicInfo.firstName}_${resume.basicInfo.lastName}_Resume.pdf`
-    );
-    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
-
-    res.json({
-      message: "Your Resume has been downloaded. Check your downloads folder",
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const buffer = await convertResumeIntoPdf(resumeHtml);
+    if (!buffer) {
+      return res.status(500).json({ message: "Server error, try again later!" });
+    }
+    res.type("pdf");
+    return res.end(buffer, "binary");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
+
+
+
 
 exports.delete = async (req, res) => {
   try {
