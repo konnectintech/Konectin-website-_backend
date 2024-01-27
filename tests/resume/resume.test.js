@@ -7,6 +7,7 @@ const { faker } = require("@faker-js/faker");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const existingUserId = "5f4cc8f7e5a7de2a393a2a8b";
+import { convertResumeIntoPdf } from "../../helpers/puppeteer";
 
 const jwtSign = (payload) => {
   return jwt.sign(payload, "K12345", { expiresIn: "24h" });
@@ -17,7 +18,6 @@ describe("Resume Routes", () => {
     it("should return 201 and the new user's resume created", async () => {
       const user = await createUser();
 
-      const token = jwtSign({ _id: user._id });
       const resumeData = {
         basicInfo: {
           firstName: user.fullname,

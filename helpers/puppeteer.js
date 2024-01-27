@@ -1,16 +1,23 @@
 const puppeteer = require("puppeteer");
 
-exports.createDownloadPdf = async (url, outputPath) => {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
+exports.convertResumeIntoPdf = async (resumeHtml) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const browser = await puppeteer.launch({ headless: true });
+      const page = await browser.newPage();
 
-  // Navigate to the specified URL
-  await page.goto(url, { waitUntil: "domcontentloaded" });
+      await page.setContent(resumeHtml, {
+        waitUntil: "domcontentloaded",
+      });
 
-  // Generate a PDF from the page content
-  const pdfBuffer = await page.pdf({ format: "A4" });
+      // Generate a PDF from the page content
+      const pdfBuffer = await page.pdf({ format: "A4" });
 
-  await browser.close();
+      await browser.close();
 
-  return pdfBuffer;
+      resolve(pdfBuffer);
+    } catch (error) {
+      reject(error);
+    }
+  });
 };

@@ -6,7 +6,7 @@ const {
   resumeSchema,
   resumeUpdateSchema,
 } = require("../../helpers/resumeValidate");
-const { createDownloadPdf } = require("../../helpers/puppeteer");
+const { convertResumeIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
@@ -123,16 +123,17 @@ exports.updateUserResume = async function (req, res) {
 
 exports.createPdf = async function (req, res) {
   try {
+    const { resumeHtml } = req.body;
     const { resumeId } = req.query;
 
     const resume = await ResumeBuilder.findById({ _id: resumeId });
-
+    
     if (!resume) {
       return res.status(404).json({ message: "Resume not found" });
     }
-    
-    // Create the Resume as a PDF
-    const pdfBuffer = await createDownloadPdf();
+
+    // Create the CV as a PDF
+    const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
 
     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
