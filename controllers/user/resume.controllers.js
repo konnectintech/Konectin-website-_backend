@@ -107,14 +107,14 @@ exports.updateUserResume = async function (req, res) {
     if (error) {
       return res.status(400).json({ Error: error.details[0].message });
     }
-
+    const updated = await ResumeBuilder.findByIdAndUpdate(resumeId, { ...value }, { new: true });
     // Update the found CV directly
-    cv.set({ ...value });
-    await cv.save();
+    // cv.set({ ...value });
+    // await cv.save();
 
     return res.status(200).json({
       message: "Resume Updated successfully",
-      cv,
+      updated,
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });

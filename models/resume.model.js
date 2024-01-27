@@ -89,6 +89,10 @@ const resumeSchema = new mongoose.Schema({
     },
   ],
   skills: [{ type: String }],
+  currentEditedJob: { type: Number },
+  currentEditedEducation: { type: Number },
+  bio: { type: String },
+  selectedTemplate: { type: String },
   currentStage: {
     type: Number,
   },
