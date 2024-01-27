@@ -122,16 +122,14 @@ exports.updateUserResume = async function (req, res) {
 
 exports.createPdf = async function (req, res) {
   try {
+    const { resumeHtml } = req.body;
+
     const { resumeId } = req.query;
 
     const cv = await ResumeBuilder.findById({ _id: resumeId });
 
-    if (!cv) {
-      return res.status(404).json({ message: "CV not found" });
-    }
-
     // Create the CV as a PDF
-    const pdfBuffer = await createPdf();
+    const pdfBuffer = await createPdf(resumeHtml);
 
     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
