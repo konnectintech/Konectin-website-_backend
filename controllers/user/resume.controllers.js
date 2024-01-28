@@ -149,7 +149,7 @@ exports.createPdf = async function (req, res) {
     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
 
     try {
-      await downloadFile(
+      const buffer = await downloadFile(
         path.join(
           downloadsFolderPath,
           `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
@@ -159,9 +159,8 @@ exports.createPdf = async function (req, res) {
       // Delete the 'tmp' folder and its contents after successful download
       await fs.promises.rmdir(tmpFolderPath, { recursive: true });
 
-      res.json({
-        message: "Your CV has been downloaded. Check your downloads folder",
-      });
+      res.type("pdf");
+      return res.end(buffer, "binary");
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
