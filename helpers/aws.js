@@ -38,7 +38,7 @@ const uploadFile = (fileName, key) => {
   });
 };
 
-const downloadFile = async (localFilePath, key) => {
+const downloadFile = async (key) => {
   try {
     const downloadParams = {
       Bucket: process.env.AWS_S3_BUCKET,
@@ -47,9 +47,14 @@ const downloadFile = async (localFilePath, key) => {
 
     const { Body } = await s3Client.send(new GetObjectCommand(downloadParams));
 
-    await fs.writeFile(localFilePath, Body);
+    // Convert the stream to a Buffer
+    const chunks = [];
+    for await (const chunk of Body) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
 
-    return localFilePath;
+    return buffer;
   } catch (error) {
     throw error;
   }

@@ -131,39 +131,27 @@ exports.createPdf = async function (req, res) {
     if (!cv) {
       return res.status(404).json({ message: "CV not found" });
     }
-    // Create the CV as a PDF
+    // 1. Create the CV as a PDF
     const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
 
     const tmpFolderPath = path.join(__dirname, "tmp");
     await fs.promises.mkdir(tmpFolderPath, { recursive: true });
 
-    // Save the CV PDF to a local file in the 'tmp' folder
+    // 2. Save the CV PDF to a local file in the 'tmp' folder
     const pdfFilePath = path.join(tmpFolderPath, `${cv.id}.pdf`);
     await fs.promises.writeFile(pdfFilePath, pdfBuffer);
 
-    // Upload the PDF file to AWS S3 and update the cv imageUrl
+    // 3. Upload the PDF file to AWS S3 and update the cv imageUrl
     const imageUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
     cv.cloudinaryUrl = imageUrl;
 
-    const downloadsFolderPath = path.join(os.homedir(), "Downloads");
-    await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
+    //4.  Remove the 'tmp' folder and its contents after successful upload
+    await fs.promises.rmdir(tmpFolderPath, { recursive: true });
 
-    try {
-      const buffer = await downloadFile(
-        path.join(
-          downloadsFolderPath,
-          `${cv.basicInfo.firstName}_${cv.basicInfo.lastName}_CV.pdf`
-        ),
-        `${cv.id}.pdf`
-      );
-      // Delete the 'tmp' folder and its contents after successful download
-      await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+    // 5. Set the response headers for download from AWS S3
+    const pdfContent = await downloadFile(`${cv.id}.pdf`);
 
-      res.type("pdf");
-      return res.end(buffer, "binary");
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+    return res.end(pdfContent, "binary");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -17,6 +17,6 @@ exports.convertResumeIntoPdf = async (resumeHtml) => {
     return pdfBuffer;
   } catch (error) {
     console.error(error);
-    return null;
+    throw error;
   }
 };
