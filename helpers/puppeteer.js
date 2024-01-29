@@ -1,23 +1,22 @@
 const puppeteer = require("puppeteer");
 
-exports.createPdf = async (resumeHtml) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const browser = await puppeteer.launch({ headless: true });
-      const page = await browser.newPage();
+exports.convertResumeIntoPdf = async (resumeHtml) => {
+  try {
+    const browser = await puppeteer.launch({ headless: "new" });
+    const page = await browser.newPage();
 
-      await page.setContent(resumeHtml, {
-        waitUntil: "domcontentloaded",
-      });
+    await page.setContent(resumeHtml, {
+      waitUntil: "domcontentloaded",
+    });
 
-      // Generate a PDF from the page content
-      const pdfBuffer = await page.pdf({ format: "A4" });
+    // Generate a PDF from the page content
+    const pdfBuffer = await page.pdf({ format: "A4" });
 
-      await browser.close();
+    await browser.close();
 
-      resolve(pdfBuffer);
-    } catch (error) {
-      reject(error);
-    }
-  });
+    return pdfBuffer;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
