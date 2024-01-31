@@ -21,16 +21,17 @@ exports.resumeBuilder = async (req, res) => {
         .status(404)
         .json({ message: "User does not exist, please register" });
     }
-    const { error, value } = resumeSchema.validate(req.body);
+    // const { error, value } = resumeSchema.validate(req.body);
 
-    if (error) {
-      return res.status(400).json({ Error: error.details[0].message });
-    }
+    // if (error) {
+    //   return res.status(400).json({ Error: error.details[0].message });
+    // }
 
     const cv = new ResumeBuilder({
       userId,
       currentStage: 1,
-      ...value,
+      // ...value,
+      ...req.body
     });
 
     await cv.save();
@@ -103,11 +104,11 @@ exports.updateUserResume = async function (req, res) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { error, value } = resumeUpdateSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ Error: error.details[0].message });
-    }
-    const updated = await ResumeBuilder.findByIdAndUpdate(resumeId, { ...value }, { new: true });
+    // const { error, value } = resumeUpdateSchema.validate(req.body);
+    // if (error) {
+    //   return res.status(400).json({ Error: error.details[0].message });
+    // }
+    const updated = await ResumeBuilder.findByIdAndUpdate(resumeId, { ...req.body }, { new: true });
     // Update the found CV directly
     // cv.set({ ...value });
     // await cv.save();
