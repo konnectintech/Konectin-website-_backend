@@ -32,7 +32,7 @@ exports.convertResumeIntoPdf = async (resumeHtml) => {
     });
 
     // Generate a PDF from the page content
-    const pdfBuffer = await page.pdf({ format: "letter", printBackground: true });
+    const pdfBuffer = await page.pdf({ margin: 0, format: "letter", printBackground: true, preferCSSPageSize: true });
 
     await browser.close();
 
