@@ -10,7 +10,8 @@ const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
 const { verifyEmail } = require("../../utils/verifyEmail");
 const { countries, getCountry } = require("../../utils/countrySearch");
-const fetch = require('node-fetch');
+const fetchPromise = import("node-fetch");
+const fetch = async (...args) => (await fetchPromise).default(...args);
 
 require("dotenv").config();
 
@@ -52,8 +53,6 @@ exports.register = async (req, res) => {
       //Send email
       await transporter(saveUser.email, subject, msg);
       //
-
-      await transporter(email, subject, msg);
       return res.status(201).json({ message: "User created successfully", user });
     }
 
@@ -300,13 +299,15 @@ exports.forgetPassword = async (req, res) => {
     if (!response.ok) {
       return res.status(400).json({ message: "Some error occured, try again later" });
     }
+
     const locationData = await response.json();
     const countryAbbreviation = locationData.country;
     const sortedData = countries.sort((a, b) => a.abbreviation - b.abbreviation);
+    
     let location = getCountry(sortedData, countryAbbreviation);
     location !== -1 ? location: location = countryAbbreviation;
     let device = userAgent;
-    //
+    
     const token = await generatePasswordOTP(user._id);
     const subject = "Konectin Technical - Reset password";
     const msg = ResetPasswordEmail(user.fullname.split(' ')[0], location, device, token); 

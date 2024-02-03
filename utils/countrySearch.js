@@ -1,14 +1,16 @@
 
-exports.getCountry = (arr, abbreviation)=>{
-    let firstIndex = 0;
-    let lastIndex = arr.length - 1;
-    let middleIndex = Math.floor((firstIndex + lastIndex)/2);
-    if(arr[middleIndex][abbreviation] === abbreviation){
-        return arr[middleIndex][full_name];
-    }else if(arr[middleIndex][abbreviation] > arr[middleIndex][firstIndex]){
-        firstIndex = arr[middleIndex] + 1;
-    }else{
-        firstIndex = arr[middleIndex] -1;
+exports.getCountry = (arr, abbrev)=>{
+    let leftIndex = 0;
+    let rigthIndex = arr.length - 1;
+    while (leftIndex <= rigthIndex) {
+        let middleIndex = Math.floor((leftIndex + rigthIndex)/2);
+        if(arr[middleIndex].abbreviation === abbrev){
+            return arr[middleIndex].full_name;
+        }else if( arr[middleIndex].abbreviation < abbrev){
+            leftIndex = middleIndex + 1;
+        }else{
+            rigthIndex = middleIndex -1;
+        }
     }
     return -1;
 };
