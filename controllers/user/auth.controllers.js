@@ -136,6 +136,24 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.removeEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    const userExist = await User.exists({ email });
+    if (!userExist) return res.status(404).json({ message: "Email does not exist" });
+
+    const user = await User.findOneAndDelete({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email deletion failed" });
+    }
+
+    return res.status(200).json({message: "Email deleted successfully!"});
+
+  } catch (err) {
+    return res.status(500).json({ message: "Server error, try again later!" });
+  }
+};
+
 exports.getUser = async (req, res) => {
   try {
     const userId = req.params.userId;
