@@ -8,6 +8,9 @@ const { jwtSign } = require("../../helpers/jsonwebtoken");
 const passwordOTP = require("../../models/passwordOTP");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
+const { verifyEmail } = require("../../utils/verifyEmail");
+const { countries, getCountry } = require("../../utils/countrySearch");
+const fetch = require('node-fetch');
 
 require("dotenv").config();
 
@@ -37,19 +40,26 @@ exports.register = async (req, res) => {
       process.env.NODE_ENV === "development" ||
       process.env.NODE_ENV === "production"
     ) {
+      const saveUser = await user.save();
+      // If user registration fails
+      if(!saveUser) return res.status(404).json({ message: "Registration failed" });
+      // Generate OTP
       const token = await generateRegisterOTP(user._id);
+      // Email Subject
       const subject = "Konectin Technical - Email Verification";
-      const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
-                  <h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
-                  <p class="text-xs my-1 text-center">If you did not req this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
-              `;
+      // Email body
+      const msg = verifyEmail(saveUser.fullname.split(' ')[0], saveUser.email, token);
+      //Send email
+      await transporter(saveUser.email, subject, msg);
+      //
 
       await transporter(email, subject, msg);
+      return res.status(201).json({ message: "User created successfully", user });
     }
 
-    await user.save();
+    // await user.save();
 
-    return res.status(201).json({ message: "User created successfully", user });
+    // return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -250,14 +260,38 @@ exports.requestEmailToken = async (req, res) => {
 exports.forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email: email });
+    let ipAddress = req.ip;
+    const userAgent = req.get('user-agent');
+
+    const user = await User.findOne({ email: email }, {email: 1, fullname:1});
 
     if (!user) {
       return res.status(400).json({ message: "Please sign-up first" });
     }
+    // 
+    const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
+    if (isIPv6) {
+      // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
+    ipAddress = ipAddress.includes('::ffff:') ? ipAddress.replace(/^.*:/, "") : null;
+    }
+    if (!ipAddress) {
+      return res.status(400).json({ message: "Some error occured, try again later" });
+    }
+    //Get location
+    const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
+    if (!response.ok) {
+      return res.status(400).json({ message: "Some error occured, try again later" });
+    }
+    const locationData = await response.json();
+    const countryAbbreviation = locationData.country;
+    const sortedData = countries.sort((a, b) => a.abbreviation - b.abbreviation);
+    let location = getCountry(sortedData, countryAbbreviation);
+    location !== -1 ? location: location = countryAbbreviation;
+    let device = userAgent;
+    //
     const token = await generatePasswordOTP(user._id);
     const subject = "Konectin Technical - Reset password";
-    const msg = ResetPasswordEmail(token);
+    const msg = ResetPasswordEmail(user.fullname.split(' ')[0], location, device, token); 
     await transporter(email, subject, msg);
     return res.status(200).json({
       message: "Please check email for the code to reset your password",
