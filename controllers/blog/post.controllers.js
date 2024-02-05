@@ -113,7 +113,7 @@ exports.likePost = async (req, res) => {
         if (!blog) {
             return res.status(400).json({ message: "Blog post not found" });
         }
-
+        
         const ifLikeExists = blog.likes.includes(userId);
         if (ifLikeExists) {
             const success = await unlikeBlog(blogId, user.id);
