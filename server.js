@@ -29,12 +29,12 @@ app.use(
   })
 );
 
-app.get("/v2", (request, response) => {
+app.get("/", (request, response) => {
   response.json({ message: "Welcome to Konectin!" });
 });
 
-app.use("/v2/user", userRoutes);
-app.use("/v2/admin", adminRoutes);
+app.use("/user", userRoutes);
+app.use("/admin", adminRoutes);
 
 const server = app.listen(port, () => {
   console.log(`Server running on port: ${port}`);

@@ -187,7 +187,7 @@ const verifyEmail = (first_name, email, otp)=>{
                   <hr style="margin-top: 32px" />
                   <div>
                       <p>
-                      If you did not create an account, <a href="${process.env.BACKEND_URL_LOCAL}/user/removeEmail?email=${email}">click here</a> to
+                      If you did not create an account, <a href="${process.env.BACKEND_URL}/user/removeEmail?email=${email}">click here</a> to
                       remove this email address
                       </p>
                   </div>

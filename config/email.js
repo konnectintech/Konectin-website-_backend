@@ -3,12 +3,12 @@ const { template } = require("../utils/mail-template");
 require("dotenv").config();
 
 const nm = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
+  service: "gmail",
   port: process.env.EMAIL_PORT,
-  secure: false,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD, 
+    pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: true,
