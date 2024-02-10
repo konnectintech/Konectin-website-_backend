@@ -207,7 +207,9 @@ describe("Auth Routes", () => {
     it("should return user details", async () => {
       const user = await createUser({});
 
-      const response = await request(app).get(`/user/getUser/${user._id}`);
+      const response = await request(app)
+        .get("/user/getUser")
+        .query({ userId: user.id });
 
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual(
@@ -221,9 +223,9 @@ describe("Auth Routes", () => {
 
     it("should return an error if a user is not found", async () => {
       const existingUserId = "5f4cc8f7e5a7de2a393a2a8b";
-      const response = await request(app).get(
-        `/user/getUser/${existingUserId}`
-      );
+      const response = await request(app)
+        .get("/user/getUser")
+        .query({ userId: existingUserId });
 
       expect(response.status).toEqual(StatusCodes.NOT_FOUND);
       expect(response.body.message).toEqual("No such user exists");
