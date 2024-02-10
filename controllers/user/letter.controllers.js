@@ -3,7 +3,6 @@ const LetterBuilder = require("../../models/letter.model");
 require("dotenv").config();
 const { convertPageIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
-const os = require("os");
 const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
 const { Types } = require("mongoose");

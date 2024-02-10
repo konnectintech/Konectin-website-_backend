@@ -1,16 +1,8 @@
 const User = require("../../models/user.model");
 const ResumeBuilder = require("../../models/resume.model");
-require("dotenv").config();
-
-const {
-  resumeSchema,
-  resumeUpdateSchema,
-} = require("../../helpers/resumeValidate");
 const { convertPageIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
-const os = require("os");
 const fs = require("fs");
-const cloudinaryUpload = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -21,16 +13,10 @@ exports.resumeBuilder = async (req, res) => {
         .status(404)
         .json({ message: "User does not exist, please register" });
     }
-    // const { error, value } = resumeSchema.validate(req.body);
-
-    // if (error) {
-    //   return res.status(400).json({ Error: error.details[0].message });
-    // }
 
     const cv = new ResumeBuilder({
       userId,
       currentStage: 1,
-      // ...value,
       ...req.body,
     });
 
@@ -104,18 +90,11 @@ exports.updateUserResume = async function (req, res) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // const { error, value } = resumeUpdateSchema.validate(req.body);
-    // if (error) {
-    //   return res.status(400).json({ Error: error.details[0].message });
-    // }
     const updated = await ResumeBuilder.findByIdAndUpdate(
       resumeId,
       { ...req.body },
       { new: true }
     );
-    // Update the found CV directly
-    // cv.set({ ...value });
-    // await cv.save();
 
     return res.status(200).json({
       message: "Resume Updated successfully",
