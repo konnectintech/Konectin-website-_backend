@@ -1,7 +1,6 @@
 const User = require("../../models/user.model");
 const LetterBuilder = require("../../models/letter.model");
 require("dotenv").config();
-
 const { convertPageIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
@@ -210,7 +209,7 @@ exports.createLetterIntoPdf = async function (req, res) {
     const letter = await LetterBuilder.findById({ _id: letterId });
 
     if (!letter) {
-      return res.status(404).json({ message: "Letter not found" });
+      return res.status(404).json({ message: "letter not found" });
     }
     // 1. Create the letter as a PDF
     const pdfBuffer = await convertPageIntoPdf(letterHtml);
@@ -224,12 +223,10 @@ exports.createLetterIntoPdf = async function (req, res) {
 
     // 3. Upload the PDF file to AWS S3 and update the letter imageUrl
     const imageUrl = await uploadFile(pdfFilePath, `${letter.id}.pdf`);
-    letter.cloudinaryUrl = imageUrl;
-
-    console.log("imageUrl", imageUrl);
+    letter.imageUrl = imageUrl;
 
     //4.  Remove the 'tmp' folder and its contents after successful upload
-    await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+    await fs.promises.rm(tmpFolderPath, { recursive: true });
 
     // 5. Set the response headers for download from AWS S3
     const pdfContent = await downloadFile(`${letter.id}.pdf`);

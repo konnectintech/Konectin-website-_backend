@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer");
 
-exports.convertResumeIntoPdf = async (resumeHtml) => {
+exports.convertPageIntoPdf = async (resumeHtml) => {
   try {
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();

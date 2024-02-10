@@ -4,7 +4,7 @@ const letterSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Types.ObjectId,
   },
-  cloudinaryUrl: {
+  letterUrl: {
     type: String,
   },
   basicInfo: {

@@ -6,7 +6,7 @@ const {
   resumeSchema,
   resumeUpdateSchema,
 } = require("../../helpers/resumeValidate");
-const { convertResumeIntoPdf } = require("../../helpers/puppeteer");
+const { convertPageIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const os = require("os");
 const { uploadFile, downloadFile } = require("../../helpers/aws");
@@ -121,7 +121,7 @@ exports.updateUserResume = async function (req, res) {
   }
 };
 
-exports.createPdf = async function (req, res) {
+exports.downloadPDF = async function (req, res) {
   try {
     const { resumeId } = req.query;
     const { resumeHtml } = req.body;
@@ -132,7 +132,7 @@ exports.createPdf = async function (req, res) {
       return res.status(404).json({ message: "CV not found" });
     }
     // 1. Create the CV as a PDF
-    const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
+    const pdfBuffer = await convertPageIntoPdf(resumeHtml);
 
     const tmpFolderPath = path.join(__dirname, "tmp");
     await fs.promises.mkdir(tmpFolderPath, { recursive: true });
