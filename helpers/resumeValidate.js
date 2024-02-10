@@ -101,5 +101,6 @@ const resumeSchema = Joi.object({
 //     })),
 //     skills: Joi.array().items(Joi.string()).optional().empty("")
 // })
+
 const resumeUpdateSchema = resumeSchema;
 module.exports = { resumeSchema, resumeUpdateSchema };
