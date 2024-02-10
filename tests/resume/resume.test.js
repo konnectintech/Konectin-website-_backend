@@ -293,8 +293,6 @@ describe("Resume Routes", () => {
         .query({ userId: user._id.toString() })
         .send(updateResumeDto)
         .set("Authorization", `Bearer ${token}`);
-
-      console.log("response..", response);
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual("Resume Updated successfully");
       expect(response.body.updated.userId).toEqual(user._id.toString());
