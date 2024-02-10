@@ -4,6 +4,7 @@ const { Comment } = require("../../models/comment.model");
 const BlogLike = require("../../models/likeBlog.model");
 const hubspotClient = require("../../config/hubspot");
 const { unlikeBlog, likeBlog: like } = require("../../utils/postLike");
+const ip = require("ip")
 
 exports.createPost = async (req, res) => {
     try {
@@ -77,12 +78,12 @@ exports.getPost = async (req, res) => {
     try {
         const blogId = req.query.blogId;
         const blogPost = await hubspotClient.cms.blogs.blogPosts.blogPostsApi.getById(blogId);
-        if(blogPost){
+        if (blogPost) {
             //check if the blogPost Id stored in database, else create one
             const blog = await Blog.findById({ _id: blogId });
-            if(!blog){
+            if (!blog) {
                 await Blog.create({
-                    _id:blogId
+                    _id: blogId
                 })
             }
             return res
@@ -137,17 +138,19 @@ exports.likePost = async (req, res) => {
 
 exports.updateNumOfReads = async (req, res) => {
     let blog;
-    const ipAddress = req.socket.remoteAddress
+    const ipAddress = ip.address()
     try {
         const blogId = req.query.blogId;
         blog = await Blog.findById(blogId)
         if (!blog) {
-            return res.status(404).json({message:"Blog not found"})
+            return res.status(404).json({ message: "Blog not found" })
         } else {
-            if(blog.userIP.includes(ipAddress)){
+            console.log(ipAddress)
+            console.log(blog.userIP)
+            if (blog.userIP.includes(ipAddress)) {
                 console.log("Already read")
                 return res.status(200).json({ message: "Number of reads updated", data: blog })
-            }else{
+            } else {
                 blog = await Blog.findByIdAndUpdate(blogId, { $inc: { numOfReads: 1 } }, { new: true })
                 blog.userIP.push(ipAddress)
                 await blog.save()
@@ -183,16 +186,16 @@ exports.updateNumOfReads = async (req, res) => {
     }
 };
 
-exports.getBlogActions= async (req, res) => {
+exports.getBlogActions = async (req, res) => {
     let blog;
     try {
         const blogId = req.query.blogId;
         blog = await Blog.findById(blogId)
         if (!blog) {
             // blog = await Blog.create({ blogId, numOfReads: 1 })
-            return res.status(404).json({message:"Blog post not found"})
+            return res.status(404).json({ message: "Blog post not found" })
         }
-        return res.status(200).json({ message: "Blog actions", data: {views:blog.numOfReads,shares:blog.numOfShares,likes:blog.likes} })
+        return res.status(200).json({ message: "Blog actions", data: { views: blog.numOfReads, shares: blog.numOfShares, likes: blog.likes } })
     } catch (err) {
         console.log(err.message);
         return res
@@ -207,7 +210,7 @@ exports.updateNumOfShares = async (req, res) => {
     try {
         blog = await Blog.findById(blogId)
         if (!blog) {
-            return res.status(404).json({message:"Blog not found"})
+            return res.status(404).json({ message: "Blog not found" })
         } else {
             blog = await Blog.findByIdAndUpdate(blogId, { $inc: { numOfShares: 1 } }, { new: true })
         }
