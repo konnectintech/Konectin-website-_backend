@@ -7,6 +7,7 @@ const { faker } = require("@faker-js/faker");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const existingUserId = "5f4cc8f7e5a7de2a393a2a8b";
+import { convertResumeIntoPdf } from "../../helpers/puppeteer";
 
 const jwtSign = (payload) => {
   return jwt.sign(payload, "K12345", { expiresIn: "24h" });
@@ -18,7 +19,6 @@ describe("Resume Routes", () => {
       const user = await createUser();
 
       const resumeData = {
-        userId: user._id,
         basicInfo: {
           firstName: user.fullname,
           lastName: user.fullname,
@@ -64,14 +64,11 @@ describe("Resume Routes", () => {
 
       const response = await request(app)
         .post("/user/resume")
+        .query({ userId: user._id.toString() })
         .set("content-type", "application/json")
         .send(resumeData);
-
       expect(response.status).toEqual(StatusCodes.CREATED);
       expect(response.body.message).toEqual("Resume created successfully");
-      expect(response.body.cv.userId.toString()).toEqual(
-        resumeData.userId.toString()
-      );
       expect(response.body.cv.skills).toEqual(resumeData.skills);
       expect(response.body.cv.education[0].schoolName).toEqual(
         resumeData.education[0].schoolName
@@ -84,7 +81,6 @@ describe("Resume Routes", () => {
 
     it("should return an error if the user id does not exist", async () => {
       const resumeData = {
-        userId: existingUserId,
         basicInfo: {
           firstName: faker.person.firstName,
           lastName: faker.person.lastName,
@@ -130,6 +126,7 @@ describe("Resume Routes", () => {
 
       const response = await request(app)
         .post("/user/resume")
+        .query({ userId: existingUserId })
         .set("content-type", "application/json")
         .send(resumeData);
 
@@ -143,12 +140,15 @@ describe("Resume Routes", () => {
   describe("USER RESUMES", () => {
     it("should return a list of user's resumes", async () => {
       const user = await createUser();
-
+      const token = jwtSign({ _id: user._id });
       const resume1 = await createResume({ userId: user._id });
       const resume2 = await createResume({ userId: user._id });
       const cvs = [resume1, resume2];
 
-      const response = await request(app).get(`/user/getResumes/${user._id}`);
+      const response = await request(app)
+        .get("/user/getResumes")
+        .query({ userId: user._id.toString() })
+        .set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual("Resumes retrieved successfully");
@@ -164,24 +164,31 @@ describe("Resume Routes", () => {
       );
     });
 
-    it("should return an error if the user does not exist", async () => {
-      const response = await request(app).get(
-        `/user/getResumes/${existingUserId}`
-      );
+    it("should return an error if the token is not correct", async () => {
+      const user = await createUser();
+      const token = jwtSign({ _id: user._id });
+      const response = await request(app)
+        .get("/user/getResumes")
+        .query({ userId: existingUserId })
+        .set("Authorization", `Bearer ${token}`);
 
-      expect(response.status).toEqual(StatusCodes.NOT_FOUND);
-      expect(response.body.message).toEqual(
-        "User does not exist, please register"
-      );
+      expect(response.status).toEqual(StatusCodes.UNAUTHORIZED);
+      expect(response.body.message).toEqual("Invalid access token");
     });
   });
 
   describe("GET ONE RESUME", () => {
-    it("should get a use  resume by id", async () => {
+    it("should get a user  resume by id", async () => {
       const user = await createUser();
+      const token = jwtSign({ _id: user._id });
       const resume = await createResume({ userId: user._id });
 
-      const response = await request(app).get(`/user/getResume/${resume._id}`);
+      const response = await request(app)
+        .get("/user/getResume")
+        .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
+        .set("Authorization", `Bearer ${token}`);
+
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual("Resume retrieved successfully");
       expect(response.body.cv._id.toString()).toEqual(resume._id.toString());
@@ -190,9 +197,13 @@ describe("Resume Routes", () => {
       );
     });
     it("should return an error if the resume is not found", async () => {
-      const response = await request(app).get(
-        `/user/getResume/${existingUserId}`
-      );
+      const user = await createUser();
+      const token = jwtSign({ _id: user._id });
+
+      const response = await request(app)
+        .get("/user/getResume")
+        .query({ resumeId: existingUserId })
+        .set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(StatusCodes.NOT_FOUND);
       expect(response.body.message).toEqual("Resume with Id does not exist");
@@ -206,7 +217,9 @@ describe("Resume Routes", () => {
       const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
-        .delete(`/user/resume/${resume._id}`)
+        .delete("/user/resume")
+        .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual(
@@ -220,7 +233,8 @@ describe("Resume Routes", () => {
       const user = await createUser();
       const token = jwtSign({ _id: user._id });
       const response = await request(app)
-        .delete(`/user/resume/${existingUserId}`)
+        .delete("/user/resume")
+        .query({ resumeId: existingUserId })
         .set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(StatusCodes.NOT_FOUND);
@@ -230,16 +244,18 @@ describe("Resume Routes", () => {
     it("should return an error if a user is not authenticated", async () => {
       const user = await createUser();
       const user1 = await createUser();
-      const token = jwtSign({ _id: user._id });
+      const token = jwtSign({ _id: user1._id });
 
-      const resume = await createResume({ userId: user1._id });
+      const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
-        .delete(`/user/resume/${resume._id}`)
+        .delete("/user/resume")
+        .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
 
       expect(response.status).toEqual(StatusCodes.UNAUTHORIZED);
-      expect(response.body.message).toEqual("Unauthorized");
+      expect(response.body.message).toEqual("Invalid access token");
     });
   });
 
@@ -261,7 +277,9 @@ describe("Resume Routes", () => {
       };
 
       const response = await request(app)
-        .put(`/user/updateResume/${resume._id}`)
+        .put("/user/updateResume")
+        .query({ resumeId: resume._id.toString() })
+        .query({ userId: user._id.toString() })
         .send(updateResumeDto)
         .set("Authorization", `Bearer ${token}`);
 

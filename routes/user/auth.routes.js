@@ -3,7 +3,7 @@ const auth = require("../../controllers/user/auth.controllers");
 
 router.post("/register", auth.register);
 router.post("/login", auth.login);
-router.get("/getUser/:userId", auth.getUser);
+router.get("/getUser", auth.getUser);
 router.post("/microsoft/login", auth.microsoftLogin);
 router.post("/verify-otp", auth.verifyOtp);
 router.post("/requestEmail", auth.requestEmailToken);
