@@ -2,6 +2,9 @@ const User = require("../../models/user.model");
 const LetterBuilder = require("../../models/letter.model");
 require("dotenv").config();
 const { convertPageIntoPdf } = require("../../helpers/puppeteer");
+const path = require("path");
+const { uploadFile, downloadFile } = require("../../helpers/aws");
+const fs = require("fs");
 const { Types } = require("mongoose");
 
 exports.letterBuilder = async (req, res) => {
@@ -199,27 +202,35 @@ exports.updateUserLetter = async (req, res) => {
 
 exports.createLetterIntoPdf = async function (req, res) {
   try {
-    try {
-      const { letterId } = req.query;
-      const { letterHtml } = req.body;
-      const letter = await LetterBuilder.findById(letterId);
-      if (!letter) {
-        return res.status(404).json({ message: "Retter not found" });
-      }
-      const buffer = await convertPageIntoPdf(letterHtml);
-      if (!buffer) {
-        return res
-          .status(500)
-          .json({ message: "Server error, try again later!" });
-      }
-      res.type("pdf");
-      return res.end(buffer, "binary");
-    } catch (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json({ message: "Server error, try again later!" });
+    const { letterId } = req.query;
+    const { letterHtml } = req.body;
+
+    const letter = await LetterBuilder.findById({ _id: letterId });
+
+    if (!letter) {
+      return res.status(404).json({ message: "letter not found" });
     }
+    // 1. Create the letter as a PDF
+    const pdfBuffer = await convertPageIntoPdf(letterHtml);
+
+    const tmpFolderPath = path.join(__dirname, "tmp");
+    await fs.promises.mkdir(tmpFolderPath, { recursive: true });
+
+    // 2. Save the letter PDF to a local file in the 'tmp' folder
+    const pdfFilePath = path.join(tmpFolderPath, `${letter.id}.pdf`);
+    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
+
+    // 3. Upload the PDF file to AWS S3 and update the letter imageUrl
+    const imageUrl = await uploadFile(pdfFilePath, `${letter.id}.pdf`);
+    letter.imageUrl = imageUrl;
+
+    //4.  Remove the 'tmp' folder and its contents after successful upload
+    await fs.promises.rm(tmpFolderPath, { recursive: true });
+
+    // 5. Set the response headers for download from AWS S3
+    const pdfContent = await downloadFile(`${letter.id}.pdf`);
+
+    return res.end(pdfContent, "binary");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

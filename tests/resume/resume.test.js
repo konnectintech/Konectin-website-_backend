@@ -75,11 +75,17 @@ describe("Resume Routes", () => {
       expect(response.body.cv.skills[0].name).toEqual(
         resumeData.skills[0].name
       );
+      expect(response.body.cv.skills[0].name).toEqual(
+        resumeData.skills[0].name
+      );
       expect(response.body.cv.education[0].schoolName).toEqual(
         resumeData.education[0].schoolName
       );
       expect(response.body.cv.jobExperience[0].jobTitle).toEqual(
         resumeData.jobExperience[0].jobTitle
+      );
+      expect(response.body.cv.basicInfo.firstName).toEqual(
+        resumeData.basicInfo.firstName
       );
       expect(response.body.cv.basicInfo.firstName).toEqual(
         resumeData.basicInfo.firstName
@@ -131,6 +137,7 @@ describe("Resume Routes", () => {
           { name: "blogging", lvl: "beginner" },
           { name: "content writing", lvl: "advanced" },
         ],
+
         currentStage: 1,
       };
 

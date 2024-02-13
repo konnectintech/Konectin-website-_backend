@@ -8,10 +8,6 @@ router.get("/getLetter", verifyUserToken, letter.getUserLetter);
 router.get("/getLetters", verifyUserToken, letter.getUserLetters);
 router.delete("/letter", verifyUserToken, letter.delete);
 router.put("/updateLetter", verifyUserToken, letter.updateUserLetter);
-router.post(
-  "/createLetterIntoPdf",
-  verifyUserToken,
-  letter.createLetterIntoPdf
-);
+router.post("/v2/createLetterPdf", verifyUserToken, letter.createLetterIntoPdf);
 
 module.exports = router;

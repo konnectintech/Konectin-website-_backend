@@ -9,8 +9,6 @@ const adminRoutes = require("./routes/admin");
 const expressFileUpload = require("express-fileupload");
 const moment = require("moment-timezone");
 const connectDatabase = require("./config/database");
-const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./swagger.json");
 
 // set the default timezone to West African Standard Time
 moment.tz.setDefault("Africa/Lagos");
@@ -35,7 +33,6 @@ app.get("/", (request, response) => {
   response.json({ message: "Welcome to Konectin!" });
 });
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
 
