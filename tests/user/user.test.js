@@ -231,4 +231,192 @@ describe("Auth Routes", () => {
       expect(response.body.message).toEqual("No such user exists");
     });
   });
+
+  describe("VERIFY OTP", () => {
+    it("should return an error if the otp has been expired", async () => {
+      const user = await createUser();
+      const otp = await createOTP({
+        userId: user._id,
+        expiresIn: faker.date.past(),
+      });
+
+      const response = await request(app)
+        .post("/user/verify-otp")
+        .send({ OTP: otp.OTP });
+
+      expect(response.status).toEqual(StatusCodes.BAD_REQUEST);
+      expect(response.body.message).toEqual(
+        "The OTP has expired, please req a new one"
+      );
+    });
+
+    it("should return an error if the otp does not exist", async () => {
+      const user = await createUser();
+      const otp = {
+        userId: user._id,
+        OTP: randomOTP,
+        expiresIn: faker.date.soon(),
+      };
+
+      const response = await request(app)
+        .post("/user/verify-otp")
+        .send({ OTP: otp.OTP });
+
+      expect(response.status).toEqual(StatusCodes.NOT_FOUND);
+      expect(response.body.message).toEqual("Invalid OTP");
+    });
+
+    it("should verify otp", async () => {
+      const user = await createUser();
+      const otp = await createOTP({
+        userId: user._id,
+        expiresIn: faker.date.future(),
+      });
+
+      const response = await request(app)
+        .post("/user/verify-otp")
+        .send({ OTP: otp.OTP });
+
+      expect(response.status).toEqual(StatusCodes.OK);
+      expect(response.body.message).toEqual("OTP verified successfully");
+    });
+  });
+
+  describe("REQUEST EMAIL TOKEN", () => {
+    it("should request token to signup", async () => {
+      const user = await createUser();
+
+      const response = await request(app)
+        .post("/user/requestEmail")
+        .send({ email: user.email });
+
+      expect(response.body.message).toEqual(
+        "Check your email for the verification code"
+      );
+    });
+    it("should return an error if user is not found", async () => {
+      const response = await request(app)
+        .post("/user/requestEmail")
+        .send({ email: "test@email.com" });
+
+      expect(response.status).toEqual(StatusCodes.BAD_REQUEST);
+      expect(response.body.message).toEqual(
+        "Please sign up before requesting a new token"
+      );
+    });
+  });
+
+  describe("FORGOT PASSWORD", () => {
+    it("should return an error message if a user is not found", async () => {
+      const response = await request(app)
+        .post("/user/forgotPassword")
+        .send({ email: "test@email.com" });
+
+      expect(response.status).toEqual(StatusCodes.BAD_REQUEST);
+      expect(response.body.message).toEqual("Please sign-up first");
+    });
+
+    it("should send the email successfully if user found", async () => {
+      const user = await createUser();
+
+      const response = await request(app)
+        .post("/user/forgotPassword")
+        .send({ email: user.email });
+      expect(response.status).toEqual(StatusCodes.OK);
+      expect(response.body.message).toEqual(
+        "Please check email for the code to reset your password"
+      );
+    });
+  });
+
+  describe("RESET PASSWORD", () => {
+    it("should return an error message if all fields are not filled", async () => {
+      const user = await createUser();
+      const otp = await createOTP({
+        userId: user._id,
+        expiresIn: faker.date.future(),
+      });
+      const password = "NewPassword@12";
+      const response = await request(app)
+        .post("/user/resetPassword")
+        .send(otp.OTP, password, password);
+
+      expect(response.status).toEqual(StatusCodes.BAD_REQUEST);
+      expect(response.body.message).toEqual("Please fill all fields");
+    });
+
+    it("should return an error if passwords don't match", async () => {
+      const user = await createUser();
+      const otp = await createOTP({
+        userId: user._id,
+        expiresIn: faker.date.future(),
+      });
+
+      const response = await request(app).post("/user/resetPassword").send({
+        password: "NewPassword@12",
+        confirmPassword: "NewPassword@13",
+        OTP: otp.OTP,
+        email: user.email,
+      });
+
+      expect(response.status).toEqual(StatusCodes.BAD_REQUEST);
+      expect(response.body.message).toEqual("Passwords do not match");
+    });
+
+    it("should return an error if token is expired", async () => {
+      const user = await createUser();
+      const otp = await createOTP({
+        userId: user._id,
+        expiresIn: faker.date.past(),
+      });
+
+      const response = await request(app).post("/user/resetPassword").send({
+        password: "NewPassword@12",
+        confirmPassword: "NewPassword@12",
+        OTP: otp.OTP,
+        email: user.email,
+      });
+      expect(response.status).toEqual(StatusCodes.BAD_REQUEST);
+      expect(response.body.message).toEqual(
+        "The token has expired, please req a new one"
+      );
+    });
+
+    it("should return an error if no user", async () => {
+      const user = await createUser();
+      const otp = await createOTP({
+        userId: user._id,
+        expiresIn: faker.date.future(),
+      });
+
+      const response = await request(app).post("/user/resetPassword").send({
+        password: "NewPassword@12",
+        confirmPassword: "NewPassword@12",
+        OTP: otp.OTP,
+        email: "test@email.com",
+      });
+
+      expect(response.status).toEqual(StatusCodes.BAD_REQUEST);
+      expect(response.body.message).toEqual("Invalid email address");
+    });
+
+    it("should return a successful message", async () => {
+      const user = await createUser();
+      const otp = await createOTP({
+        userId: user._id,
+        expiresIn: faker.date.future(),
+      });
+      const response = await request(app).post("/user/resetPassword").send({
+        password: "NewPassword@12",
+        confirmPassword: "NewPassword@12",
+        OTP: otp.OTP,
+        email: user.email,
+      });
+
+      expect(response.status).toEqual(StatusCodes.OK);
+      expect(response.body.message).toEqual(
+        "Password updated successfully, please login"
+      );
+    });
+  });
 });
