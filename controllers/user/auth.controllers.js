@@ -340,6 +340,6 @@ exports.logOut = async function (req, res) {
   try {
     return res.status(400).json({ message: "In development" });
   } catch (err) {
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
