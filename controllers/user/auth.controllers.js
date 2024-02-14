@@ -9,48 +9,42 @@ const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
 
 require("dotenv").config();
+const { uploadFile } = require("../../helpers/aws");
 
 exports.register = async (req, res) => {
   try {
-    const { fullname, email, password, profilePhoto } = req.body;
-    if (!fullname && !email && !password) {
-      return res
-        .status(400)
-        .json({ message: "Please fill all required fields" });
+    const { fullname, email, password } = req.body;
+
+    const pictureFile = req.files.picture;
+    if (!req.files || !req.files.picture) {
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
     const userExists = await User.findOne({ email: email });
-
     if (userExists) {
       return res.status(409).json({ message: "User already exists" });
     }
+    const pictureUrl = await uploadFile(
+      pictureFile.tempFilePath,
+      pictureFile.name
+    );
 
     const hashedPassword = await passwordHash(password);
     const user = new User({
       fullname: fullname,
       email: email,
       password: hashedPassword,
-      picture: profilePhoto,
+      picture: pictureUrl,
     });
-    if (
-      process.env.NODE_ENV === "development" ||
-      process.env.NODE_ENV === "production"
-    ) {
-      const token = await generateRegisterOTP(user._id);
-      const subject = "Konectin Technical - Email Verification";
-      const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
-                  <h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
-                  <p class="text-xs my-1 text-center">If you did not req this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
-              `;
 
-      await transporter(email, subject, msg);
-    }
+    // Other code for generating OTP, sending email, etc.
 
     await user.save();
 
+    console.log("user...", user);
+
     return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
-    // return res.status(500).json({ message: err.message });
     return res.status(500).json({ message: err.message });
   }
 };

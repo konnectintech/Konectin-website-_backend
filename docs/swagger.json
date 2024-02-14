@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "User Registration API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/user/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullname": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "picture": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "isEmailVerified": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "typeOfUser": {
+                    "type": "string",
+                    "enum": ["Regular", "Google", "Microsoft"],
+                    "default": "Regular"
+                  }
+                },
+                "required": ["fullname", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Please fill all required fields"
+          },
+          "409": {
+            "description": "User already exists"
+          }
+        }
+      }
+    }
+  }
+}

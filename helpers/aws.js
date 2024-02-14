@@ -22,7 +22,6 @@ const uploadFile = (fileName, key) => {
         Bucket: process.env.AWS_S3_BUCKET,
         Key: key,
         Body: fileContent,
-        ACL: "public",
       };
 
       // Sending the PutObjectCommand and waiting for it to complete
@@ -44,7 +43,6 @@ const downloadFile = async (key) => {
     const downloadParams = {
       Bucket: process.env.AWS_S3_BUCKET,
       Key: key,
-      ACL: "public",
     };
 
     const { Body } = await s3Client.send(new GetObjectCommand(downloadParams));
