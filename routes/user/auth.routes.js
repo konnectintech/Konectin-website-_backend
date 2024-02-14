@@ -10,9 +10,9 @@ router.get("/getUser", auth.getUser);
 router.post("/requestEmail", auth.requestEmailToken);
 router.post("/verify-otp", auth.verifyOtp);
 router.post("/verifyEmail", auth.verifyEmailAddress);
-router.post("/microsoft/login", auth.microsoftLogin);
 router.post("/forgotPassword", auth.forgetPassword);
 router.post("/resetPassword", auth.resetPassword);
+router.post("/microsoft/login", auth.microsoftLogin);
 router.post("/googleSignIn", auth.googleLogin);
 
 router.delete("/logout", auth.logOut);

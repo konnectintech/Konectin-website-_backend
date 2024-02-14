@@ -32,34 +32,7 @@
           "required": true,
           "content": {
             "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "fullname": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "type": "string"
-                  },
-                  "picture": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "isEmailVerified": {
-                    "type": "boolean",
-                    "default": false
-                  },
-                  "typeOfUser": {
-                    "type": "string",
-                    "enum": ["Regular", "Google", "Microsoft"],
-                    "default": "Regular"
-                  }
-                },
-                "required": ["fullname", "email", "password"]
-              }
+              "schema": { "$ref": "#/components/schemas/User" }
             }
           }
         },
@@ -84,14 +57,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
-                },
-                "required": ["email", "password"]
-              }
+              "schema": { "$ref": "#/components/schemas/UserLogin" }
             }
           }
         },
@@ -100,21 +66,7 @@
             "description": "User logged in successfully",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": { "type": "string" },
-                    "token": { "type": "string" },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "_id": { "type": "string" },
-                        "fullname": { "type": "string" },
-                        "email": { "type": "string" }
-                      }
-                    }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
               }
             }
           },
@@ -209,7 +161,6 @@
         }
       }
     },
-
     "/user/getUser": {
       "get": {
         "summary": "Get user by ID",
@@ -608,6 +559,57 @@
   },
   "components": {
     "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "fullname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string",
+            "format": "binary"
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "default": false
+          },
+          "typeOfUser": {
+            "type": "string",
+            "enum": ["Regular", "Google", "Microsoft"],
+            "default": "Regular"
+          }
+        },
+        "required": ["fullname", "email", "password"]
+      },
+      "UserLogin": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "required": ["email", "password"]
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "token": { "type": "string" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "_id": { "type": "string" },
+              "fullname": { "type": "string" },
+              "email": { "type": "string" }
+            }
+          }
+        }
+      },
       "Resume": {
         "type": "object",
         "properties": {
