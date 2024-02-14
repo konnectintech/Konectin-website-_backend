@@ -1,7 +1,7 @@
 const User = require("../../models/user.model");
 const ResumeBuilder = require("../../models/resume.model");
 require("dotenv").config();
-const { convertResumeIntoPdf } = require("../../helpers/puppeteer");
+const { convertPageIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
 const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
@@ -118,7 +118,7 @@ exports.downloadPDF = async function (req, res) {
       return res.status(404).json({ message: "CV not found" });
     }
     // 1. Create the CV as a PDF
-    const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
+    const pdfBuffer = await convertPageIntoPdf(resumeHtml);
 
     const tmpFolderPath = path.join(__dirname, "tmp");
     await fs.promises.mkdir(tmpFolderPath, { recursive: true });
@@ -132,12 +132,15 @@ exports.downloadPDF = async function (req, res) {
     cv.cloudinaryUrl = imageUrl;
 
     //4.  Remove the 'tmp' folder and its contents after successful upload
-    await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+    // await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${cv.id}.pdf"`,
+    });
 
-    // 5. Set the response headers for download from AWS S3
-    const pdfContent = await downloadFile(`${cv.id}.pdf`);
-
-    return res.end(pdfContent, "binary");
+    // Stream the PDF file directly to the response
+    const fileStream = fs.createReadStream(pdfFilePath);
+    fileStream.pipe(res);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
