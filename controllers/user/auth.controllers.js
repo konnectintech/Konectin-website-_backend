@@ -36,12 +36,7 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       picture: pictureUrl,
     });
-
-    // Other code for generating OTP, sending email, etc.
-
     await user.save();
-
-    console.log("user...", user);
 
     return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
