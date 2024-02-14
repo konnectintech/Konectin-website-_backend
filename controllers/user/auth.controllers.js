@@ -217,6 +217,7 @@ exports.requestEmailToken = async (req, res) => {
         .json({ message: "Please sign up before requesting a new token" });
     }
     const token = await generateRegisterOTP(user._id);
+
     const subject = "Konectin Technical - OTP Code request";
     const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
               <h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>

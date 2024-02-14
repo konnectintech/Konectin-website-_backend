@@ -56,6 +56,285 @@
           }
         }
       }
+    },
+    "/user/login": {
+      "post": {
+        "summary": "User login",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "token": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "_id": { "type": "string" },
+                        "fullname": { "type": "string" },
+                        "email": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Please fill all required fields or incorrect password"
+          },
+          "404": {
+            "description": "User does not exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/requestEmail": {
+      "post": {
+        "summary": "Request email token",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Check your email for the verification code"
+          },
+          "400": {
+            "description": "Please sign up before requesting a new token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/verifyEmail": {
+      "post": {
+        "summary": "Verify user's email address using OTP.",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Email address of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "OTP": {
+                    "type": "string",
+                    "description": "The One-Time Password (OTP) sent to the user's email."
+                  }
+                },
+                "required": ["OTP"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email verified successfully."
+          },
+          "400": {
+            "description": "Token has expired, please request a new one."
+          },
+          "404": {
+            "description": "User or OTP does not exist."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+
+    "/user/getUser": {
+      "get": {
+        "summary": "Get user by ID",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "_id": { "type": "string" },
+                        "fullname": { "type": "string" },
+                        "email": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such user exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/forgotPassword": {
+      "post": {
+        "summary": "Forget password",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Please check email for the code to reset your password"
+          },
+          "400": {
+            "description": "Please sign-up first"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/verify-otp": {
+      "post": {
+        "summary": "Verify OTP",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "OTP": { "type": "string" }
+                },
+                "required": ["OTP"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully"
+          },
+          "400": {
+            "description": "Please provide OTP or The OTP has expired, please req a new one"
+          },
+          "404": {
+            "description": "Invalid OTP"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/resetPassword": {
+      "post": {
+        "summary": "Reset password",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "OTP": { "type": "string" },
+                  "password": { "type": "string" },
+                  "confirmPassword": { "type": "string" },
+                  "email": { "type": "string" }
+                },
+                "required": ["OTP", "password", "confirmPassword", "email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully, please login"
+          },
+          "400": {
+            "description": "Please fill all fields or Passwords do not match or Invalid or expired token or Invalid email address"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   }
 }
