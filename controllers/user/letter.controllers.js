@@ -224,13 +224,16 @@ exports.createLetterIntoPdf = async function (req, res) {
     const imageUrl = await uploadFile(pdfFilePath, `${letter.id}.pdf`);
     letter.imageUrl = imageUrl;
 
-    //4.  Remove the 'tmp' folder and its contents after successful upload
-    await fs.promises.rm(tmpFolderPath, { recursive: true });
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${letter.id}.pdf"`,
+    });
 
-    // 5. Set the response headers for download from AWS S3
-    const pdfContent = await downloadFile(`${letter.id}.pdf`);
-
-    return res.end(pdfContent, "binary");
+    // 4.Stream the PDF file directly to the response
+    const fileStream = fs.createReadStream(pdfFilePath);
+    fileStream.pipe(res);
+    //5.  Remove the 'tmp' folder and its contents after successful upload
+    await fs.promises.rmdir(tmpFolderPath, { recursive: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

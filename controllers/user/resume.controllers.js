@@ -131,16 +131,16 @@ exports.downloadPDF = async function (req, res) {
     const imageUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
     cv.cloudinaryUrl = imageUrl;
 
-    //4.  Remove the 'tmp' folder and its contents after successful upload
-    // await fs.promises.rmdir(tmpFolderPath, { recursive: true });
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${cv.id}.pdf"`,
     });
 
-    // Stream the PDF file directly to the response
+    // 4.Stream the PDF file directly to the response
     const fileStream = fs.createReadStream(pdfFilePath);
     fileStream.pipe(res);
+    //5.  Remove the 'tmp' folder and its contents after successful upload
+    await fs.promises.rmdir(tmpFolderPath, { recursive: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

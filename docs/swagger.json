@@ -555,6 +555,316 @@
           }
         }
       }
+    },
+    "/user/letter": {
+      "post": {
+        "summary": "Create a new letter",
+        "tags": ["Letter"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Letter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Letter created successfully"
+          },
+          "400": {
+            "description": "Invalid request data"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/getLetter": {
+      "get": {
+        "summary": "Get a letter by ID",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Letter retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/getLetters": {
+      "get": {
+        "summary": "Get user's letters",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Letters retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/deleteLetter": {
+      "delete": {
+        "summary": "Delete a letter",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Letter deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/updateLetter": {
+      "put": {
+        "summary": "Update a letter",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "basicInfo": {
+                    "type": "object",
+                    "properties": {
+                      "fullName": { "type": "string" },
+                      "email": { "type": "string" },
+                      "jobPosition": { "type": "string" },
+                      "companyName": { "type": "string" }
+                    }
+                  },
+                  "jobDescriptionAndCompanyBrief": {
+                    "type": "object",
+                    "properties": {
+                      "jobDescription": { "type": "string" },
+                      "companyInfo": { "type": "string" }
+                    }
+                  },
+                  "jobLink": { "type": "string" },
+                  "professionalBio": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Letter updated successfully"
+          },
+          "400": {
+            "description": "Invalid request data"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/createLetterPdf": {
+      "post": {
+        "summary": "Create PDF from letter HTML content",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "letterHtml": { "type": "string" }
+                },
+                "required": ["letterHtml"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "CV downloaded successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -783,6 +1093,49 @@
           }
         },
         "required": ["userId"]
+      },
+      "Letter": {
+        "type": "object",
+        "properties": {
+          "letterUrl": {
+            "type": "string"
+          },
+          "basicInfo": {
+            "type": "object",
+            "properties": {
+              "fullName": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "jobPosition": {
+                "type": "string"
+              },
+              "companyName": {
+                "type": "string"
+              }
+            }
+          },
+          "jobDescriptionAndCompanyBrief": {
+            "type": "object",
+            "properties": {
+              "jobDescription": {
+                "type": "string"
+              },
+              "companyInfo": {
+                "type": "string"
+              }
+            }
+          },
+          "jobLink": {
+            "type": "string"
+          },
+          "professionalBio": {
+            "type": "string"
+          }
+        },
+        "required": ["userId", "basicInfo"]
       }
     },
     "securitySchemes": {
