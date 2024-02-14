@@ -1,8 +1,27 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "User Registration API",
-    "version": "1.0.0"
+    "title": "KonectIn APIs Documentation",
+    "version": "1.0.0",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "jeannedarc@konectin.org",
+      "name": "Jeanne d'Arc NYIRAMWIZA",
+      "title": "Backend Engineer"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "externalDocs": {
+      "description": "Find out more about Swagger",
+      "url": "http://swagger.io"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:4000"
+      }
+    ]
   },
   "paths": {
     "/user/register": {
