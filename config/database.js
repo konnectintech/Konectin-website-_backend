@@ -11,7 +11,7 @@ const connectDatabase = async () => {
       await mongoose.connect(uri);
       console.log("Using MongoMemoryServer for testing");
     } else {
-      const connectionString = process.env.MONGO_DB_URI;
+      const connectionString = process.env.MONGO_DB_URI_CLOUD;
       await mongoose.connect(connectionString);
       console.log("Using regular MongoDB connection");
     }
