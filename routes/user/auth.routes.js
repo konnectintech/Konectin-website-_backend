@@ -12,5 +12,6 @@ router.post("/resetPassword", auth.resetPassword);
 router.post("/googleSignIn", auth.googleLogin);
 router.post("/verifyEmail", auth.verifyEmailAddress);
 router.delete("/logout", auth.logOut);
+router.delete("/removeEmail", auth.removeEmail);
 
 module.exports = router;
