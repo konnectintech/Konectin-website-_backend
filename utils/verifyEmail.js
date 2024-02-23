@@ -1,86 +1,245 @@
-const ResetPasswordEmail = (code) => {
+const verifyEmail = (first_name, email, otp)=>{
   return `
-  
-  
-  <table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-  <tbody>
-    <tr>
-      <td>
-        <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-bottom: 0 solid #efeef4; border-left: 0 solid #efeef4; border-right: 0px solid #efeef4; border-top: 0 solid #efeef4; color: #000; width: 700px; margin: 0 auto;" width="700">
-          <tbody>
-            <tr>
-              <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-left: 20px; padding-right: 20px; padding-top: 10px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
-                <table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-                  <tr>
-                    <td class="pad" style="padding-bottom:15px;padding-top:10px;text-align:center;width:100%;">
-                      <h2 style="margin: 0; color: #201f42; direction: ltr; font-family: 'Merriweather', 'Georgia', serif; font-size: 22px; font-weight: 700; letter-spacing: normal; line-height: 120%; text-align: left; margin-top: 0; margin-bottom: 0;"><span style="color: #fc670b;">Verify</span> Your Email</h2>
-                    </td>
-                  </tr>
-                </table>
-                <table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
-                  <tr>
-                    <td class="pad" style="padding-bottom:10px;">
-                      <div style="color:#201f42;direction:ltr;font-family:Inter, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:180%;text-align:left;mso-line-height-alt:28.8px;">
-                        <p style="margin: 0;">Hi,</p>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Verify Email</title>
+          </head>
+          <style>
+              @import url("https://fonts.cdnfonts.com/css/avenir");
+              @import url("https://fonts.googleapis.com/css2?family=Merriweather:wght@900&display=swap");
+              @import url("https://fonts.cdnfonts.com/css/satoshi");
+          
+              body {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+              font-size: 18px;
+              }
+              .wrapper {
+              margin-left: auto;
+              margin-right: auto;
+              width: 100%;
+              background-color: #fff; /* Neutral/200 */
+              display: flex;
+              justify-content: center;
+              gap: 20px;
+              }
+              .main {
+              max-width: 800px;
+              width: 100%;
+              }
+              .header {
+              background-color: #26204d;
+              color: white;
+              /* border-top-right-radius: 24px;
+              border-top-left-radius: 24px; */
+              border-bottom: 4px solid #8c86b3;
+              padding: 19px 40px;
+              }
+              .content {
+              padding: 28px 40px;
+              border-left: 1px solid #c3ccd6;
+              border-right: 1px solid #c3ccd6;
+              color: #191a1f;
+              font-family: "Avenir", sans-serif;
+              }
+              .content-title {
+              font-size: 24px;
+              font-weight: 900;
+              line-height: 120%;
+              }
+              .heading {
+              font-family: "Merriweather", serif;
+              }
+              .accent {
+              color: #fc670b;
+              }
+              .email {
+              font-weight: 700;
+              color: #403580;
+              }
+              a {
+              color: #403580;
+              }
+              .content-body {
+              padding-top: 0;
+              padding-bottom: 0;
+              display: flex;
+              flex-direction: column;
+              row-gap: 16px;
+              }
+              .cta {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              }
+              .cta-btn {
+              color: #fff;
+              background-color: #26204d;
+              border-radius: 10px;
+              padding: 20px 72px;
+              text-align: center;
+              font-weight: 700;
+              font-size: 16px;
+              line-height: 120%;
+              text-decoration: none;
+              font-family: "Satoshi", sans-serif;
+              }
+              .bold {
+              font-weight: 700;
+              }
+              .extra-bold {
+              font-weight: 800;
+              }
+              .black {
+              font-weight: 900;
+              }
+              .footer {
+              border-top: 4px solid #8c86b3;
+              /* border-bottom-right-radius: 24px;
+              border-bottom-left-radius: 24px; */
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              background-color: #26204d;
+              padding: 32px 40px;
+              color: #fff;
+              font-family: "Avenir", sans-serif;
+              }
+              .connect {
+              display: flex;
+              align-items: center;
+              gap: 16px;
+              }
+              .links {
+              display: flex;
+              flex-direction: column;
+              row-gap: 16px;
+              padding-top: 16px;
+              padding-bottom: 16px;
+              }
+              .links a {
+              color: #fff;
+              }
+              .company-links {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 8px;
+              }
+              .show {
+              display: none;
+              }
+          
+              @media only screen and (min-width: 768px) {
+              .links {
+                  flex-direction: row;
+                  column-gap: 8px;
+              }
+              .show {
+                  display: block;
+              }
+              }
+          </style>
+          <body>
+              <div class="wrapper">
+              <div class="main">
+                  <div class="header">
+                  <img
+                      src="https://res.cloudinary.com/konectin-cloud/image/upload/v1706144241/znspp5iz3t64xaz7fzzy.svg"
+                      alt="Konectin"
+                  />
+                  </div>
+                  <div class="content">
+                  <div class="content-wrapper">
+                      <p class="content-title heading" style="margin-top: 0">
+                      <span class="accent">Verify</span> Your Email
+                      </p>
+                      <div class="content-body">
+                      <div>
+                          <p>Hi, ${first_name},</p>
+                          <p>
+                          Your email address
+                          <span class="email extra-bold">${email}</span> has
+                          been added to
+                          <a href="https://konectin.org/">konectin.org</a>
+                          <p>
+                              To finish verifying your email address, click the “Verify Email
+                              Address” button below.
+                          </p>
+                          </p>
                       </div>
-                    </td>
-                  </tr>
-                </table>
-                <table class="paragraph_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
-                  <tr>
-                    <td class="pad" style="padding-bottom:10px;">
-                      <div style="color:#201f42;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:180%;text-align:left;mso-line-height-alt:28.8px;">
-                        <p style="margin: 0;">Your email address has been added to www.konectin.com</p>
+                      <div class="cta">
+                          <a class="cta-btn" href="#">${otp}</a>
                       </div>
-                    </td>
-                  </tr>
-                </table>
-                <table class="paragraph_block block-4" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
-                  <tr>
-                    <td class="pad" style="padding-bottom:10px;">
-                      <div style="color:#201f42;direction:ltr;font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:180%;text-align:left;mso-line-height-alt:28.8px;">
-                        <p style="margin: 0;">Use this code to verify your Konectin account. It expires in 10 minutes.</p>
+                      <div>
+                          <p style="margin-bottom: 0">
+                          *** Note, the OTP above only works for
+                          <span class="bold">10 minutes</span> and can be used only
+                          <span class="bold">once</span> ***
+                          </p>
                       </div>
-                    </td>
-                  </tr>
-                </table>
-                <table class="button_block block-5" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
-                  <tr>
-                    <td class="pad">
-                      <div class="alignment" align="center"><!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:42px;width:100px;v-text-anchor:middle;" arcsize="10%" stroke="false" fillcolor="#26204d"><w:anchorlock/><v:textbox inset="0px,0px,0px,0px"><center style="color:#ffffff; font-family:sans-serif; font-size:16px"><![endif]-->
-                        <div style="text-decoration:none;display:inline-block;color:#ffffff;background-color:#26204d;border-radius:4px;width:auto;border-top:0px solid transparent;font-weight:400;border-right:0px solid transparent;border-bottom:0px solid transparent;border-left:0px solid transparent;padding-top:5px;padding-bottom:5px;font-family:Inter, sans-serif;font-size:16px;text-align:center;mso-border-alt:none;word-break:keep-all;"><span style="padding-left:20px;padding-right:20px;font-size:16px;display:inline-block;letter-spacing:normal;"><span style="word-break: break-word; line-height: 32px;"><strong>${code}</strong></span></span></div><!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
                       </div>
-                    </td>
-                  </tr>
-                </table>
-                <table class="paragraph_block block-6" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
-                  <tr>
-                    <td class="pad" style="padding-bottom:10px;">
-                      <div style="color:#201f42;direction:ltr;font-family:Inter, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:180%;text-align:left;mso-line-height-alt:28.8px;">
-                        <p style="margin: 0;">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+                  </div>
+                  <hr style="margin-top: 32px" />
+                  <div>
+                      <p>
+                      If you did not create an account, <a href="${process.env.BACKEND_URL}/user/removeEmail?email=${email}">click here</a> to
+                      remove this email address
+                      </p>
+                  </div>
+                  <div>
+                      <p style="line-height: 150%">
+                      Regards, <br />
+                      <a href="https://konectin.org/" class="extra-bold">Konectin</a>
+                      Team
+                      </p>
+                  </div>
+                  </div>
+                  <div class="footer">
+                  <div class="connect">
+                      <p style="font-size: 16px">Connect With Us</p>
+                      <a href="mailto:info@konectin.org"></a>
+                      <img
+                          src="https://res.cloudinary.com/konectin-cloud/image/upload/v1706144240/wodptjoeokd8yzbhnysn.svg"
+                          alt="Connect with konectin via gmail"
+                      />
+                      </a>
+                      <a
+                      href="https://web.facebook.com/people/Konectin-Inc/100091305090654/"
+                      >
+                      <img
+                      src="https://res.cloudinary.com/konectin-cloud/image/upload/v1706144240/yghkkxw7x6csyi7lhgjb.svg"
+                      alt="Connect with konectin via facebook"
+                      />
+                      </a>
+                  </div>
+                  <div class="links">
+                      <div class="company-links">
+                      <a href="https://konectin.org/">konectin.org</a>
+                      <span>&#8208;</span>
+                      <a href="https://konectin.org/terms">Terms of service</a>
                       </div>
-                    </td>
-                  </tr>
-                </table>
-                <table class="paragraph_block block-7" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
-                  <tr>
-                    <td class="pad" style="padding-bottom:10px;">
-                      <div style="color:#201f42;direction:ltr;font-family:Inter, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:180%;text-align:left;mso-line-height-alt:28.8px;">
-                        <p style="margin: 0;">Regards,<br><strong>Konectin Team</strong></p>
+                      <span class="show">&#8208;</span>
+                      <div class="company-links">
+                      <a href="https://konectin.org/policy">Privacy Policy</a>
+                      <span>&#8208;</span>
+                      <a href="https://konectin.org/faq">FAQ</a>
                       </div>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
+                  </div>
+                  <p style="font-size: 16px">Copyright &copy; 2023 Konectin.</p>
+                  <p style="font-size: 16px">
+                      651 N Broad Street, Middletown Delaware, USA
+                  </p>
+                  </div>
+              </div>
+              </div>
+          </body>
+          </html>
   `;
 };
 
-module.exports = { ResetPasswordEmail };
+module.exports = { verifyEmail };
