@@ -7,6 +7,7 @@ const RegisterOTP = require("../../models/registerOTP");
 const { jwtSign } = require("../../helpers/jsonwebtoken");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
+const { verifyEmail } = require("../../utils/verifyEmail");
 
 require("dotenv").config();
 const { uploadFile } = require("../../helpers/aws");
@@ -15,19 +16,16 @@ exports.register = async (req, res) => {
   try {
     const { fullname, email, password } = req.body;
 
-    const pictureFile = req.files.picture;
-    if (!req.files || !req.files.picture) {
-      return res.status(400).json({ message: "No file uploaded" });
+    let pictureUrl;
+    if (req.files && req.files.picture) {
+      const pictureFile = req.files.picture;
+      pictureUrl = await uploadFile(pictureFile.tempFilePath, pictureFile.name);
     }
 
     const userExists = await User.findOne({ email: email });
     if (userExists) {
       return res.status(409).json({ message: "User already exists" });
     }
-    const pictureUrl = await uploadFile(
-      pictureFile.tempFilePath,
-      pictureFile.name
-    );
 
     const hashedPassword = await passwordHash(password);
     const user = new User({
@@ -37,7 +35,20 @@ exports.register = async (req, res) => {
       picture: pictureUrl,
     });
     await user.save();
-
+    if (
+      process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "production"
+    ) {
+      // Generate OTP
+      const token = await generateRegisterOTP(user._id);
+      // Email Subject
+      const subject = "Konectin Technical - Email Verification";
+      // Email body
+      const msg = verifyEmail(user.fullname.split(" ")[0], user.email, token);
+      //Send email
+      await transporter(user.email, subject, msg);
+      //
+    }
     return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -65,14 +76,12 @@ exports.verifyEmailAddress = async (req, res) => {
       });
     }
 
-    await User.findByIdAndUpdate(
-      { _id: user._id },
-      { $set: { isEmailVerified: true } },
-      { new: true }
-    ).exec();
+    user.isEmailVerified = true;
     await user.save();
 
-    return res.status(200).json({ message: "Email verified successfully" });
+    return res
+      .status(200)
+      .json({ message: "Email verified successfully", user });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -95,6 +104,9 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
+    if (user.isEmailVerified !== true) {
+      return res.status(400).json({ message: "Your email is not verified" });
+    }
     const payload = {
       _id: user._id,
       fullname: user.fullname,

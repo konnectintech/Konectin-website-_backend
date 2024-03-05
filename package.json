@@ -11,7 +11,7 @@
   "engines": {
     "node": ">=14.17.0"
   },
-  "author": "Akinloluwa Olumuyide",
+  "author": "KonectIn",
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.515.0",

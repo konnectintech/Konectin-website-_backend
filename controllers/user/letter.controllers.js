@@ -13,7 +13,7 @@ exports.letterBuilder = async (req, res) => {
     const {
       basicInfo: { fullName, email, jobPosition, companyName },
       jobDescriptionAndCompanyBrief: { jobDescription, companyInfo },
-      jobLink,
+      content,
       professionalBio,
     } = req.body;
 
@@ -38,7 +38,7 @@ exports.letterBuilder = async (req, res) => {
         jobDescription,
         companyInfo,
       },
-      jobLink,
+      content,
       professionalBio,
     };
 

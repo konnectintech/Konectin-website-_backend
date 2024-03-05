@@ -234,7 +234,7 @@ describe("Resume Routes", () => {
       const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
-        .delete("/user/resume")
+        .delete("/user/delete/resume")
         .query({ resumeId: resume._id.toString() })
         .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
@@ -250,7 +250,7 @@ describe("Resume Routes", () => {
       const user = await createUser();
       const token = jwtSign({ _id: user._id });
       const response = await request(app)
-        .delete("/user/resume")
+        .delete("/user/delete/resume")
         .query({ resumeId: existingUserId })
         .set("Authorization", `Bearer ${token}`);
 
@@ -266,7 +266,7 @@ describe("Resume Routes", () => {
       const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
-        .delete("/user/resume")
+        .delete("/user/delete/resume")
         .query({ resumeId: resume._id.toString() })
         .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);

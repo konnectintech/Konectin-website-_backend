@@ -32,7 +32,7 @@ const letterSchema = new mongoose.Schema({
       type: String,
     },
   },
-  jobLink: { type: String, match: /^(http|https):\/\/[^ "]+$/ },
+  content: { type: String },
   professionalBio: { type: String },
 });
 

@@ -11,6 +11,9 @@ const jwtSign = (payload) => {
   return jwt.sign(payload, "K12345", { expiresIn: "24h" });
 };
 
+const letterContent =
+  "I am thrilled to apply for the Senior Full Stack Software Engineer position at your esteemed company. With a solid background in software development spanning over four years, I bring a unique blend of experience, creativity, and a strong passion for innovation to your team.";
+
 describe("Letter Routes", () => {
   describe("USER CREATES A LETTER", () => {
     it("should return 201 and the new user's letter created", async () => {
@@ -24,7 +27,7 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       };
 
@@ -33,14 +36,13 @@ describe("Letter Routes", () => {
         .query({ userId: user._id.toString() })
         .set("content-type", "application/json")
         .send(letterData);
-
       expect(response.status).toEqual(StatusCodes.CREATED);
       expect(response.body.message).toEqual("Letter created successfully");
-      expect(response.body.data.basicInfo.fullName).toEqual(user.fullname);
-      expect(response.body.data.basicInfo.email).toEqual(user.email);
-      expect(
-        response.body.data.jobDescriptionAndCompanyBrief.jobDescription
-      ).toEqual(letterData.jobDescriptionAndCompanyBrief.jobDescription);
+      expect(response.body.data.userId.toString()).toEqual(user._id.toString());
+      expect(response.body.data.content).toEqual(letterData.content);
+      expect(response.body.data.professionalBio).toEqual(
+        letterData.professionalBio
+      );
     });
 
     it("should create a letter  if the user id does not exist", async () => {
@@ -55,7 +57,7 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       };
 
@@ -94,7 +96,7 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
 
@@ -143,7 +145,7 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
 
@@ -174,7 +176,7 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
       const letter2 = await createLetter({
@@ -189,7 +191,7 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
 
@@ -239,10 +241,12 @@ describe("Letter Routes", () => {
     });
   });
 
-  describe("DELETE A LETETR", () => {
+  describe("DELETE A LETTER", () => {
     it("should delete a letter if authenticated", async () => {
       const user = await createUser();
+
       const token = jwtSign({ _id: user._id });
+
       const letter = await createLetter({
         userId: user._id,
         basicInfo: {
@@ -255,12 +259,11 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
-
       const response = await request(app)
-        .delete("/user/letter")
+        .delete("/user/deleteLetter")
         .query({ letterId: letter._id.toString() })
         .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
@@ -272,11 +275,11 @@ describe("Letter Routes", () => {
       await expect(LetterBuilder.findById(letter._id)).resolves.toBeNull();
     });
 
-    it("should return an error if the resume is not found", async () => {
+    it("should return an error if the letter is not found", async () => {
       const user = await createUser();
       const token = jwtSign({ _id: user._id });
       const response = await request(app)
-        .delete("/user/letter")
+        .delete("/user/deleteLetter")
         .query({ letterId: existingUserId })
         .set("Authorization", `Bearer ${token}`);
 
@@ -301,12 +304,12 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
 
       const response = await request(app)
-        .delete("/user/letter")
+        .delete("/user/deleteLetter")
         .query({ letterId: letter._id.toString() })
         .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
@@ -321,7 +324,7 @@ describe("Letter Routes", () => {
       const user = await createUser();
       const token = jwtSign({ _id: user._id });
 
-      const letter = await createLetter({
+      await createLetter({
         userId: user._id,
         basicInfo: {
           fullName: user.fullname,
@@ -333,12 +336,12 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
 
       const updateLetterDto = {
-        jobLink: "https://examptest.com/job",
+        content: "https://examptest.com/job",
       };
 
       const response = await request(app)
@@ -366,12 +369,12 @@ describe("Letter Routes", () => {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
-        jobLink: "https://example.com/job",
+        content: letterContent,
         professionalBio: "Professional biography",
       });
 
       const updateLetterDto = {
-        jobLink: "https://examptest.com/job",
+        content: "https://examptest.com/job",
       };
 
       const response = await request(app)
@@ -387,7 +390,7 @@ describe("Letter Routes", () => {
       expect(response.body.letter.userId.toString()).toEqual(
         user._id.toString()
       );
-      expect(response.body.letter.jobLink).toEqual(updateLetterDto.jobLink);
+      expect(response.body.letter.content).toEqual(updateLetterDto.content);
     });
   });
 });

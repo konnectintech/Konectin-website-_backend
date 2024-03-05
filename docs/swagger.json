@@ -49,6 +49,54 @@
         }
       }
     },
+    "/user/verifyEmail": {
+      "post": {
+        "summary": "Verify user's email address using OTP.",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Email address of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "OTP": {
+                    "type": "string",
+                    "description": "The One-Time Password (OTP) sent to the user's email."
+                  }
+                },
+                "required": ["OTP"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email verified successfully."
+          },
+          "400": {
+            "description": "Token has expired, please request a new one."
+          },
+          "404": {
+            "description": "User or OTP does not exist."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
     "/user/login": {
       "post": {
         "summary": "User login",
@@ -113,54 +161,7 @@
         }
       }
     },
-    "/user/verifyEmail": {
-      "post": {
-        "summary": "Verify user's email address using OTP.",
-        "tags": ["User"],
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "description": "Email address of the user",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "OTP": {
-                    "type": "string",
-                    "description": "The One-Time Password (OTP) sent to the user's email."
-                  }
-                },
-                "required": ["OTP"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Email verified successfully."
-          },
-          "400": {
-            "description": "Token has expired, please request a new one."
-          },
-          "404": {
-            "description": "User or OTP does not exist."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
+   
     "/user/getUser": {
       "get": {
         "summary": "Get user by ID",
@@ -790,7 +791,7 @@
                       "companyInfo": { "type": "string" }
                     }
                   },
-                  "jobLink": { "type": "string" },
+                  "content": { "type": "string" },
                   "professionalBio": { "type": "string" }
                 }
               }
@@ -923,7 +924,7 @@
       "Resume": {
         "type": "object",
         "properties": {
-          "cloudinaryUrl": {
+          "resumeUrl": {
             "type": "string"
           },
           "basicInfo": {
@@ -1097,9 +1098,6 @@
       "Letter": {
         "type": "object",
         "properties": {
-          "letterUrl": {
-            "type": "string"
-          },
           "basicInfo": {
             "type": "object",
             "properties": {
@@ -1128,7 +1126,7 @@
               }
             }
           },
-          "jobLink": {
+          "content": {
             "type": "string"
           },
           "professionalBio": {

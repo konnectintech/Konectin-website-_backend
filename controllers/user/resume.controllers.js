@@ -129,7 +129,7 @@ exports.downloadPDF = async function (req, res) {
 
     // 3. Upload the PDF file to AWS S3 and update the cv imageUrl
     const imageUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
-    cv.cloudinaryUrl = imageUrl;
+    cv.resumeUrl = imageUrl;
 
     //4.  Remove the 'tmp' folder and its contents after successful upload
     await fs.promises.rmdir(tmpFolderPath, { recursive: true });
