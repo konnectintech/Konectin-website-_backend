@@ -5,7 +5,6 @@ const { generateRegisterOTP } = require("../../helpers/registerToken");
 const { generatePasswordOTP } = require("../../helpers/passwordToken");
 const RegisterOTP = require("../../models/registerOTP");
 const { jwtSign } = require("../../helpers/jsonwebtoken");
-const passwordOTP = require("../../models/passwordOTP");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
 const { verifyEmail } = require("../../utils/verifyEmail");
@@ -14,18 +13,19 @@ const fetchPromise = import("node-fetch");
 const fetch = async (...args) => (await fetchPromise).default(...args);
 
 require("dotenv").config();
+const { uploadFile } = require("../../helpers/aws");
 
 exports.register = async (req, res) => {
   try {
-    const { fullname, email, password, profilePhoto } = req.body;
-    if (!fullname && !email && !password) {
-      return res
-        .status(400)
-        .json({ message: "Please fill all required fields" });
+    const { fullname, email, password } = req.body;
+
+    let pictureUrl;
+    if (req.files && req.files.picture) {
+      const pictureFile = req.files.picture;
+      pictureUrl = await uploadFile(pictureFile.tempFilePath, pictureFile.name);
     }
 
     const userExists = await User.findOne({ email: email });
-
     if (userExists) {
       return res.status(409).json({ message: "User already exists" });
     }
@@ -35,8 +35,9 @@ exports.register = async (req, res) => {
       fullname: fullname,
       email: email,
       password: hashedPassword,
-      picture: profilePhoto,
+      picture: pictureUrl,
     });
+    
     if (
       process.env.NODE_ENV === "development" ||
       process.env.NODE_ENV === "production"
@@ -44,24 +45,21 @@ exports.register = async (req, res) => {
       const saveUser = await user.save();
       // If user registration fails
       if(!saveUser) return res.status(404).json({ message: "Registration failed" });
+
       // Generate OTP
       const token = await generateRegisterOTP(user._id);
       // Email Subject
       const subject = "Konectin Technical - Email Verification";
       // Email body
-      const msg = verifyEmail(saveUser.fullname.split(' ')[0], saveUser.email, token);
+      const msg = verifyEmail(user.fullname.split(" ")[0], user.email, token);
       //Send email
-      await transporter(saveUser.email, subject, msg);
+      await transporter(user.email, subject, msg);
       //
-      return res.status(201).json({ message: "User created successfully", user });
     }
-
-    // await user.save();
-
-    // return res.status(201).json({ message: "User created successfully", user });
+    
+    return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
-    // return res.status(500).json({ message: err.message });
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -86,19 +84,14 @@ exports.verifyEmailAddress = async (req, res) => {
       });
     }
 
-    await User.findByIdAndUpdate(
-      { _id: user._id },
-      { $set: { isEmailVerified: true } },
-      { new: true }
-    ).exec();
+    user.isEmailVerified = true;
     await user.save();
 
-    return res.status(200).json({ message: "Email verified successfully" });
-  } catch (err) {
-    console.log(err);
     return res
-      .status(500)
-      .json({ message: "Some error occured, try again later!" });
+      .status(200)
+      .json({ message: "Email verified successfully", user });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -119,6 +112,9 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
+    if (user.isEmailVerified !== true) {
+      return res.status(400).json({ message: "Your email is not verified" });
+    }
     const payload = {
       _id: user._id,
       fullname: user.fullname,
@@ -132,7 +128,7 @@ exports.login = async (req, res) => {
       data: payload,
     });
   } catch (err) {
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -158,16 +154,16 @@ exports.getUser = async (req, res) => {
   try {
     const { userId } = req.query;
     const user = await User.findById({ _id: userId });
-    
+
     if (!user) {
       return res.status(404).json({ message: "No such user exists" });
     }
-    
+
     return res
       .status(200)
       .json({ message: "User profile fetched successfully", user });
   } catch (err) {
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -214,7 +210,6 @@ exports.microsoftLogin = async function (req, res) {
   }
   try {
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: error.message });
   }
   let user = await User.findOne({ email, typeOfUser: "Microsoft" });
@@ -253,25 +248,25 @@ exports.requestEmailToken = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email: email });
+
     if (!user) {
       return res
         .status(400)
-        .json({ message: "Please sign up before reqing a new token" });
+        .json({ message: "Please sign up before requesting a new token" });
     }
     const token = await generateRegisterOTP(user._id);
-    const subject = "Konectin Technical - OTP Code req";
+
+    const subject = "Konectin Technical - OTP Code request";
     const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
               <h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
-              <p class="text-xs my-1 text-center">If you did not req this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+              <p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
           `;
     await transporter(email, subject, msg);
     return res
       .status(200)
       .json({ message: "Check your email for the verification code" });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Some error occured, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -318,11 +313,7 @@ exports.forgetPassword = async (req, res) => {
       message: "Please check email for the code to reset your password",
     });
   } catch (err) {
-    console.log(err);
-    return res
-      .status(500)
-      .json({ message: "Some error occured, try again later" });
-    console.log(err);
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -336,12 +327,11 @@ exports.verifyOtp = async (req, res) => {
     }
 
     // Check if the OTP exists and is valid
-    const token = await passwordOTP.findOne({ OTP: OTP });
+    const token = await RegisterOTP.findOne({ OTP: OTP });
 
     if (!token) {
-      return res.status(400).json({ message: "Invalid OTP" });
+      return res.status(404).json({ message: "Invalid OTP" });
     }
-    console.log(moment(token.expiresIn), moment());
     if (moment(token.expiresIn) < moment()) {
       return res
         .status(400)
@@ -350,10 +340,7 @@ exports.verifyOtp = async (req, res) => {
     // OTP is valid
     return res.status(200).json({ message: "OTP verified successfully" });
   } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .json({ message: "Some error occurred, try again later" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -361,7 +348,7 @@ exports.verifyOtp = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { OTP, password, confirmPassword, email } = req.body;
-    if (!password || !confirmPassword || !OTP || !email) {
+    if (!OTP || !password || !confirmPassword || !email) {
       return res.status(400).json({ message: "Please fill all fields" });
     }
 
@@ -369,7 +356,7 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Passwords do not match" });
     }
 
-    const token = await passwordOTP.findOne({ OTP: OTP });
+    const token = await RegisterOTP.findOne({ OTP: OTP });
 
     if (!token) {
       return res.status(400).json({ message: "Invalid or expired token" });
@@ -399,10 +386,7 @@ exports.resetPassword = async (req, res) => {
       .status(200)
       .json({ message: "Password updated successfully, please login" });
   } catch (err) {
-    console.log(err.message);
-    return res
-      .status(500)
-      .json({ message: "Some error occured, try again later" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -410,7 +394,6 @@ exports.logOut = async function (req, res) {
   try {
     return res.status(400).json({ message: "In development" });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };

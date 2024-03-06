@@ -1,16 +1,10 @@
 const User = require("../../models/user.model");
 const ResumeBuilder = require("../../models/resume.model");
 require("dotenv").config();
-
-const {
-  resumeSchema,
-  resumeUpdateSchema,
-} = require("../../helpers/resumeValidate");
-const { convertResumeIntoPdf } = require("../../helpers/puppeteer");
+const { convertPageIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
-const os = require("os");
+const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
-const cloudinaryUpload = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -21,17 +15,11 @@ exports.resumeBuilder = async (req, res) => {
         .status(404)
         .json({ message: "User does not exist, please register" });
     }
-    // const { error, value } = resumeSchema.validate(req.body);
-
-    // if (error) {
-    //   return res.status(400).json({ Error: error.details[0].message });
-    // }
 
     const cv = new ResumeBuilder({
       userId,
       currentStage: 1,
-      // ...value,
-      ...req.body
+      ...req.body,
     });
 
     await cv.save();
@@ -104,14 +92,11 @@ exports.updateUserResume = async function (req, res) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // const { error, value } = resumeUpdateSchema.validate(req.body);
-    // if (error) {
-    //   return res.status(400).json({ Error: error.details[0].message });
-    // }
-    const updated = await ResumeBuilder.findByIdAndUpdate(resumeId, { ...req.body }, { new: true });
-    // Update the found CV directly
-    // cv.set({ ...value });
-    // await cv.save();
+    const updated = await ResumeBuilder.findByIdAndUpdate(
+      resumeId,
+      { ...req.body },
+      { new: true }
+    );
 
     return res.status(200).json({
       message: "Resume Updated successfully",
@@ -133,7 +118,7 @@ exports.downloadPDF = async function (req, res) {
       return res.status(404).json({ message: "CV not found" });
     }
     // 1. Create the CV as a PDF
-    const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
+    const pdfBuffer = await convertPageIntoPdf(resumeHtml);
 
     const tmpFolderPath = path.join(__dirname, "tmp");
     await fs.promises.mkdir(tmpFolderPath, { recursive: true });
@@ -144,7 +129,7 @@ exports.downloadPDF = async function (req, res) {
 
     // 3. Upload the PDF file to AWS S3 and update the cv imageUrl
     const imageUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
-    cv.cloudinaryUrl = imageUrl;
+    cv.resumeUrl = imageUrl;
 
     //4.  Remove the 'tmp' folder and its contents after successful upload
     await fs.promises.rmdir(tmpFolderPath, { recursive: true });
@@ -152,67 +137,19 @@ exports.downloadPDF = async function (req, res) {
     // 5. Set the response headers for download from AWS S3
     const pdfContent = await downloadFile(`${cv.id}.pdf`);
 
-    return res.end(pdfContent, "binary");
+    // Set the Content-Type header to application/pdf
+    res.setHeader("Content-Type", "application/pdf");
+
+    // Set the Content-Disposition header to attachment
+    // This tells the browser to download the file instead of displaying it
+    res.setHeader("Content-Disposition", `attachment; filename="${cv.id}.pdf"`);
+
+    // Send the PDF content as the response
+    res.send(pdfContent);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
-// exports.createPdf = async function (req, res) {
-//   try {
-//     const { resumeHtml } = req.body;
-//     const { resumeId } = req.query;
-
-//     const resume = await ResumeBuilder.findById({ _id: resumeId });
-
-//     if (!resume) {
-//       return res.status(404).json({ message: "Resume not found" });
-//     }
-
-//     // Create the CV as a PDF
-//     const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
-
-//     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
-//     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
-
-//     // Save the CV PDF to a local file in the 'downloads' folder
-//     const pdfFilePath = path.join(
-//       downloadsFolderPath,
-//       `${resume.basicInfo.firstName}_${resume.basicInfo.lastName}_Resume.pdf`
-//     );
-//     await fs.promises.writeFile(pdfFilePath, pdfBuffer);
-
-//     res.json({
-//       message: "Your Resume has been downloaded. Check your downloads folder",
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-exports.createPdf = async function (req, res) {
-  try {
-    const { resumeId } = req.query;
-    const { resumeHtml } = req.body;
-    const resume = await ResumeBuilder.findById(resumeId);
-    if (resume) {
-      await ResumeBuilder.findByIdAndUpdate(resumeId, { currentStage: 6 })
-    } else {
-      return res.status(404).json({ message: "Resume not found" });
-    }
-    const buffer = await convertResumeIntoPdf(resumeHtml);
-    if (!buffer) {
-      return res.status(500).json({ message: "Server error, try again later!" });
-    }
-    res.type("pdf");
-    return res.end(buffer, "binary");
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
-  }
 };
-
-
-
 
 exports.delete = async (req, res) => {
   try {

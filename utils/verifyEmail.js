@@ -1,4 +1,4 @@
-const verifyEmail = (first_name, email, otp)=>{
+const verifyEmail = (first_name, email, otp) => {
   return `
           <!DOCTYPE html>
           <html lang="en">

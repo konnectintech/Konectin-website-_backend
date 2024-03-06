@@ -1,23 +1,25 @@
-const mongoose = require("mongoose")
-
-const userSchema = new mongoose.Schema({
+const mongoose = require("mongoose");
+const UserRoleEnum = require("../utils/userRoleEnum");
+const userSchema = new mongoose.Schema(
+  {
     fullname: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     email: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     password: {
-        type: String
+      type: String,
+      required: true,
     },
     picture: {
-        type: String
+      type: String,
     },
     isEmailVerified: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     typeOfUser: {
         type: String,
@@ -53,4 +55,4 @@ const userSchema = new mongoose.Schema({
       }
 }, {timestamps: true})
 
-module.exports = mongoose.model('users', userSchema)
+module.exports = mongoose.model("users", userSchema);
