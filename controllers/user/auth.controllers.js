@@ -8,6 +8,9 @@ const { jwtSign } = require("../../helpers/jsonwebtoken");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
 const { verifyEmail } = require("../../utils/verifyEmail");
+const { countries, getCountry } = require("../../utils/countrySearch");
+const fetchPromise = import("node-fetch");
+const fetch = async (...args) => (await fetchPromise).default(...args);
 
 require("dotenv").config();
 const { uploadFile } = require("../../helpers/aws");
@@ -34,11 +37,15 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       picture: pictureUrl,
     });
-    await user.save();
+    
     if (
       process.env.NODE_ENV === "development" ||
       process.env.NODE_ENV === "production"
     ) {
+      const saveUser = await user.save();
+      // If user registration fails
+      if(!saveUser) return res.status(404).json({ message: "Registration failed" });
+
       // Generate OTP
       const token = await generateRegisterOTP(user._id);
       // Email Subject
@@ -49,6 +56,7 @@ exports.register = async (req, res) => {
       await transporter(user.email, subject, msg);
       //
     }
+    
     return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -121,6 +129,24 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
+  }
+};
+
+exports.removeEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+    const userExist = await User.exists({ email });
+    if (!userExist) return res.status(404).json({ message: "Email does not exist" });
+
+    const user = await User.findOneAndDelete({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email deletion failed" });
+    }
+
+    return res.status(200).json({message: "Email deleted successfully!"});
+
+  } catch (err) {
+    return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
 
@@ -248,14 +274,40 @@ exports.requestEmailToken = async (req, res) => {
 exports.forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email: email });
+    let ipAddress = req.ip;
+    const userAgent = req.get('user-agent');
+
+    const user = await User.findOne({ email: email }, {email: 1, fullname:1});
 
     if (!user) {
       return res.status(400).json({ message: "Please sign-up first" });
     }
+    // 
+    const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
+    if (isIPv6) {
+      // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
+    ipAddress = ipAddress.includes('::ffff:') ? ipAddress.replace(/^.*:/, "") : null;
+    }
+    if (!ipAddress) {
+      return res.status(400).json({ message: "Some error occured, try again later" });
+    }
+    //Get location
+    const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
+    if (!response.ok) {
+      return res.status(400).json({ message: "Some error occured, try again later" });
+    }
+
+    const locationData = await response.json();
+    const countryAbbreviation = locationData.country;
+    const sortedData = countries.sort((a, b) => a.abbreviation - b.abbreviation);
+    
+    let location = getCountry(sortedData, countryAbbreviation);
+    location !== -1 ? location: location = countryAbbreviation;
+    let device = userAgent;
+    
     const token = await generatePasswordOTP(user._id);
     const subject = "Konectin Technical - Reset password";
-    const msg = ResetPasswordEmail(token);
+    const msg = ResetPasswordEmail(user.fullname.split(' ')[0], location, device, token); 
     await transporter(email, subject, msg);
     return res.status(200).json({
       message: "Please check email for the code to reset your password",

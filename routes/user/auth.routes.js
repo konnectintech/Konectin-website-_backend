@@ -14,5 +14,6 @@ router.post("/microsoft/login", auth.microsoftLogin);
 router.post("/googleSignIn", auth.googleLogin);
 
 router.delete("/logout", auth.logOut);
+router.delete("/removeEmail", auth.removeEmail);
 
 module.exports = router;
