@@ -161,7 +161,7 @@
         }
       }
     },
-   
+
     "/user/getUser": {
       "get": {
         "summary": "Get user by ID",
@@ -866,6 +866,123 @@
           }
         }
       }
+    },
+    "/user/v2/getNotificationSettings": {
+      "get": {
+        "summary": "Get user notification settings",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "user id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/getSocials": {
+      "get": {
+        "summary": "Get user social media",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "user id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/updateUser": {
+      "put": {
+        "summary": "Update a specific  user",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User Updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -894,6 +1011,38 @@
             "type": "string",
             "enum": ["Regular", "Google", "Microsoft"],
             "default": "Regular"
+          },
+          "notificationSettings": {
+            "type": "object",
+            "properties": {
+              "emails": {
+                "type": "boolean"
+              },
+              "pushNotifications": {
+                "type": "boolean"
+              }
+            }
+          },
+
+          "socials": {
+            "type": "object",
+            "properties": {
+              "github": {
+                "type": "string"
+              },
+              "facebook": {
+                "type": "string"
+              },
+              "instagram": {
+                "type": "string"
+              },
+              "linkedin": {
+                "type": "string"
+              },
+              "medium": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": ["fullname", "email", "password"]

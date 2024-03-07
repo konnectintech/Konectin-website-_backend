@@ -1,4 +1,3 @@
-const faker = require("@faker-js/faker");
 const User = require("../../models/user.model");
 const { passwordHash } = require("../../helpers/bcrypt");
 const createUser = async (overrides = {}) => {

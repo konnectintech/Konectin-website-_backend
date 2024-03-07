@@ -6,6 +6,7 @@ const path = require("path");
 const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
 const { Types } = require("mongoose");
+const { StatusCodes } = require("http-status-codes");
 
 exports.letterBuilder = async (req, res) => {
   try {
@@ -22,7 +23,9 @@ exports.letterBuilder = async (req, res) => {
     if (userId) {
       user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "User not found" });
       }
     }
 
@@ -46,10 +49,12 @@ exports.letterBuilder = async (req, res) => {
 
     const savedLetter = await newLetter.save();
     res
-      .status(201)
+      .status(StatusCodes.CREATED)
       .json({ data: savedLetter, message: "Letter created successfully" });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -60,19 +65,25 @@ exports.getUserLetter = async (req, res) => {
     const letter = await LetterBuilder.findById({ _id: letterId });
 
     if (!letter) {
-      return res.status(404).json({ message: "Letter with Id does not exist" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Letter with Id does not exist" });
     }
 
     // Convert letter.userId to string for comparison
     if (letter.userId.toString() !== userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Unauthorized" });
     }
 
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Letter retrieved successfully", letter });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -87,7 +98,7 @@ exports.getUserLetters = async function (req, res) {
     const user = await User.findById(objectIdUserId);
     if (!user) {
       return res
-        .status(404)
+        .status(StatusCodes.NOT_FOUND)
         .json({ message: "User does not exist, please register" });
     }
 
@@ -126,10 +137,12 @@ exports.getUserLetters = async function (req, res) {
     const letters = await LetterBuilder.aggregate(pipeline);
 
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Letters retrieved successfully", letters });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -140,20 +153,26 @@ exports.delete = async (req, res) => {
     const letter = await LetterBuilder.findById({ _id: letterId });
 
     if (!letter) {
-      return res.status(404).json({ message: "Letter not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Letter not found" });
     }
 
     if (letter.userId.toString() !== userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Unauthorized" });
     }
 
     await LetterBuilder.deleteOne({ _id: letter._id });
 
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Letter has been deleted successfully" });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -187,16 +206,18 @@ exports.updateUserLetter = async (req, res) => {
 
     if (!updatedLetter || updatedLetter.length === 0) {
       return res
-        .status(404)
+        .status(StatusCodes.NOT_FOUND)
         .json({ message: "Letter not found or unauthorized" });
     }
 
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       message: "Letter Updated successfully",
       letter: updatedLetter[0],
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -208,7 +229,9 @@ exports.createLetterIntoPdf = async function (req, res) {
     const letter = await LetterBuilder.findById({ _id: letterId });
 
     if (!letter) {
-      return res.status(404).json({ message: "letter not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "letter not found" });
     }
     // 1. Create the letter as a PDF
     const pdfBuffer = await convertPageIntoPdf(letterHtml);
@@ -241,6 +264,8 @@ exports.createLetterIntoPdf = async function (req, res) {
     // 8.Send the PDF content as the response
     res.send(pdfContent);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: error.message });
   }
 };
