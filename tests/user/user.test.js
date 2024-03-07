@@ -1,5 +1,4 @@
 const request = require("supertest");
-
 const { app } = require("../../server");
 const { createUser } = require("../factories/user.factory");
 const { faker } = require("@faker-js/faker");

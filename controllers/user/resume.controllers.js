@@ -25,7 +25,7 @@ exports.resumeBuilder = async (req, res) => {
 
     await cv.save();
     return res
-      .status(StatusCodes.OK)
+      .status(StatusCodes.CREATED)
       .json({ message: "Resume created successfully", cv });
   } catch (err) {
     return res

@@ -9,8 +9,9 @@ const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
 const { verifyEmail } = require("../../utils/verifyEmail");
 const { countries, getCountry } = require("../../utils/countrySearch");
-const fetchPromise = import("node-fetch");
-const fetch = async (...args) => (await fetchPromise).default(...args);
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
 const { StatusCodes } = require("http-status-codes");
 
 require("dotenv").config();
@@ -57,7 +58,7 @@ exports.register = async (req, res) => {
     }
 
     return res
-      .status(StatusCodes.OK)
+      .status(StatusCodes.CREATED)
       .json({ message: "User created successfully", user });
   } catch (err) {
     return res
