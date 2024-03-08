@@ -12,9 +12,8 @@ exports.letterBuilder = async (req, res) => {
   try {
     const { userId } = req.query;
     const {
-      basicInfo: { fullName, email, jobPosition, companyName },
-      jobDescriptionAndCompanyBrief: { jobDescription, companyInfo },
-      content,
+      details: { fullName, email, jobPosition, companyName },
+      description: { jobDescription, companyInfo },
       professionalBio,
     } = req.body;
 
@@ -31,17 +30,16 @@ exports.letterBuilder = async (req, res) => {
 
     const newLetterData = {
       userId,
-      basicInfo: {
+      details: {
         fullName: user ? user.fullname : fullName,
         email: user ? user.email : email,
         jobPosition,
         companyName,
       },
-      jobDescriptionAndCompanyBrief: {
+      description: {
         jobDescription,
         companyInfo,
       },
-      content,
       professionalBio,
     };
 
