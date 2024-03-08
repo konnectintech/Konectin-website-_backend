@@ -11,10 +11,6 @@ const moment = require("moment-timezone");
 const connectDatabase = require("./config/database");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./docs/swagger.json");
-const multer = require("multer");
-
-// Multer file upload configuration
-const upload = multer({ dest: "uploads/" });
 
 // set the default timezone to West African Standard Time
 moment.tz.setDefault("Africa/Lagos");

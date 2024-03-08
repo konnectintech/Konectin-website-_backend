@@ -1,87 +1,100 @@
 const User = require("../../models/user.model");
+const { StatusCodes } = require("http-status-codes");
 
 exports.getUserInfo = async (req, res) => {
   try {
     const { email } = req.query;
 
     if (!email) {
-      return res.status(400).json({ message: "Please provide an email address" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Please provide an email address" });
     }
 
     const user = await User.findOne({ email: email });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found" });
     }
-    return res.status(200).json({ message: "User information fetched successfully", user });
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "User information fetched successfully", user });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
 exports.getNotificationSettings = async (req, res) => {
   try {
     const { userId } = req.query;
-    
+
     const user = await User.findById(userId);
-    
-    if(!user) {
-      return res.status(404).json({message: 'User not found'});
+
+    if (!user) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found" });
     }
-    
+
     res.json(user.notificationSettings);
-    
-  } catch(err) {
-    console.error(err);
-    res.status(500).json({message: 'Server error'}); 
+  } catch (err) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
-}
+};
 
 exports.getSocials = async (req, res) => {
-
   try {
     const { userId } = req.query;
 
     const user = await User.findById(userId);
 
-    if(!user) {
-      return res.status(404).json({message: 'User not found'});
+    if (!user) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found" });
     }
 
     res.json(user.socials);
-
-  } catch(err) {
-    console.error(err);
-    res.status(500).json({message: 'Server error'});
+  } catch (err) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
-}
+};
 
 exports.updateUser = async (req, res) => {
-
   try {
     const { userId } = req.query;
     const update = req.body;
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({message: 'User not found'});
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found" });
     }
 
-    if(update.fullname || update.email) {  
+    if (update.fullname || update.email) {
       user.set(update);
     }
 
-    if(update.notificationSettings) {
+    if (update.notificationSettings) {
       user.notificationSettings = update.notificationSettings;
     }
 
-    if(update.socials){
+    if (update.socials) {
       user.socials = update.socials;
     }
     await user.save();
     res.json(user);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({message: 'Error updating user'});
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
-}
+};
