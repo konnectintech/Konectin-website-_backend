@@ -7,7 +7,7 @@ const letterSchema = new mongoose.Schema({
   letterUrl: {
     type: String,
   },
-  basicInfo: {
+  details: {
     fullName: {
       type: String,
       required: true,
@@ -24,7 +24,7 @@ const letterSchema = new mongoose.Schema({
       type: String,
     },
   },
-  jobDescriptionAndCompanyBrief: {
+  description: {
     jobDescription: {
       type: String,
     },
