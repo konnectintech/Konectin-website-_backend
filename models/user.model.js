@@ -23,6 +23,28 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["Regular", "Google","Microsoft"],
         default: "Regular"
+    },
+    notifications: {
+        resumeStatusUpdates: {
+            type: Boolean,
+            default: true
+        },
+        jobAlerts: {
+            type: Boolean,
+            default: true
+        },
+        internshipAlerts: {
+            type: Boolean,
+            default: true
+        },
+        blogUpdates: {
+            type: Boolean,
+            default: true
+        },
+        reminders: {
+            type: Boolean,
+            default: true
+        }
     }
 }, {timestamps: true})
 
