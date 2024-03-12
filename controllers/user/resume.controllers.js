@@ -1,16 +1,11 @@
 const User = require("../../models/user.model");
 const ResumeBuilder = require("../../models/resume.model");
 require("dotenv").config();
-
-const {
-  resumeSchema,
-  resumeUpdateSchema,
-} = require("../../helpers/resumeValidate");
-const { convertResumeIntoPdf } = require("../../helpers/puppeteer");
+const { convertPageIntoPdf } = require("../../helpers/puppeteer");
 const path = require("path");
-const os = require("os");
+const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
-const cloudinaryUpload = require("../../helpers/cloudinary");
+const { StatusCodes } = require("http-status-codes");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -18,26 +13,24 @@ exports.resumeBuilder = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       return res
-        .status(404)
+        .status(StatusCodes.NOT_FOUND)
         .json({ message: "User does not exist, please register" });
     }
-    // const { error, value } = resumeSchema.validate(req.body);
-
-    // if (error) {
-    //   return res.status(400).json({ Error: error.details[0].message });
-    // }
 
     const cv = new ResumeBuilder({
       userId,
       currentStage: 1,
-      // ...value,
-      ...req.body
+      ...req.body,
     });
 
     await cv.save();
-    return res.status(201).json({ message: "Resume created successfully", cv });
+    return res
+      .status(StatusCodes.CREATED)
+      .json({ message: "Resume created successfully", cv });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 exports.getUserResumes = async function (req, res) {
@@ -46,7 +39,7 @@ exports.getUserResumes = async function (req, res) {
     const user = await User.findById({ _id: userId });
     if (!user) {
       return res
-        .status(404)
+        .status(StatusCodes.NOT_FOUND)
         .json({ message: "User does not exist, please register" });
     }
 
@@ -55,15 +48,19 @@ exports.getUserResumes = async function (req, res) {
 
     for (var i = 0; i < cvs.length; i++) {
       if (cvs[i].userId.toString() !== userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ message: "Unauthorized" });
       }
     }
 
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Resumes retrieved successfully", cvs });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -74,19 +71,25 @@ exports.getUserResume = async function (req, res) {
     const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
-      return res.status(404).json({ message: "Resume with Id does not exist" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Resume with Id does not exist" });
     }
 
     // Convert cv.userId to string for comparison
     if (cv.userId.toString() !== userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Unauthorized" });
     }
 
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Resume retrieved successfully", cv });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -97,28 +100,31 @@ exports.updateUserResume = async function (req, res) {
     const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
-      return res.status(404).json({ message: "CV not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "CV not found" });
     }
 
     if (cv.userId.toString() !== userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Unauthorized" });
     }
 
-    // const { error, value } = resumeUpdateSchema.validate(req.body);
-    // if (error) {
-    //   return res.status(400).json({ Error: error.details[0].message });
-    // }
-    const updated = await ResumeBuilder.findByIdAndUpdate(resumeId, { ...req.body }, { new: true });
-    // Update the found CV directly
-    // cv.set({ ...value });
-    // await cv.save();
+    const updated = await ResumeBuilder.findByIdAndUpdate(
+      resumeId,
+      { ...req.body },
+      { new: true }
+    );
 
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       message: "Resume Updated successfully",
       updated,
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -130,10 +136,12 @@ exports.downloadPDF = async function (req, res) {
     const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
-      return res.status(404).json({ message: "CV not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "CV not found" });
     }
     // 1. Create the CV as a PDF
-    const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
+    const pdfBuffer = await convertPageIntoPdf(resumeHtml);
 
     const tmpFolderPath = path.join(__dirname, "tmp");
     await fs.promises.mkdir(tmpFolderPath, { recursive: true });
@@ -144,7 +152,7 @@ exports.downloadPDF = async function (req, res) {
 
     // 3. Upload the PDF file to AWS S3 and update the cv imageUrl
     const imageUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
-    cv.cloudinaryUrl = imageUrl;
+    cv.resumeUrl = imageUrl;
 
     //4.  Remove the 'tmp' folder and its contents after successful upload
     await fs.promises.rmdir(tmpFolderPath, { recursive: true });
@@ -152,14 +160,21 @@ exports.downloadPDF = async function (req, res) {
     // 5. Set the response headers for download from AWS S3
     const pdfContent = await downloadFile(`${cv.id}.pdf`);
 
-    return res.end(pdfContent, "binary");
+    // Set the Content-Type header to application/pdf
+    res.setHeader("Content-Type", "application/pdf");
+
+    // Set the Content-Disposition header to attachment
+    // This tells the browser to download the file instead of displaying it
+    res.setHeader("Content-Disposition", `attachment; filename="${cv.id}.pdf"`);
+
+    // Send the PDF content as the response
+    res.send(pdfContent);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: error.message });
   }
 };
-
-
-
 
 exports.delete = async (req, res) => {
   try {
@@ -168,19 +183,25 @@ exports.delete = async (req, res) => {
     const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
-      return res.status(404).json({ message: "CV not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "CV not found" });
     }
 
     if (cv.userId.toString() !== userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ message: "Unauthorized" });
     }
 
     await ResumeBuilder.deleteOne({ _id: cv._id });
 
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Resume has been deleted successfully" });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };

@@ -1,0 +1,1296 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "KonectIn APIs Documentation",
+    "version": "1.0.0",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "jeannedarc@konectin.org",
+      "name": "Jeanne d'Arc NYIRAMWIZA",
+      "title": "Backend Engineer"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "externalDocs": {
+      "description": "Find out more about Swagger",
+      "url": "http://swagger.io"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:4000"
+      }
+    ]
+  },
+  "paths": {
+    "/user/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/User" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Please fill all required fields"
+          },
+          "409": {
+            "description": "User already exists"
+          }
+        }
+      }
+    },
+    "/user/verifyEmail": {
+      "post": {
+        "summary": "Verify user's email address using OTP.",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Email address of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "OTP": {
+                    "type": "string",
+                    "description": "The One-Time Password (OTP) sent to the user's email."
+                  }
+                },
+                "required": ["OTP"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email verified successfully."
+          },
+          "400": {
+            "description": "Token has expired, please request a new one."
+          },
+          "404": {
+            "description": "User or OTP does not exist."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "summary": "User login",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserLogin" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Please fill all required fields or incorrect password"
+          },
+          "404": {
+            "description": "User does not exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/requestEmail": {
+      "post": {
+        "summary": "Request email token",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Check your email for the verification code"
+          },
+          "400": {
+            "description": "Please sign up before requesting a new token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+
+    "/user/getUser": {
+      "get": {
+        "summary": "Get user by ID",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "_id": { "type": "string" },
+                        "fullname": { "type": "string" },
+                        "email": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such user exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/forgotPassword": {
+      "post": {
+        "summary": "Forget password",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Please check email for the code to reset your password"
+          },
+          "400": {
+            "description": "Please sign-up first"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/verify-otp": {
+      "post": {
+        "summary": "Verify OTP",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "OTP": { "type": "string" }
+                },
+                "required": ["OTP"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully"
+          },
+          "400": {
+            "description": "Please provide OTP or The OTP has expired, please req a new one"
+          },
+          "404": {
+            "description": "Invalid OTP"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/resetPassword": {
+      "post": {
+        "summary": "Reset password",
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "OTP": { "type": "string" },
+                  "password": { "type": "string" },
+                  "confirmPassword": { "type": "string" },
+                  "email": { "type": "string" }
+                },
+                "required": ["OTP", "password", "confirmPassword", "email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully, please login"
+          },
+          "400": {
+            "description": "Please fill all fields or Passwords do not match or Invalid or expired token or Invalid email address"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/resume": {
+      "post": {
+        "summary": "Create a new resume",
+        "tags": ["Resume"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Resume"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resume created successfully"
+          },
+          "404": {
+            "description": "User does not exist, please register"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/getResumes": {
+      "get": {
+        "summary": "Get all resumes for a user",
+        "tags": ["Resume"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resumes retrieved successfully"
+          },
+          "404": {
+            "description": "User does not exist, please register"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/getResume": {
+      "get": {
+        "summary": "Get a specific resume for a user",
+        "tags": ["Resume"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resumeId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Resume with Id does not exist"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/updateResume": {
+      "put": {
+        "summary": "Update a specific resume for a user",
+        "tags": ["Resume"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resumeId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Resume"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resume Updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "CV not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/createPdf": {
+      "post": {
+        "summary": "Create a PDF version of a resume",
+        "tags": ["Resume"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resumeId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Resume"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resume downloaded successfully"
+          },
+          "404": {
+            "description": "CV not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/delete/resume": {
+      "delete": {
+        "summary": "Delete a specific resume for a user",
+        "tags": ["Resume"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "resumeId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume has been deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "CV not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/letter": {
+      "post": {
+        "summary": "Create a new letter",
+        "tags": ["Letter"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Letter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Letter created successfully"
+          },
+          "400": {
+            "description": "Invalid request data"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/getLetter": {
+      "get": {
+        "summary": "Get a letter by ID",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Letter retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/getLetters": {
+      "get": {
+        "summary": "Get user's letters",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Letters retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/deleteLetter": {
+      "delete": {
+        "summary": "Delete a letter",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Letter deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/updateLetter": {
+      "put": {
+        "summary": "Update a letter",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID of the user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "basicInfo": {
+                    "type": "object",
+                    "properties": {
+                      "fullName": { "type": "string" },
+                      "email": { "type": "string" },
+                      "jobPosition": { "type": "string" },
+                      "companyName": { "type": "string" }
+                    }
+                  },
+                  "jobDescriptionAndCompanyBrief": {
+                    "type": "object",
+                    "properties": {
+                      "jobDescription": { "type": "string" },
+                      "companyInfo": { "type": "string" }
+                    }
+                  },
+                  "content": { "type": "string" },
+                  "professionalBio": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Letter updated successfully"
+          },
+          "400": {
+            "description": "Invalid request data"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/createLetterPdf": {
+      "post": {
+        "summary": "Create PDF from letter HTML content",
+        "tags": ["Letter"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "letterId",
+            "in": "query",
+            "description": "ID of the letter",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "letterHtml": { "type": "string" }
+                },
+                "required": ["letterHtml"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "CV downloaded successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Letter not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/getNotificationSettings": {
+      "get": {
+        "summary": "Get user notification settings",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "user id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/getSocials": {
+      "get": {
+        "summary": "Get user social media",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "user id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/user/v2/updateUser": {
+      "put": {
+        "summary": "Update a specific  user",
+        "tags": ["User"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User Updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "fullname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string",
+            "format": "binary"
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "default": false
+          },
+          "typeOfUser": {
+            "type": "string",
+            "enum": ["Regular", "Google", "Microsoft"],
+            "default": "Regular"
+          },
+          "notificationSettings": {
+            "type": "object",
+            "properties": {
+              "emails": {
+                "type": "boolean"
+              },
+              "pushNotifications": {
+                "type": "boolean"
+              }
+            }
+          },
+
+          "socials": {
+            "type": "object",
+            "properties": {
+              "github": {
+                "type": "string"
+              },
+              "facebook": {
+                "type": "string"
+              },
+              "instagram": {
+                "type": "string"
+              },
+              "linkedin": {
+                "type": "string"
+              },
+              "medium": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": ["fullname", "email", "password"]
+      },
+      "UserLogin": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        },
+        "required": ["email", "password"]
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "token": { "type": "string" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "_id": { "type": "string" },
+              "fullname": { "type": "string" },
+              "email": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Resume": {
+        "type": "object",
+        "properties": {
+          "resumeUrl": {
+            "type": "string"
+          },
+          "basicInfo": {
+            "type": "object",
+            "properties": {
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phoneNumber": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "zipCode": {
+                "type": "string"
+              },
+              "profession": {
+                "type": "string"
+              },
+              "phoneCode": {
+                "type": "string"
+              }
+            }
+          },
+          "jobExperience": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "jobTitle": {
+                  "type": "string"
+                },
+                "company": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                },
+                "startMonth": {
+                  "type": "string"
+                },
+                "startYear": {
+                  "type": "string"
+                },
+                "endMonth": {
+                  "type": "string"
+                },
+                "endYear": {
+                  "type": "string"
+                },
+                "workDesc": {
+                  "type": "string"
+                },
+                "current": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "education": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                },
+                "country": {
+                  "type": "string"
+                },
+                "degree": {
+                  "type": "string"
+                },
+                "startMonth": {
+                  "type": "string"
+                },
+                "startYear": {
+                  "type": "number"
+                },
+                "schoolName": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                },
+                "endMonth": {
+                  "type": "string"
+                },
+                "endYear": {
+                  "type": "string"
+                },
+                "awards": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "relevantCourses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "current": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "lvl": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "currentEditedJob": {
+            "type": "number"
+          },
+          "currentEditedEducation": {
+            "type": "number"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "selectedTemplate": {
+            "type": "string"
+          },
+          "currentStage": {
+            "type": "number"
+          }
+        },
+        "required": ["userId"]
+      },
+      "Letter": {
+        "type": "object",
+        "properties": {
+          "basicInfo": {
+            "type": "object",
+            "properties": {
+              "fullName": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "jobPosition": {
+                "type": "string"
+              },
+              "companyName": {
+                "type": "string"
+              }
+            }
+          },
+          "jobDescriptionAndCompanyBrief": {
+            "type": "object",
+            "properties": {
+              "jobDescription": {
+                "type": "string"
+              },
+              "companyInfo": {
+                "type": "string"
+              }
+            }
+          },
+          "content": {
+            "type": "string"
+          },
+          "professionalBio": {
+            "type": "string"
+          }
+        },
+        "required": ["userId", "basicInfo"]
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
