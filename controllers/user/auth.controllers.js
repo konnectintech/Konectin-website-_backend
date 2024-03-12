@@ -440,3 +440,38 @@ exports.updateNotificationPreferences = async (req, res) => {
     return res.status(500).json({ message: "Server error, try again later" });
   }
 };
+
+exports.updateUserInfo = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const {
+      fullname,
+      picture,
+      phoneNumber,
+      country,
+      city,
+      college,
+    } = req.body;
+
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (fullname) user.fullname = fullname;
+    if (picture) user.picture = picture;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (country) user.country = country;
+    if (city) user.city = city;
+    if (college) user.college = college;
+
+    user = await user.save();
+
+    return res.status(200).json({ message: "User information updated successfully", user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error, try again later" });
+  }
+};
