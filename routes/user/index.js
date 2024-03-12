@@ -2,8 +2,9 @@ const router = require("express").Router();
 
 const authRoutes = require("./auth.routes");
 const resumeRoutes = require("./resume.routes");
-const contactRoutes = require("./contact-us.routes");
+const dashboardRoutes = require("./dashboard.routes");
 
-router.use("",authRoutes, resumeRoutes, contactRoutes);
+
+router.use("",authRoutes, resumeRoutes, dashboardRoutes);
 
 module.exports = router;

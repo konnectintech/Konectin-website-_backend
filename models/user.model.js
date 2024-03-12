@@ -41,6 +41,14 @@ const userSchema = new mongoose.Schema({
         default: "Regular"
     },
     notifications: {
+        emails: {
+          type: Boolean,
+          default: true
+        },
+        pushNotifications: {
+          type: Boolean,
+          default: true
+        },
         resumeStatusUpdates: {
             type: Boolean,
             default: true
@@ -61,7 +69,24 @@ const userSchema = new mongoose.Schema({
             type: Boolean,
             default: true
         }
-    }
+    },
+    socials: {
+        github: {
+          type: String
+        },
+        facebook: {
+          type: String
+        },
+        instagram: {
+          type: String
+        },
+        linkedin: {
+          type: String
+        },
+        medium: {
+          type: String
+        }
+      }
 }, {timestamps: true})
 
 module.exports = mongoose.model('users', userSchema)

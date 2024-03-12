@@ -122,57 +122,39 @@ exports.updateUserResume = async function (req, res) {
   }
 };
 
-// exports.createPdf = async function (req, res) {
-//   try {
-//     const { resumeHtml } = req.body;
-//     const { resumeId } = req.query;
-
-//     const resume = await ResumeBuilder.findById({ _id: resumeId });
-
-//     if (!resume) {
-//       return res.status(404).json({ message: "Resume not found" });
-//     }
-
-//     // Create the CV as a PDF
-//     const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
-
-//     const downloadsFolderPath = path.join(os.homedir(), "Downloads");
-//     await fs.promises.mkdir(downloadsFolderPath, { recursive: true });
-
-//     // Save the CV PDF to a local file in the 'downloads' folder
-//     const pdfFilePath = path.join(
-//       downloadsFolderPath,
-//       `${resume.basicInfo.firstName}_${resume.basicInfo.lastName}_Resume.pdf`
-//     );
-//     await fs.promises.writeFile(pdfFilePath, pdfBuffer);
-
-//     res.json({
-//       message: "Your Resume has been downloaded. Check your downloads folder",
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-exports.createPdf = async function (req, res) {
+exports.downloadPDF = async function (req, res) {
   try {
     const { resumeId } = req.query;
     const { resumeHtml } = req.body;
-    const resume = await ResumeBuilder.findById(resumeId);
-    if (resume) {
-      await ResumeBuilder.findByIdAndUpdate(resumeId, { currentStage: 6 })
-    } else {
-      return res.status(404).json({ message: "Resume not found" });
+
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
+
+    if (!cv) {
+      return res.status(404).json({ message: "CV not found" });
     }
-    const buffer = await convertResumeIntoPdf(resumeHtml);
-    if (!buffer) {
-      return res.status(500).json({ message: "Server error, try again later!" });
-    }
-    res.type("pdf");
-    return res.end(buffer, "binary");
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    // 1. Create the CV as a PDF
+    const pdfBuffer = await convertResumeIntoPdf(resumeHtml);
+
+    const tmpFolderPath = path.join(__dirname, "tmp");
+    await fs.promises.mkdir(tmpFolderPath, { recursive: true });
+
+    // 2. Save the CV PDF to a local file in the 'tmp' folder
+    const pdfFilePath = path.join(tmpFolderPath, `${cv.id}.pdf`);
+    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
+
+    // 3. Upload the PDF file to AWS S3 and update the cv imageUrl
+    const imageUrl = await uploadFile(pdfFilePath, `${cv.id}.pdf`);
+    cv.cloudinaryUrl = imageUrl;
+
+    //4.  Remove the 'tmp' folder and its contents after successful upload
+    await fs.promises.rmdir(tmpFolderPath, { recursive: true });
+
+    // 5. Set the response headers for download from AWS S3
+    const pdfContent = await downloadFile(`${cv.id}.pdf`);
+
+    return res.end(pdfContent, "binary");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
