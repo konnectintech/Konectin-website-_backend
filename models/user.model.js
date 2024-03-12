@@ -15,6 +15,22 @@ const userSchema = new mongoose.Schema({
     picture: {
         type: String
     },
+    phoneNumber: {
+        type: String,
+        default: ''
+    },
+    country: {
+        type: String,
+        default: ''
+    },
+    city: {
+        type: String, 
+        default: ''
+    },
+    college: {
+        type: String,
+        default: ''
+    },
     isEmailVerified: {
         type: Boolean,
         default: false
