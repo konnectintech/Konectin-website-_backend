@@ -15,7 +15,5 @@ router.post("/googleSignIn", auth.googleLogin);
 
 router.delete("/logout", auth.logOut);
 router.delete("/removeEmail", auth.removeEmail);
-router.patch('/:userId/notifications', auth.updateNotificationPreferences);
-router.patch('/:userId/updateInfo', auth.updateUserInfo);
 
 module.exports = router;

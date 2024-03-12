@@ -10,5 +10,6 @@ router.get(
 );
 router.get("/v2/getSocials", verifyUserToken, dashboard.getSocials);
 router.put("/v2/updateUser", verifyUserToken, dashboard.updateUser);
+router.put('/v2/updateNotificationSettings', verifyUserToken, dashboard.updateNotificationSettings);
 
 module.exports = router;
