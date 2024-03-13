@@ -1,7 +1,7 @@
 const UserRoleEnum = {
-  REGULAR: "REGULAR",
-  GOOGLE: "GOOGLE",
-  MICROSOFT: "MICROSOFT",
+  REGULAR: "Regular",
+  GOOGLE: "Google",
+  MICROSOFT: "Microsoft",
 };
 
 module.exports = UserRoleEnum;
