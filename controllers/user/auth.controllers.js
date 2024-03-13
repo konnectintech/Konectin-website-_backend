@@ -126,11 +126,12 @@ exports.login = async (req, res) => {
         .json({ message: "Incorrect password" });
     }
 
-    if (user.isEmailVerified !== true) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Your email is not verified" });
-    }
+    // if (user.isEmailVerified !== true) {
+    //   return res
+    //     .status(StatusCodes.BAD_REQUEST)
+    //     .json({ message: "Your email is not verified" });
+    // }
+    
     const payload = {
       _id: user._id,
       fullname: user.fullname,
