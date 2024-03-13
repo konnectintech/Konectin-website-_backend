@@ -60,7 +60,7 @@ exports.updateNotificationSettings = async (req, res) => {
     }
 
     if(emailNotifications) user.notifications.emails = emailNotifications;
-    if(pushNotifications) user.notifications.pushNotifications
+    if(pushNotifications) user.notifications.pushNotifications = pushNotifications;
     if(resumeStatusUpdates) user.notifications.resumeStatusUpdates = resumeStatusUpdates;
     if(jobAlerts) user.notifications.jobAlerts = jobAlerts;
     if(internshipAlerts) user.notifications.internshipAlerts = internshipAlerts;
