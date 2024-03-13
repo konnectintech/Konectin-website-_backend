@@ -48,6 +48,34 @@ exports.getNotificationSettings = async (req, res) => {
   }
 };
 
+exports.updateNotificationSettings = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const { emailNotifications, pushNotifications, resumeStatusUpdates, jobAlerts, internshipAlerts, blogUpdates, reminders } = req.body;
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if(emailNotifications) user.notifications.emails = emailNotifications;
+    if(pushNotifications) user.notifications.pushNotifications
+    if(resumeStatusUpdates) user.notifications.resumeStatusUpdates = resumeStatusUpdates;
+    if(jobAlerts) user.notifications.jobAlerts = jobAlerts;
+    if(internshipAlerts) user.notifications.internshipAlerts = internshipAlerts;
+    if(blogUpdates) user.notifications.blogUpdates = blogUpdates;
+    if(reminders) user.notifications.reminders = reminders;
+
+    await user.save();
+
+    return res.status(200).json({ message: "Notification preferences updated successfully", user });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error, try again later" });
+  }
+};
+
 exports.getSocials = async (req, res) => {
   try {
     const { userId } = req.query;
@@ -79,7 +107,7 @@ exports.updateUser = async (req, res) => {
         .json({ message: "User not found" });
     }
 
-    if (update.fullname || update.email) {
+    if (update.fullname || update.email || update.phoneNumber || update.picture || update.country || update.city || update.college) {
       user.set(update);
     }
 
