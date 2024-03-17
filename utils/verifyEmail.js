@@ -1,4 +1,4 @@
-const verifyEmail = (first_name, email, otp)=>{
+const verifyEmail = (first_name, email, otp) => {
   return `
           <!DOCTYPE html>
           <html lang="en">
@@ -173,7 +173,7 @@ const verifyEmail = (first_name, email, otp)=>{
                           </p>
                       </div>
                       <div class="cta">
-                          <a class="cta-btn" href="#">${otp}</a>
+                          <a class="cta-btn" href="${process.env.BACKEND_URL}/user/verifyEmail?email=${email}">${otp}</a>
                       </div>
                       <div>
                           <p style="margin-bottom: 0">

@@ -11,6 +11,7 @@ router.post("/forgotPassword", auth.forgetPassword);
 router.post("/resetPassword", auth.resetPassword);
 router.post("/googleSignIn", auth.googleLogin);
 router.post("/verifyEmail", auth.verifyEmailAddress);
+router.get("/verifyEmail", auth.getVerifyEmailPage);
 router.delete("/logout", auth.logOut);
 router.delete("/removeEmail", auth.removeEmail);
 

@@ -43,17 +43,24 @@ exports.register = async (req, res) => {
     ) {
       const saveUser = await user.save();
       // If user registration fails
-      if(!saveUser) return res.status(404).json({ message: "Registration failed" });
+      if (!saveUser)
+        return res.status(404).json({ message: "Registration failed" });
       // Generate OTP
       const token = await generateRegisterOTP(user._id);
       // Email Subject
       const subject = "Konectin Technical - Email Verification";
       // Email body
-      const msg = verifyEmail(saveUser.fullname.split(' ')[0], saveUser.email, token);
+      const msg = verifyEmail(
+        saveUser.fullname.split(" ")[0],
+        saveUser.email,
+        token
+      );
       //Send email
       await transporter(saveUser.email, subject, msg);
       //
-      return res.status(201).json({ message: "User created successfully", user });
+      return res
+        .status(201)
+        .json({ message: "User created successfully", user });
     }
 
     // await user.save();
@@ -101,6 +108,9 @@ exports.verifyEmailAddress = async (req, res) => {
       .json({ message: "Some error occured, try again later!" });
   }
 };
+exports.getVerifyEmailPage = async (req, res) => {
+  const { email } = req.query;
+};
 
 exports.login = async (req, res) => {
   try {
@@ -140,15 +150,15 @@ exports.removeEmail = async (req, res) => {
   try {
     const { email } = req.query;
     const userExist = await User.exists({ email });
-    if (!userExist) return res.status(404).json({ message: "Email does not exist" });
+    if (!userExist)
+      return res.status(404).json({ message: "Email does not exist" });
 
     const user = await User.findOneAndDelete({ email });
     if (!user) {
       return res.status(404).json({ message: "Email deletion failed" });
     }
 
-    return res.status(200).json({message: "Email deleted successfully!"});
-
+    return res.status(200).json({ message: "Email deleted successfully!" });
   } catch (err) {
     return res.status(500).json({ message: "Server error, try again later!" });
   }
@@ -158,11 +168,11 @@ exports.getUser = async (req, res) => {
   try {
     const { userId } = req.query;
     const user = await User.findById({ _id: userId });
-    
+
     if (!user) {
       return res.status(404).json({ message: "No such user exists" });
     }
-    
+
     return res
       .status(200)
       .json({ message: "User profile fetched successfully", user });
@@ -280,39 +290,55 @@ exports.forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
     let ipAddress = req.ip;
-    const userAgent = req.get('user-agent');
+    const userAgent = req.get("user-agent");
 
-    const user = await User.findOne({ email: email }, {email: 1, fullname:1});
+    const user = await User.findOne(
+      { email: email },
+      { email: 1, fullname: 1 }
+    );
 
     if (!user) {
       return res.status(400).json({ message: "Please sign-up first" });
     }
-    // 
+    //
     const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
     if (isIPv6) {
       // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
-    ipAddress = ipAddress.includes('::ffff:') ? ipAddress.replace(/^.*:/, "") : null;
+      ipAddress = ipAddress.includes("::ffff:")
+        ? ipAddress.replace(/^.*:/, "")
+        : null;
     }
     if (!ipAddress) {
-      return res.status(400).json({ message: "Some error occured, try again later" });
+      return res
+        .status(400)
+        .json({ message: "Some error occured, try again later" });
     }
     //Get location
     const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
     if (!response.ok) {
-      return res.status(400).json({ message: "Some error occured, try again later" });
+      return res
+        .status(400)
+        .json({ message: "Some error occured, try again later" });
     }
 
     const locationData = await response.json();
     const countryAbbreviation = locationData.country;
-    const sortedData = countries.sort((a, b) => a.abbreviation - b.abbreviation);
-    
+    const sortedData = countries.sort(
+      (a, b) => a.abbreviation - b.abbreviation
+    );
+
     let location = getCountry(sortedData, countryAbbreviation);
-    location !== -1 ? location: location = countryAbbreviation;
+    location !== -1 ? location : (location = countryAbbreviation);
     let device = userAgent;
-    
+
     const token = await generatePasswordOTP(user._id);
     const subject = "Konectin Technical - Reset password";
-    const msg = ResetPasswordEmail(user.fullname.split(' ')[0], location, device, token); 
+    const msg = ResetPasswordEmail(
+      user.fullname.split(" ")[0],
+      location,
+      device,
+      token
+    );
     await transporter(email, subject, msg);
     return res.status(200).json({
       message: "Please check email for the code to reset your password",
