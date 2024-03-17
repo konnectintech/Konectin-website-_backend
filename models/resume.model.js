@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const resumeSchema = new mongoose.Schema({
   userId: {
@@ -16,10 +17,23 @@ const resumeSchema = new mongoose.Schema({
     },
     email: {
       type: String,
+      validate: {
+        validator: function (v) {
+          return validator.isEmail(v);
+        },
+        message: (props) => `${props.value} is not a valid email address.`,
+      },
     },
     phoneNumber: {
       type: String,
+      validate: {
+        validator: function (v) {
+          return /^\+?\d{1,3}?\d{9,14}$/.test(v);
+        },
+        message: (props) => `${props.value} is not a valid phone number.`,
+      },
     },
+
     country: {
       type: String,
     },

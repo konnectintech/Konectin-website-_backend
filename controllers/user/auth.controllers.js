@@ -105,6 +105,10 @@ exports.verifyEmailAddress = async (req, res) => {
   }
 };
 
+exports.getVerifyEmailPage = async (req, res) => {
+  const { email } = req.query;
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;

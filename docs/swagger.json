@@ -1009,8 +1009,8 @@
           },
           "typeOfUser": {
             "type": "string",
-            "enum": ["Regular", "Google", "Microsoft"],
-            "default": "Regular"
+            "enum": ["REGULAR", "GOOGLE", "MICROSOFT"],
+            "default": "REGULAR"
           },
           "notificationSettings": {
             "type": "object",

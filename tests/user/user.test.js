@@ -13,7 +13,7 @@ const UserRoleEnum = require("../../utils/userRoleEnum");
 describe("Auth Routes", () => {
   describe("user registration", () => {
     it("should return a conflict error if a user already exists", async () => {
-      const password = "K12345";
+      const password = "Password@1";
       const hashedPassword = await passwordHash(password);
 
       // Create the user in the database
@@ -34,7 +34,7 @@ describe("Auth Routes", () => {
       expect(response.body.message).toEqual("User already exists");
     });
     it("should return 201 and the new user", async () => {
-      const password = "K12345";
+      const password = "Password@1";
       const hashedPassword = await passwordHash(password);
 
       const userData = {
@@ -124,7 +124,7 @@ describe("Auth Routes", () => {
 
   describe("User Login", () => {
     it("should login successfully", async () => {
-      const password = "K12345";
+      const password = "Password@1";
       const hashedPassword = await passwordHash(password);
 
       const user = await createUser({
@@ -162,7 +162,7 @@ describe("Auth Routes", () => {
       expect(response.body.message).toEqual("User does not exist");
     });
     it("should return an error if the password is wrong", async () => {
-      const password = "K12345";
+      const password = "Password@1";
       const hashedPassword = await passwordHash(password);
 
       const user = await createUser({

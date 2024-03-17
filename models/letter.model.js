@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const letterSchema = new mongoose.Schema({
   userId: {
@@ -15,7 +16,12 @@ const letterSchema = new mongoose.Schema({
     email: {
       type: String,
       required: true,
-      match: /^\S+@\S+\.\S+$/,
+      validate: {
+        validator: function (v) {
+          return validator.isEmail(v);
+        },
+        message: (props) => `${props.value} is not a valid email address.`,
+      },
     },
     jobPosition: {
       type: String,

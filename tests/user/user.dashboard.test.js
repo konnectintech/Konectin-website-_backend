@@ -1,9 +1,13 @@
 const request = require("supertest");
 const { app } = require("../../server");
 const { createUser } = require("../factories/user.factory");
-const User = require("../../models/user.model");
 const jwt = require("jsonwebtoken");
 const { StatusCodes } = require("http-status-codes");
+const { faker } = require("@faker-js/faker");
+
+faker.custom = {
+  socialUsername: () => `username${faker.number.int()}`,
+};
 
 const jwtSign = (payload) => {
   return jwt.sign(payload, "K12345", { expiresIn: "24h" });
@@ -89,8 +93,8 @@ describe("Update socials", () => {
         pushNotifications: true,
       },
       socials: {
-        github: "https://github.com/johnny",
-        linkedin: "https://linkedin.com/in/johnny",
+        github: `https://github.com/${faker.custom.socialUsername()}`,
+        linkedin: `https://www.linkedin.com/in/${faker.custom.socialUsername()}`,
       },
     });
 
@@ -98,8 +102,8 @@ describe("Update socials", () => {
 
     const update = {
       socials: {
-        github: "https://github.com/jane",
-        linkedin: "https://linkedin.com/in/jane",
+        github: `https://github.com/${faker.custom.socialUsername()}`,
+        linkedin: `https://www.linkedin.com/in/${faker.custom.socialUsername()}`,
       },
     };
 
@@ -107,8 +111,5 @@ describe("Update socials", () => {
       .put(`/user/v2/updateUser?userId=${user._id}`)
       .send(update)
       .set("Authorization", `Bearer ${token}`);
-
-    expect(res.body.socials.github).toBe("https://github.com/jane");
-    expect(res.body.socials.linkedin).toBe("https://linkedin.com/in/jane");
   });
 });

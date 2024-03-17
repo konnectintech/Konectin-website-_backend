@@ -4,7 +4,7 @@ const createUser = async (overrides = {}) => {
   const user = new User({
     fullname: "jehanne",
     email: "jehanne@gmail.com",
-    password: await passwordHash("K123456"),
+    password: await passwordHash("Password@1"),
     ...overrides,
   });
 

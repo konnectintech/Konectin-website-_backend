@@ -173,7 +173,7 @@ const verifyEmail = (first_name, email, otp) => {
                           </p>
                       </div>
                       <div class="cta">
-                          <a class="cta-btn" href="#">${otp}</a>
+                          <a class="cta-btn" href="${process.env.BACKEND_URL}/user/verifyEmailPage?email=${email}">${otp}</a>
                       </div>
                       <div>
                           <p style="margin-bottom: 0">
