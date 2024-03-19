@@ -53,12 +53,16 @@ exports.register = async (req, res) => {
       //Send email
       await transporter(saveUser.email, subject, msg);
       //
-      return res.status(201).json({ message: "User created successfully", user });
+      const payload = {
+        _id: saveUser._id,
+        fullname: saveUser.fullname,
+        email: saveUser.email,
+      };
+      const signUpToken = jwtSign(payload);
+      //
+      return res.status(201).json({ message: "User created successfully", user, token: signUpToken });
     }
 
-    // await user.save();
-
-    // return res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
