@@ -34,4 +34,22 @@ const transporter = (email, subject, content, signature) => {
   });
 };
 
-module.exports = { transporter };
+const sendHtmlEmail = (email, subject, html) => {
+  return new Promise((resolve, reject) => {
+    nm.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: subject,
+      html: html,
+    })
+      .then((msg) => {
+        resolve(msg);
+      })
+      .catch((err) => {
+        console.error(err);
+        reject(err);
+      });
+  });
+};
+
+module.exports = { transporter, sendHtmlEmail };
