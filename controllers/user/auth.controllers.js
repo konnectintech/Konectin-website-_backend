@@ -53,13 +53,18 @@ exports.register = async (req, res) => {
       // Email body
       const msg = verifyEmail(user.fullname.split(" ")[0], user.email, token);
       //Send email
-      await transporter(user.email, subject, msg);
-      //
+      await transporter(saveUser.email, subject, msg);
+
+      const payload = {
+        _id: saveUser._id,
+        fullname: saveUser.fullname,
+        email: saveUser.email,
+      };
+
+      const signUpToken = jwtSign(payload);
+      return res.status(201).json({ message: "User created successfully", user: { ...payload, isEmailVerified: false }, token: signUpToken });
     }
 
-    return res
-      .status(StatusCodes.CREATED)
-      .json({ message: "User created successfully", user });
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -131,7 +136,7 @@ exports.login = async (req, res) => {
     //     .status(StatusCodes.BAD_REQUEST)
     //     .json({ message: "Your email is not verified" });
     // }
-    
+
     const payload = {
       _id: user._id,
       fullname: user.fullname,
@@ -142,7 +147,7 @@ exports.login = async (req, res) => {
     return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
       token: token,
-      data: payload,
+      data: { ...payload, isEmailVerified: user.isEmailVerified },
     });
   } catch (err) {
     return res
