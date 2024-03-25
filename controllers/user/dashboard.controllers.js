@@ -1,4 +1,9 @@
 const User = require("../../models/user.model");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  secure: true,
+});
 
 exports.getUserInfo = async (req, res) => {
   try {
@@ -85,3 +90,33 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({message: 'Error updating user'});
   }
 }
+
+exports.updateUserPicture = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const file = req.files.picture;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!file) {
+      return res.status(400).json({ message: "No picture file provided" });
+    }
+
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: "user_pictures",
+      unique_filename: true,
+      overwrite: true,
+    });
+
+    user.picture = result.secure_url;
+    await user.save();
+
+    res.json({ message: "User picture updated successfully", url: user.picture });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating user picture" });
+  }
+};
