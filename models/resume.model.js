@@ -4,7 +4,7 @@ const resumeSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Types.ObjectId,
   },
-  cloudinaryUrl: {
+  resumeUrl: {
     type: String,
   },
   basicInfo: {
@@ -15,9 +15,6 @@ const resumeSchema = new mongoose.Schema({
       type: String,
     },
     email: {
-      type: String,
-    },
-    profileSummary: {
       type: String,
     },
     phoneNumber: {
@@ -74,21 +71,35 @@ const resumeSchema = new mongoose.Schema({
       workDesc: {
         type: String,
       },
+      current: Boolean,
     },
   ],
   education: [
     {
-      schoolName: { type: String },
-      degree: { type: String },
-      country: { type: String },
-      city: { type: String },
-      state: { type: String },
-      graduated: { type: Boolean },
-      graduationMonth: { type: String },
-      graduationYear: { type: String },
+      city: String,
+      country: String,
+      degree: String,
+      startMonth: String,
+      startYear: Number,
+      schoolName: String,
+      state: String,
+      endMonth: String,
+      endYear: String,
+      awards: [{ name: String }],
+      relevantCourses: [{ name: String }],
+      current: Boolean,
     },
   ],
-  skills: [{ type: String }],
+  skills: [
+    {
+      name: String,
+      lvl: String,
+    },
+  ],
+  currentEditedJob: { type: Number },
+  currentEditedEducation: { type: Number },
+  bio: { type: String },
+  selectedTemplate: { type: String },
   currentStage: {
     type: Number,
   },

@@ -3,15 +3,11 @@ const { template } = require("../utils/mail-template");
 require("dotenv").config();
 
 const nm = nodemailer.createTransport({
-  service: "gmail",
-  port: 465,
-  secure: true,
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: true,
   },
 });
 const transporter = (email, subject, content, signature) => {
@@ -34,4 +30,22 @@ const transporter = (email, subject, content, signature) => {
   });
 };
 
-module.exports = { transporter };
+const sendHtmlEmail = (email, subject, html) => {
+  return new Promise((resolve, reject) => {
+    nm.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: subject,
+      html: html,
+    })
+      .then((msg) => {
+        resolve(msg);
+      })
+      .catch((err) => {
+        console.error(err);
+        reject(err);
+      });
+  });
+};
+
+module.exports = { transporter, sendHtmlEmail };

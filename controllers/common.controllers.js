@@ -1,9 +1,10 @@
-const transporter = require("../config/email");
+const { transporter, sendHtmlEmail } = require("../config/email");
 const { internSubSchema } = require("../helpers/internSubscriptionValidate");
 const intern = require("../models/internshipModel");
 const newsletter = require("../models/newsletter");
 const internSubscription = require("../models/internSubscription.model");
 const cloudinary = require("cloudinary").v2;
+const subscribedInternEmail = require("../utils/subscribedIntern");
 
 cloudinary.config({
   secure: true,
@@ -26,7 +27,7 @@ exports.konectinInternshipMail = async (req, res) => {
     });
     await internship.save();
     const subject = "Konectin Technical - Konectin Internship";
-    const msg = `This email is to signify that you have reqed to be notified when the internship service launch.
+    const msg = `This email is to signify that you have requested to be notified when the internship service launch.
 			<p class="text-xs my-1 text-center">If you did not req this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
 		`;
     await transporter(email, subject, msg);
@@ -56,8 +57,8 @@ exports.subscribeNewsLetter = async (req, res) => {
     await news.save();
     const subject = "Konectin Technical";
     const msg = `This email is to signify that you have successfully subscribed to our newsletter.
-			<p class="text-xs my-1 text-center">If you did not req this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
-		`;
+          <p class="text-xs my-1 text-center">If you did not req this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+        `;
     await transporter(email, subject, msg);
     return res.status(200).json({ message: "Subscribed successfully" });
   } catch (err) {
@@ -103,10 +104,12 @@ exports.subscribeIntern = async (req, res) => {
     }
 
     const data = await internSubscription.create({ userId: userId, ...value });
-    await transporter(
+    message = subscribedInternEmail({ ...data.basicDetails, role: data.internType, upload: data.upload })
+    await sendHtmlEmail(
       "interns@konectin.org,dfelastevetest@gmail.com",
       "New Konectin Internship Subscription",
-      JSON.stringify({ Details: data.basicDetails, upload: data.upload })
+      // JSON.stringify({ Details: { ...data.basicDetails, role: data.internType }, upload: data.upload })
+      message
     );
     return res.status(201).json({ message: "Subscribed successfully", data });
   } catch (err) {
