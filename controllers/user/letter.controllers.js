@@ -15,6 +15,7 @@ exports.letterBuilder = async (req, res) => {
       details: { fullName, email, jobPosition, companyName },
       description: { jobDescription, companyInfo },
       professionalBio,
+      content,
     } = req.body;
 
     let user = null;
@@ -40,6 +41,7 @@ exports.letterBuilder = async (req, res) => {
         jobDescription,
         companyInfo,
       },
+      content,
       professionalBio,
     };
 
