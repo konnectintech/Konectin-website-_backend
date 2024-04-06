@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const Admin = require("../models/admin.model");
 require("dotenv").config();
 
 const jwtSign = (payload) => {
@@ -41,7 +42,35 @@ const verifyUserToken = (req, res, next) => {
   }
 };
 
+const verifyAdmin = async (req, res, next) => {
+  try {
+    const token = req.query.token;
+    let details;
+    if (token) {
+      details = jwtVerify(token);
+      if (!details) {
+        return res.status(400).json({ message: "Please login again" });
+      }
+      const admin = await Admin.findOne({ id: details.id, email: details.email })
+      if (!admin) {
+        return res.status(401).json({ message: "Invalid access token" });
+      }
+      next();
+    } else {
+      return res
+        .status(400)
+        .json({
+          message:
+            "An access token is required to proceed, please login to get one",
+        });
+    }
+  } catch (err) {
+    return res.status(500).json({ message: "An error occured", Error: err });
+  }
+};
+
 module.exports = {
   jwtSign,
   verifyUserToken,
+  verifyAdmin
 };
