@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 
 exports.convertResumeIntoPdf = async (resumeHtml) => {
   try {
-    const browser = await puppeteer.launch({ 
+    const browser = await puppeteer.launch({
       headless: "new",
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
@@ -13,7 +13,12 @@ exports.convertResumeIntoPdf = async (resumeHtml) => {
     });
 
     // Generate a PDF from the page content
-    const pdfBuffer = await page.pdf({ margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' }, format: "letter", printBackground: true, preferCSSPageSize: true });
+    const pdfBuffer = await page.pdf({
+      margin: { top: "0px", right: "0px", bottom: "0px", left: "0px" },
+      format: "letter",
+      printBackground: true,
+      preferCSSPageSize: true,
+    });
 
     await browser.close();
 

@@ -4,7 +4,7 @@ const resumeSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Types.ObjectId,
   },
-  cloudinaryUrl: {
+  resumeUrl: {
     type: String,
   },
   basicInfo: {
@@ -71,7 +71,7 @@ const resumeSchema = new mongoose.Schema({
       workDesc: {
         type: String,
       },
-      current: Boolean
+      current: Boolean,
     },
   ],
   education: [
@@ -90,10 +90,12 @@ const resumeSchema = new mongoose.Schema({
       current: Boolean,
     },
   ],
-  skills: [{
-    name: String,
-    lvl: String
-  }],
+  skills: [
+    {
+      name: String,
+      lvl: String,
+    },
+  ],
   currentEditedJob: { type: Number },
   currentEditedEducation: { type: Number },
   bio: { type: String },

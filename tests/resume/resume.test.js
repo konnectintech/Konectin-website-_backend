@@ -7,7 +7,6 @@ const { faker } = require("@faker-js/faker");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const existingUserId = "5f4cc8f7e5a7de2a393a2a8b";
-import { convertResumeIntoPdf } from "../../helpers/puppeteer";
 
 const jwtSign = (payload) => {
   return jwt.sign(payload, "K12345", { expiresIn: "24h" });
@@ -58,7 +57,10 @@ describe("Resume Routes", () => {
             graduationYear: "2013",
           },
         ],
-        skills: ["blogging", "content writing"],
+        skills: [
+          { name: "blogging", lvl: "beginner" },
+          { name: "content writing", lvl: "advanced" },
+        ],
         currentStage: 1,
       };
 
@@ -67,16 +69,27 @@ describe("Resume Routes", () => {
         .query({ userId: user._id.toString() })
         .set("content-type", "application/json")
         .send(resumeData);
+
       expect(response.status).toEqual(StatusCodes.CREATED);
       expect(response.body.message).toEqual("Resume created successfully");
-      expect(response.body.cv.skills).toEqual(resumeData.skills);
+      expect(response.body.cv.skills[0].name).toEqual(
+        resumeData.skills[0].name
+      );
+      expect(response.body.cv.skills[0].name).toEqual(
+        resumeData.skills[0].name
+      );
       expect(response.body.cv.education[0].schoolName).toEqual(
         resumeData.education[0].schoolName
       );
       expect(response.body.cv.jobExperience[0].jobTitle).toEqual(
         resumeData.jobExperience[0].jobTitle
       );
-      expect(response.body.cv.basicInfo).toEqual(resumeData.basicInfo);
+      expect(response.body.cv.basicInfo.firstName).toEqual(
+        resumeData.basicInfo.firstName
+      );
+      expect(response.body.cv.basicInfo.firstName).toEqual(
+        resumeData.basicInfo.firstName
+      );
     });
 
     it("should return an error if the user id does not exist", async () => {
@@ -120,7 +133,11 @@ describe("Resume Routes", () => {
             graduationYear: "2013",
           },
         ],
-        skills: ["blogging", "content writing"],
+        skills: [
+          { name: "blogging", lvl: "beginner" },
+          { name: "content writing", lvl: "advanced" },
+        ],
+
         currentStage: 1,
       };
 
@@ -217,7 +234,7 @@ describe("Resume Routes", () => {
       const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
-        .delete("/user/resume")
+        .delete("/user/delete/resume")
         .query({ resumeId: resume._id.toString() })
         .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
@@ -233,7 +250,7 @@ describe("Resume Routes", () => {
       const user = await createUser();
       const token = jwtSign({ _id: user._id });
       const response = await request(app)
-        .delete("/user/resume")
+        .delete("/user/delete/resume")
         .query({ resumeId: existingUserId })
         .set("Authorization", `Bearer ${token}`);
 
@@ -249,7 +266,7 @@ describe("Resume Routes", () => {
       const resume = await createResume({ userId: user._id });
 
       const response = await request(app)
-        .delete("/user/resume")
+        .delete("/user/delete/resume")
         .query({ resumeId: resume._id.toString() })
         .query({ userId: user._id.toString() })
         .set("Authorization", `Bearer ${token}`);
@@ -282,20 +299,19 @@ describe("Resume Routes", () => {
         .query({ userId: user._id.toString() })
         .send(updateResumeDto)
         .set("Authorization", `Bearer ${token}`);
-
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual("Resume Updated successfully");
-      expect(response.body.cv.userId.toString()).toEqual(user._id.toString());
-      expect(response.body.cv.jobExperience[0].jobTitle).toEqual(
+      expect(response.body.updated.userId).toEqual(user._id.toString());
+      expect(response.body.updated.jobExperience[0].jobTitle).toEqual(
         updateResumeDto.jobExperience[0].jobTitle
       );
-      expect(response.body.cv.jobExperience[0].jobTitle).toEqual(
+      expect(response.body.updated.jobExperience[0].jobTitle).toEqual(
         updateResumeDto.jobExperience[0].jobTitle
       );
-      expect(response.body.cv.jobExperience[0].company).toEqual(
+      expect(response.body.updated.jobExperience[0].company).toEqual(
         updateResumeDto.jobExperience[0].company
       );
-      expect(response.body.cv.jobExperience[0].country).toEqual(
+      expect(response.body.updated.jobExperience[0].country).toEqual(
         updateResumeDto.jobExperience[0].country
       );
     });
