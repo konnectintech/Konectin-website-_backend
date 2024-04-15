@@ -12,21 +12,18 @@ exports.letterBuilder = async (req, res) => {
   try {
     const { userId } = req.query;
     const {
-      details: { fullName, email, jobPosition, companyName },
-      description: { jobDescription, companyInfo },
+      details: { fullName, email, jobPosition, companyName } = {},
+      description: { jobDescription, companyInfo } = {},
       professionalBio,
       content,
     } = req.body;
 
-    let user = null;
+    let user = await User.findById(userId);
 
-    if (userId) {
-      user = await User.findById(userId);
-      if (!user) {
-        return res
-          .status(StatusCodes.NOT_FOUND)
-          .json({ message: "User not found" });
-      }
+    if (!user) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User not found" });
     }
 
     const newLetterData = {
@@ -175,7 +172,6 @@ exports.delete = async (req, res) => {
       .json({ message: err.message });
   }
 };
-
 exports.updateUserLetter = async (req, res) => {
   try {
     const { letterId, userId } = req.query;
@@ -185,34 +181,65 @@ exports.updateUserLetter = async (req, res) => {
     const objectIdUserId = new Types.ObjectId(userId);
     const objectIdLetterId = new Types.ObjectId(letterId);
 
-    // Define the aggregation pipeline
-    const pipeline = [
-      {
-        $match: {
-          _id: objectIdLetterId,
-          userId: objectIdUserId,
-        },
-      },
-      {
-        $set: updateFields,
-      },
-      {
-        $replaceRoot: { newRoot: "$$ROOT" },
-      },
-    ];
+    // Find the letter by id
+    let letter = await LetterBuilder.findOne({
+      _id: objectIdLetterId,
+      userId: objectIdUserId,
+    });
 
-    // Execute the aggregation pipeline to update and return the updated letter
-    const updatedLetter = await LetterBuilder.aggregate(pipeline);
-
-    if (!updatedLetter || updatedLetter.length === 0) {
+    if (!letter) {
       return res
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Letter not found or unauthorized" });
     }
 
+    // Update the letter's fields
+    for (const key in updateFields) {
+      if (key !== "chats") {
+        letter[key] = updateFields[key];
+      }
+    }
+
+    // Add a new chat message to the chats array
+    if (updateFields.chats) {
+      const newChat = updateFields.chats[0]; // Assuming only one chat message is added at a time
+      letter.chats.push(newChat);
+    }
+
+    // Save the updated letter
+    await letter.save();
+
     res.status(StatusCodes.OK).json({
       message: "Letter Updated successfully",
-      letter: updatedLetter[0],
+      letter,
+    });
+  } catch (err) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
+  }
+};
+exports.getLetterWithChats = async (req, res) => {
+  try {
+    const { letterId } = req.query;
+
+    // Convert letterId to ObjectId
+    const objectIdLetterId = new Types.ObjectId(letterId);
+
+    // Find the letter by id and populate the chats field
+    const letter = await LetterBuilder.findOne({
+      _id: objectIdLetterId,
+    }).populate("chats");
+
+    if (!letter) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Letter not found" });
+    }
+    const letterChats = letter.chats;
+
+    res.status(StatusCodes.OK).json({
+      letterChats,
     });
   } catch (err) {
     res

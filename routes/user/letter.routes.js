@@ -9,5 +9,6 @@ router.get("/getLetters", verifyUserToken, letter.getUserLetters);
 router.delete("/deleteLetter", verifyUserToken, letter.delete);
 router.put("/updateLetter", verifyUserToken, letter.updateUserLetter);
 router.post("/v2/createLetterPdf", verifyUserToken, letter.createLetterIntoPdf);
+router.get("/getLetter/chats", verifyUserToken, letter.getLetterWithChats);
 
 module.exports = router;
