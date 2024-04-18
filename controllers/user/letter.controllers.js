@@ -1,12 +1,9 @@
 const User = require("../../models/user.model");
 const LetterBuilder = require("../../models/letter.model");
 require("dotenv").config();
-const { convertPageIntoPdf } = require("../../helpers/puppeteer");
-const path = require("path");
-const { uploadFile, downloadFile } = require("../../helpers/aws");
-const fs = require("fs");
 const { Types } = require("mongoose");
 const { StatusCodes } = require("http-status-codes");
+const { Document, Packer, Paragraph, TextRun } = require("docx");
 
 exports.letterBuilder = async (req, res) => {
   try {
@@ -248,48 +245,43 @@ exports.getLetterWithChats = async (req, res) => {
   }
 };
 
-exports.createLetterIntoPdf = async function (req, res) {
+exports.createLetterIntoDocx = async function (req, res) {
   try {
     const { letterId } = req.query;
-    const { letterHtml } = req.body;
 
     const letter = await LetterBuilder.findById({ _id: letterId });
 
     if (!letter) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "letter not found" });
+        .json({ message: "Letter not found" });
     }
-    // 1. Create the letter as a PDF
-    const pdfBuffer = await convertPageIntoPdf(letterHtml);
 
-    const tmpFolderPath = path.join(__dirname, "tmp");
-    await fs.promises.mkdir(tmpFolderPath, { recursive: true });
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [new TextRun(letter.content)],
+            }),
+          ],
+        },
+      ],
+    });
 
-    // 2. Save the letter PDF to a local file in the 'tmp' folder
-    const pdfFilePath = path.join(tmpFolderPath, `${letter.id}.pdf`);
-    await fs.promises.writeFile(pdfFilePath, pdfBuffer);
+    // Convert DOCX to buffer
+    const buffer = await Packer.toBuffer(doc);
 
-    // 3. Upload the PDF file to AWS S3 and update the letter imageUrl
-    const imageUrl = await uploadFile(pdfFilePath, `${letter.id}.pdf`);
-    letter.imageUrl = imageUrl;
+    // Send response with appropriate headers
+    res.set({
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "Content-Disposition": `attachment; filename="${letter.id}.docx"`,
+    });
 
-    await fs.promises.rmdir(tmpFolderPath, { recursive: true });
-    // 5. Set the response headers for download from AWS S3
-    const pdfContent = await downloadFile(`${letter.id}.pdf`);
-
-    // 6.Set the Content-Type header to application/pdf
-    res.setHeader("Content-Type", "application/pdf");
-
-    // 7..Set the Content-Disposition header to attachment
-    // This tells the browser to download the file instead of displaying it
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${letter.id}.pdf"`
-    );
-
-    // 8.Send the PDF content as the response
-    res.send(pdfContent);
+    // Send the base64 encoded file in the response
+    res.status(StatusCodes.OK).send(buffer);
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
