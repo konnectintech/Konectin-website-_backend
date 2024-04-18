@@ -9,7 +9,7 @@ router.get("/getLetters", verifyUserToken, letter.getUserLetters);
 router.delete("/deleteLetter", verifyUserToken, letter.delete);
 router.put("/updateLetter", verifyUserToken, letter.updateUserLetter);
 router.post(
-  "/v2/createLetterPdf",
+  "/v2/createLetterDocx",
   verifyUserToken,
   letter.createLetterIntoDocx
 );

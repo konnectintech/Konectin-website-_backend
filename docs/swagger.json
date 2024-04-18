@@ -827,7 +827,7 @@
         }
       }
     },
-    "/user/v2/createLetterPdf": {
+    "/user/v2/createLetterDocx": {
       "post": {
         "summary": "Create PDF from letter HTML content",
         "tags": ["Letter"],
