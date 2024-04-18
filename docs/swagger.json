@@ -829,7 +829,7 @@
     },
     "/user/v2/createLetterDocx": {
       "post": {
-        "summary": "Create PDF from letter HTML content",
+        "summary": "Download the letter content as docx",
         "tags": ["Letter"],
         "security": [
           {
@@ -847,23 +847,10 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "letterHtml": { "type": "string" }
-                },
-                "required": ["letterHtml"]
-              }
-            }
-          }
-        },
+
         "responses": {
           "200": {
-            "description": "CV downloaded successfully"
+            "description": "Letter downloaded successfully"
           },
           "401": {
             "description": "Unauthorized"
