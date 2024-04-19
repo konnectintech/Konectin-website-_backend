@@ -15,19 +15,23 @@ exports.letterBuilder = async (req, res) => {
       content,
     } = req.body;
 
-    let user = await User.findById(userId);
+    let userDetails = {};
+    if (userId) {
+      let user = await User.findById(userId);
 
-    if (!user) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "User not found" });
+      userDetails = {
+        fullName: user.fullname,
+        email: user.email,
+      };
+    } else {
+      // If userId is not provided or empty, populate userDetails from the request body
+      userDetails = { fullName, email };
     }
 
     const newLetterData = {
-      userId,
+      userId: userId ? userId : null, // Set userId to empty string if not provided or empty
       details: {
-        fullName: user ? user.fullname : fullName,
-        email: user ? user.email : email,
+        ...userDetails,
         jobPosition,
         companyName,
       },
@@ -54,7 +58,7 @@ exports.letterBuilder = async (req, res) => {
 
 exports.getUserLetter = async (req, res) => {
   try {
-    const { letterId, userId } = req.query;
+    const { letterId } = req.query;
 
     const letter = await LetterBuilder.findById({ _id: letterId });
 
@@ -62,13 +66,6 @@ exports.getUserLetter = async (req, res) => {
       return res
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Letter with Id does not exist" });
-    }
-
-    // Convert letter.userId to string for comparison
-    if (letter.userId.toString() !== userId) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ message: "Unauthorized" });
     }
 
     return res
@@ -209,34 +206,6 @@ exports.updateUserLetter = async (req, res) => {
     res.status(StatusCodes.OK).json({
       message: "Letter Updated successfully",
       letter,
-    });
-  } catch (err) {
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: err.message });
-  }
-};
-exports.getLetterWithChats = async (req, res) => {
-  try {
-    const { letterId } = req.query;
-
-    // Convert letterId to ObjectId
-    const objectIdLetterId = new Types.ObjectId(letterId);
-
-    // Find the letter by id and populate the chats field
-    const letter = await LetterBuilder.findOne({
-      _id: objectIdLetterId,
-    }).populate("chats");
-
-    if (!letter) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Letter not found" });
-    }
-    const letterChats = letter.chats;
-
-    res.status(StatusCodes.OK).json({
-      letterChats,
     });
   } catch (err) {
     res
