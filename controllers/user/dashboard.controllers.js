@@ -139,9 +139,9 @@ exports.updateUser = async (req, res) => {
 exports.updateUserPicture = async (req, res) => {
   try {
     const { userId } = req.query;
-    console.log(req.body);
-
     const file = req.body.picture;
+    
+    console.log(file);
 
     if (!userId) {
       console.error('User ID not provided');
@@ -163,20 +163,23 @@ exports.updateUserPicture = async (req, res) => {
       return res.status(400).json({ message: "No picture file provided" });
     }
 
+    
+    console.log("Uploading....");
+
     const result = await cloudinary.uploader.upload(file.tempFilePath, {
       folder: "profile_pictures",
       unique_filename: true,
       overwrite: true,
     });
+    
+    console.log("uploaded");
 
     user.picture = result.secure_url;
     await user.save();
-
-    console.log(`User picture updated successfully for user ID: ${userId}`);
+    
     res.json({ message: "User picture updated successfully", url: user.picture });
   } catch (err) {
     console.error(`Error updating user picture: ${err.message}`);
-    console.error(err);
     res.status(500).json({ message: "Error updating user picture", error: err});
   }
 };
