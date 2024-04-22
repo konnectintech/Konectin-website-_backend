@@ -19,11 +19,13 @@ describe("Letter Routes", () => {
     it("should return 201 and the new user's letter created", async () => {
       const user = await createUser();
       const letterData = {
-        basicInfo: {
+        details: {
+          fullName: user.fullname,
+          email: user.email,
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -47,13 +49,13 @@ describe("Letter Routes", () => {
 
     it("should create a letter  if the user id does not exist", async () => {
       const letterData = {
-        basicInfo: {
+        details: {
           fullName: "Mary",
           email: "mary@gmail.com",
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -68,31 +70,24 @@ describe("Letter Routes", () => {
 
       expect(response.status).toEqual(StatusCodes.CREATED);
       expect(response.body.message).toEqual("Letter created successfully");
-      expect(response.body.data.basicInfo.fullName).toEqual(
-        letterData.basicInfo.fullName
+      expect(response.body.data.userId).toEqual(null);
+      expect(response.body.data.content).toEqual(letterData.content);
+      expect(response.body.data.professionalBio).toEqual(
+        letterData.professionalBio
       );
-      expect(response.body.data.basicInfo.email).toEqual(
-        letterData.basicInfo.email
-      );
-      expect(
-        response.body.data.jobDescriptionAndCompanyBrief.jobDescription
-      ).toEqual(letterData.jobDescriptionAndCompanyBrief.jobDescription);
     });
   });
 
   describe("GET ONE LETTER", () => {
     it("should get a user  letter by id", async () => {
-      const user = await createUser();
-      const token = jwtSign({ _id: user._id });
       const letter = await createLetter({
-        userId: user._id,
-        basicInfo: {
+        details: {
           fullName: "Mary",
           email: "mary@gmail.com",
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -102,61 +97,21 @@ describe("Letter Routes", () => {
 
       const response = await request(app)
         .get("/user/getLetter")
-        .query({ letterId: letter._id.toString() })
-        .query({ userId: user._id.toString() })
-        .set("Authorization", `Bearer ${token}`);
+        .query({ letterId: letter._id.toString() });
 
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual("Letter retrieved successfully");
       expect(response.body.letter._id.toString()).toEqual(
         letter._id.toString()
       );
-      expect(response.body.letter.userId.toString()).toEqual(
-        letter.userId.toString()
-      );
     });
     it("should return an error if the letter is not found", async () => {
-      const user = await createUser();
-      const token = jwtSign({ _id: user._id });
-
       const response = await request(app)
         .get("/user/getLetter")
-        .query({ letterId: existingUserId })
-        .set("Authorization", `Bearer ${token}`);
+        .query({ letterId: existingUserId });
 
       expect(response.status).toEqual(StatusCodes.NOT_FOUND);
       expect(response.body.message).toEqual("Letter with Id does not exist");
-    });
-
-    it("should return an error if the letter.userId  is not equal to the userId", async () => {
-      const user = await createUser();
-      const token = jwtSign({ _id: user._id });
-
-      const user1 = await createUser();
-      const letter = await createLetter({
-        userId: user1._id,
-        basicInfo: {
-          fullName: "Mary",
-          email: "mary@gmail.com",
-          jobPosition: "Software Engineer",
-          companyName: "Example Inc.",
-        },
-        jobDescriptionAndCompanyBrief: {
-          jobDescription: "Description of the job",
-          companyInfo: "Information about the company",
-        },
-        content: letterContent,
-        professionalBio: "Professional biography",
-      });
-
-      const response = await request(app)
-        .get("/user/getLetter")
-        .query({ letterId: letter._id.toString() })
-        .query({ userId: user._id.toString() })
-        .set("Authorization", `Bearer ${token}`);
-
-      expect(response.status).toEqual(StatusCodes.UNAUTHORIZED);
-      expect(response.body.message).toEqual("Unauthorized");
     });
   });
 
@@ -166,13 +121,13 @@ describe("Letter Routes", () => {
       const token = jwtSign({ _id: user._id });
       const letter1 = await createLetter({
         userId: user._id,
-        basicInfo: {
+        details: {
           fullName: user.fullname,
           email: user.email,
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -181,13 +136,13 @@ describe("Letter Routes", () => {
       });
       const letter2 = await createLetter({
         userId: user._id,
-        basicInfo: {
+        details: {
           fullName: user.fullname,
           email: user.email,
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -249,13 +204,13 @@ describe("Letter Routes", () => {
 
       const letter = await createLetter({
         userId: user._id,
-        basicInfo: {
+        details: {
           fullName: user.fullname,
           email: user.email,
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -294,13 +249,13 @@ describe("Letter Routes", () => {
 
       const letter = await createLetter({
         userId: user._id,
-        basicInfo: {
+        details: {
           fullName: user.fullname,
           email: user.email,
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -326,13 +281,13 @@ describe("Letter Routes", () => {
 
       await createLetter({
         userId: user._id,
-        basicInfo: {
+        details: {
           fullName: user.fullname,
           email: user.email,
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
@@ -359,13 +314,13 @@ describe("Letter Routes", () => {
 
       const letter = await createLetter({
         userId: user._id,
-        basicInfo: {
+        details: {
           fullName: user.fullname,
           email: user.email,
           jobPosition: "Software Engineer",
           companyName: "Example Inc.",
         },
-        jobDescriptionAndCompanyBrief: {
+        description: {
           jobDescription: "Description of the job",
           companyInfo: "Information about the company",
         },
