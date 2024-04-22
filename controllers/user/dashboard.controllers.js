@@ -139,7 +139,7 @@ exports.updateUser = async (req, res) => {
 exports.updateUserPicture = async (req, res) => {
   try {
     const { userId } = req.query;
-    console.log(userId);
+    console.log(req.body);
 
     const file = req.body.picture;
 
