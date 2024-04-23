@@ -15,23 +15,11 @@ exports.letterBuilder = async (req, res) => {
       content,
     } = req.body;
 
-    let userDetails = {};
-    if (userId) {
-      let user = await User.findById(userId);
-
-      userDetails = {
-        fullName: user.fullname,
-        email: user.email,
-      };
-    } else {
-      // If userId is not provided or empty, populate userDetails from the request body
-      userDetails = { fullName, email };
-    }
-
     const newLetterData = {
       userId: userId ? userId : null, // Set userId to empty string if not provided or empty
       details: {
-        ...userDetails,
+        fullName, 
+        email,
         jobPosition,
         companyName,
       },
