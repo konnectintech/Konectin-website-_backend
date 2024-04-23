@@ -159,18 +159,15 @@ exports.updateUserLetter = async (req, res) => {
     const { letterId } = req.query;
     const updateFields = req.body;
 
-    // Convert userId and letterId to ObjectId
-    const objectIdLetterId = new Types.ObjectId(letterId);
-
     // Find the letter by id
     let letter = await LetterBuilder.findOne({
-      _id: objectIdLetterId,
+      _id: letterId,
     });
 
     if (!letter) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Letter not found or unauthorized" });
+        .json({ message: "Letter not found" });
     }
 
     // Update the letter's fields
