@@ -1,4 +1,5 @@
 const User = require("../../models/user.model")
+const Resume = require("../../models/resume.model")
 const fs = require("fs");
 const converter = require('json-2-csv')
 const { createTempFile } = require("../../utils/functions")
@@ -39,6 +40,20 @@ exports.getUser = async (req, res) => {
             return res.status(404).json({ message: "User record not found" })
         }
         return res.status(200).json({ message: "User record retrieved successfully", data })
+    }
+    catch (err) {
+        return res.status(500).json({ message: "Server error, try again later" })
+    }
+}
+
+exports.getUserResume = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId).select("-password")
+        const data = await Resume.find({ userId: req.params.userId })
+        if (!user) {
+            return res.status(404).json({ message: "User record not found" })
+        }
+        return res.status(200).json({ message: "User Resume record(s) retrieved successfully", data })
     }
     catch (err) {
         return res.status(500).json({ message: "Server error, try again later" })
