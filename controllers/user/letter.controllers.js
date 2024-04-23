@@ -154,15 +154,14 @@ exports.delete = async (req, res) => {
       .json({ message: err.message });
   }
 };
+
 exports.updateUserLetter = async (req, res) => {
   try {
     const { letterId } = req.query;
     const updateFields = req.body;
 
     // Find the letter by id
-    let letter = await LetterBuilder.findOne({
-      _id: letterId,
-    });
+    let letter = await LetterBuilder.findById({ _id: letterId });
 
     if (!letter) {
       return res
