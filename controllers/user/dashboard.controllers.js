@@ -161,15 +161,11 @@ exports.updateUserPicture = async (req, res) => {
       return res.status(400).json({ message: "No picture file provided" });
     }
 
-    console.log("Uploading....");
-
     const result = await cloudinary.uploader.upload(file, {
-      folder: "profile_pictures",
+      folder: `profile_pictures/${userId}`,
       unique_filename: true,
       overwrite: true,
     });
-    
-    console.log("uploaded");
 
     user.picture = result.secure_url;
     await user.save();
