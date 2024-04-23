@@ -6,7 +6,12 @@ const { createJSONFile, createCSVFile } = require("../../helpers/fileCreator");
 exports.getResumes = async (req, res) => {
     try {
         const { file_type, ...filters } = req.query;
-        const data = await Resume.find(req.params.resumeId)
+        let data;
+        if (filters) {
+            data = await Resume.find(filters)
+        } else {
+            data = await Resume.find()
+        }
         if (file_type) {
             switch (file_type) {
                 case "json": {
