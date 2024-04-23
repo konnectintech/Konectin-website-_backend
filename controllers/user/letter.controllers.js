@@ -156,17 +156,15 @@ exports.delete = async (req, res) => {
 };
 exports.updateUserLetter = async (req, res) => {
   try {
-    const { letterId, userId } = req.query;
+    const { letterId } = req.query;
     const updateFields = req.body;
 
     // Convert userId and letterId to ObjectId
-    const objectIdUserId = new Types.ObjectId(userId);
     const objectIdLetterId = new Types.ObjectId(letterId);
 
     // Find the letter by id
     let letter = await LetterBuilder.findOne({
       _id: objectIdLetterId,
-      userId: objectIdUserId,
     });
 
     if (!letter) {
