@@ -106,9 +106,8 @@ exports.subscribeIntern = async (req, res) => {
     const data = await internSubscription.create({ userId: userId, ...value });
     message = subscribedInternEmail({ ...data.basicDetails, role: data.internType, upload: data.upload })
     await sendHtmlEmail(
-      "interns@konectin.org,dfelastevetest@gmail.com",
+      "interns@konectin.org",
       "New Konectin Internship Subscription",
-      // JSON.stringify({ Details: { ...data.basicDetails, role: data.internType }, upload: data.upload })
       message
     );
     return res.status(201).json({ message: "Subscribed successfully", data });
