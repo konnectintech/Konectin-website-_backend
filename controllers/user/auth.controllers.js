@@ -5,29 +5,33 @@ const { generateRegisterOTP } = require("../../helpers/registerToken");
 const { generatePasswordOTP } = require("../../helpers/passwordToken");
 const RegisterOTP = require("../../models/registerOTP");
 const { jwtSign } = require("../../helpers/jsonwebtoken");
-const passwordOTP = require("../../models/passwordOTP");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
 const { verifyEmail } = require("../../utils/verifyEmail");
 const { countries, getCountry } = require("../../utils/countrySearch");
-const fetchPromise = import("node-fetch");
-const fetch = async (...args) => (await fetchPromise).default(...args);
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
+const { StatusCodes } = require("http-status-codes");
 
 require("dotenv").config();
+const { uploadFile } = require("../../helpers/aws");
 
 exports.register = async (req, res) => {
   try {
-    const { fullname, email, password, profilePhoto } = req.body;
-    if (!fullname && !email && !password) {
-      return res
-        .status(400)
-        .json({ message: "Please fill all required fields" });
+    const { fullname, email, password } = req.body;
+
+    let pictureUrl;
+    if (req.files && req.files.picture) {
+      const pictureFile = req.files.picture;
+      pictureUrl = await uploadFile(pictureFile.tempFilePath, pictureFile.name);
     }
 
     const userExists = await User.findOne({ email: email });
-
     if (userExists) {
-      return res.status(409).json({ message: "User already exists" });
+      return res
+        .status(StatusCodes.CONFLICT)
+        .json({ message: "User already exists" });
     }
 
     const hashedPassword = await passwordHash(password);
@@ -35,37 +39,36 @@ exports.register = async (req, res) => {
       fullname: fullname,
       email: email,
       password: hashedPassword,
-      picture: profilePhoto,
+      picture: pictureUrl,
     });
+    await user.save();
     if (
       process.env.NODE_ENV === "development" ||
       process.env.NODE_ENV === "production"
     ) {
-      const saveUser = await user.save();
-      // If user registration fails
-      if(!saveUser) return res.status(404).json({ message: "Registration failed" });
       // Generate OTP
       const token = await generateRegisterOTP(user._id);
       // Email Subject
       const subject = "Konectin Technical - Email Verification";
       // Email body
-      const msg = verifyEmail(saveUser.fullname.split(' ')[0], saveUser.email, token);
+      const msg = verifyEmail(user.fullname.split(" ")[0], user.email, token);
       //Send email
       await transporter(saveUser.email, subject, msg);
-    
+
       const payload = {
         _id: saveUser._id,
         fullname: saveUser.fullname,
         email: saveUser.email,
       };
-      
+
       const signUpToken = jwtSign(payload);
-      return res.status(201).json({ message: "User created successfully", user: {...payload, isEmailVerified: false}, token: signUpToken });
+      return res.status(201).json({ message: "User created successfully", user: { ...payload, isEmailVerified: false }, token: signUpToken });
     }
 
   } catch (err) {
-    // return res.status(500).json({ message: err.message });
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -76,33 +79,34 @@ exports.verifyEmailAddress = async (req, res) => {
     const token = await RegisterOTP.findOne({ OTP: OTP });
 
     if (!token) {
-      return res.status(404).json({ message: "otp does not exist" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "otp does not exist" });
     }
     const user = await User.findOne({ email: email });
 
     if (!user) {
-      return res.status(404).json({ message: "User does not exist" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User does not exist" });
     }
 
     if (token.expiresIn < new Date()) {
-      return res.status(400).json({
+      return res.status(StatusCodes.BAD_REQUEST).json({
         message: "Token has expired, please request a new one",
       });
     }
 
-    await User.findByIdAndUpdate(
-      { _id: user._id },
-      { $set: { isEmailVerified: true } },
-      { new: true }
-    ).exec();
+    user.isEmailVerified = true;
     await user.save();
 
-    return res.status(200).json({ message: "Email verified successfully" });
-  } catch (err) {
-    console.log(err);
     return res
-      .status(500)
-      .json({ message: "Some error occured, try again later!" });
+      .status(StatusCodes.OK)
+      .json({ message: "Email verified successfully", user });
+  } catch (err) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -111,17 +115,27 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     if (!email && !password) {
       return res
-        .status(400)
+        .status(StatusCodes.BAD_REQUEST)
         .json({ message: "Please fill all required fields" });
     }
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({ message: "User does not exist" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "User does not exist" });
     }
     const passwordMatch = await passwordCompare(password, user.password);
     if (!passwordMatch) {
-      return res.status(400).json({ message: "Incorrect password" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Incorrect password" });
     }
+
+    // if (user.isEmailVerified !== true) {
+    //   return res
+    //     .status(StatusCodes.BAD_REQUEST)
+    //     .json({ message: "Your email is not verified" });
+    // }
 
     const payload = {
       _id: user._id,
@@ -130,13 +144,15 @@ exports.login = async (req, res) => {
     };
     const token = jwtSign(payload);
 
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
       token: token,
-      data: {...payload, isEmailVerified: user.isEmailVerified},
+      data: { ...payload, isEmailVerified: user.isEmailVerified },
     });
   } catch (err) {
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -144,17 +160,25 @@ exports.removeEmail = async (req, res) => {
   try {
     const { email } = req.query;
     const userExist = await User.exists({ email });
-    if (!userExist) return res.status(404).json({ message: "Email does not exist" });
+    if (!userExist)
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Email does not exist" });
 
     const user = await User.findOneAndDelete({ email });
     if (!user) {
-      return res.status(404).json({ message: "Email deletion failed" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Email deletion failed" });
     }
 
-    return res.status(200).json({message: "Email deleted successfully!"});
-
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: "Email deleted successfully!" });
   } catch (err) {
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error, try again later!" });
   }
 };
 
@@ -162,16 +186,20 @@ exports.getUser = async (req, res) => {
   try {
     const { userId } = req.query;
     const user = await User.findById({ _id: userId });
-    
+
     if (!user) {
-      return res.status(404).json({ message: "No such user exists" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "No such user exists" });
     }
-    
+
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "User profile fetched successfully", user });
   } catch (err) {
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -197,13 +225,13 @@ exports.googleLogin = async (req, res) => {
       email: user.email,
     };
 
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
       data: user,
       token: token,
     });
   } else {
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
       data: user,
       token: token,
@@ -214,12 +242,15 @@ exports.googleLogin = async (req, res) => {
 exports.microsoftLogin = async function (req, res) {
   const { name, username: email } = req.body;
   if (!name && !email) {
-    return res.status(400).json({ message: "Please fill all required fields" });
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Please fill all required fields" });
   }
   try {
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
   let user = await User.findOne({ email, typeOfUser: "Microsoft" });
   if (user) {
@@ -229,7 +260,7 @@ exports.microsoftLogin = async function (req, res) {
       email: user.email,
     };
     const token = jwtSign(payload);
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
       token: token,
       data: payload,
@@ -249,7 +280,7 @@ exports.microsoftLogin = async function (req, res) {
   const token = jwtSign(payload);
   user.token = token;
   return res
-    .status(200)
+    .status(StatusCodes.OK)
     .json({ message: "User logged in successfully", token, data: payload });
 };
 
@@ -257,25 +288,25 @@ exports.requestEmailToken = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email: email });
+
     if (!user) {
       return res
-        .status(400)
-        .json({ message: "Please sign up before reqing a new token" });
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Please sign up before requesting a new token" });
     }
     const token = await generateRegisterOTP(user._id);
-    const subject = "Konectin Technical - OTP Code req";
+
+    const subject = "Konectin Technical - OTP Code request";
     const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
               <h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
-              <p class="text-xs my-1 text-center">If you did not req this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
+              <p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
           `;
     await transporter(email, subject, msg);
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Check your email for the verification code" });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Some error occured, try again later!" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -284,49 +315,65 @@ exports.forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
     let ipAddress = req.ip;
-    const userAgent = req.get('user-agent');
+    const userAgent = req.get("user-agent");
 
-    const user = await User.findOne({ email: email }, {email: 1, fullname:1});
+    const user = await User.findOne(
+      { email: email },
+      { email: 1, fullname: 1 }
+    );
 
     if (!user) {
-      return res.status(400).json({ message: "Please sign-up first" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Please sign-up first" });
     }
-    // 
+    //
     const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
     if (isIPv6) {
       // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
-    ipAddress = ipAddress.includes('::ffff:') ? ipAddress.replace(/^.*:/, "") : null;
+      ipAddress = ipAddress.includes("::ffff:")
+        ? ipAddress.replace(/^.*:/, "")
+        : null;
     }
     if (!ipAddress) {
-      return res.status(400).json({ message: "Some error occured, try again later" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Some error occured, try again later" });
     }
     //Get location
     const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
     if (!response.ok) {
-      return res.status(400).json({ message: "Some error occured, try again later" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Some error occured, try again later" });
     }
 
     const locationData = await response.json();
     const countryAbbreviation = locationData.country;
-    const sortedData = countries.sort((a, b) => a.abbreviation - b.abbreviation);
-    
+    const sortedData = countries.sort(
+      (a, b) => a.abbreviation - b.abbreviation
+    );
+
     let location = getCountry(sortedData, countryAbbreviation);
-    location !== -1 ? location: location = countryAbbreviation;
+    location !== -1 ? location : (location = countryAbbreviation);
     let device = userAgent;
-    
+
     const token = await generatePasswordOTP(user._id);
     const subject = "Konectin Technical - Reset password";
-    const msg = ResetPasswordEmail(user.fullname.split(' ')[0], location, device, token); 
+    const msg = ResetPasswordEmail(
+      user.fullname.split(" ")[0],
+      location,
+      device,
+      token
+    );
     await transporter(email, subject, msg);
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       message: "Please check email for the code to reset your password",
     });
   } catch (err) {
-    console.log(err);
     return res
-      .status(500)
-      .json({ message: "Some error occured, try again later" });
-    console.log(err);
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -336,28 +383,30 @@ exports.verifyOtp = async (req, res) => {
     const { OTP } = req.body;
 
     if (!OTP) {
-      return res.status(400).json({ message: "Please provide OTP" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Please provide OTP" });
     }
 
     // Check if the OTP exists and is valid
-    const token = await passwordOTP.findOne({ OTP: OTP });
+    const token = await RegisterOTP.findOne({ OTP: OTP });
 
     if (!token) {
-      return res.status(400).json({ message: "Invalid OTP" });
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Invalid OTP" });
     }
-    console.log(moment(token.expiresIn), moment());
     if (moment(token.expiresIn) < moment()) {
       return res
-        .status(400)
+        .status(StatusCodes.BAD_REQUEST)
         .json({ message: "The OTP has expired, please req a new one" });
     }
     // OTP is valid
-    return res.status(200).json({ message: "OTP verified successfully" });
-  } catch (err) {
-    console.error(err);
     return res
-      .status(500)
-      .json({ message: "Some error occurred, try again later" });
+      .status(StatusCodes.OK)
+      .json({ message: "OTP verified successfully" });
+  } catch (err) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
@@ -365,23 +414,29 @@ exports.verifyOtp = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { OTP, password, confirmPassword, email } = req.body;
-    if (!password || !confirmPassword || !OTP || !email) {
-      return res.status(400).json({ message: "Please fill all fields" });
+    if (!OTP || !password || !confirmPassword || !email) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Please fill all fields" });
     }
 
     if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Passwords do not match" });
     }
 
-    const token = await passwordOTP.findOne({ OTP: OTP });
+    const token = await RegisterOTP.findOne({ OTP: OTP });
 
     if (!token) {
-      return res.status(400).json({ message: "Invalid or expired token" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Invalid or expired token" });
     }
 
     if (token.expiresIn < Date.now()) {
       return res
-        .status(400)
+        .status(StatusCodes.BAD_REQUEST)
         .json({ message: "The token has expired, please req a new one" });
     }
 
@@ -389,7 +444,9 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findById(token.userId).select("email").exec();
 
     if (!user || user.email !== email) {
-      return res.status(400).json({ message: "Invalid email address" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Invalid email address" });
     }
 
     const hashedPassword = await passwordHash(password);
@@ -400,21 +457,23 @@ exports.resetPassword = async (req, res) => {
       { new: true }
     ).exec();
     return res
-      .status(200)
+      .status(StatusCodes.OK)
       .json({ message: "Password updated successfully, please login" });
   } catch (err) {
-    console.log(err.message);
     return res
-      .status(500)
-      .json({ message: "Some error occured, try again later" });
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };
 
 exports.logOut = async function (req, res) {
   try {
-    return res.status(400).json({ message: "In development" });
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "In development" });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error, try again later!" });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
   }
 };

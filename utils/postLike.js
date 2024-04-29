@@ -33,6 +33,9 @@ exports.unlikeBlog =  async function (blogId, userId) {
         // await blog.save();
 
         blog.likes.splice(blog.likes.indexOf(userId), 1)
+        if (blog.likes.length < 0) {
+            blog.likes = [];
+        }
         await blog.save()
         return true
     }
