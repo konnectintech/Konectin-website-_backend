@@ -3,8 +3,12 @@ const cloudinary = require("cloudinary").v2;
 const { StatusCodes } = require("http-status-codes");
 
 cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
+
 
 exports.getUserInfo = async (req, res) => {
   try {
@@ -135,9 +139,20 @@ exports.updateUser = async (req, res) => {
 exports.updateUserPicture = async (req, res) => {
   try {
     const { userId } = req.query;
-    const file = req.files.picture;
+    const file = req.body.picture;
+
+    if (!userId) {
+      console.error('User ID not provided');
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    if (!file) {
+      console.error('No picture file provided');
+      return res.status(400).json({ message: "Please upload a picture file" });
+    }
 
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -146,18 +161,18 @@ exports.updateUserPicture = async (req, res) => {
       return res.status(400).json({ message: "No picture file provided" });
     }
 
-    const result = await cloudinary.uploader.upload(file.tempFilePath, {
-      folder: "user_pictures",
+    const result = await cloudinary.uploader.upload(file, {
+      folder: `profile_pictures/${userId}`,
       unique_filename: true,
       overwrite: true,
     });
 
     user.picture = result.secure_url;
     await user.save();
-
+    
     res.json({ message: "User picture updated successfully", url: user.picture });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error updating user picture" });
+    console.error(`Error updating user picture: ${err.message}`);
+    res.status(500).json({ message: "Error updating user picture", error: err});
   }
 };

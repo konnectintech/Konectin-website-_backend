@@ -34,6 +34,16 @@ const letterSchema = new mongoose.Schema({
   },
   content: { type: String },
   professionalBio: { type: String },
+  chats: [
+    {
+      userType: {
+        type: String,
+      },
+      message: {
+        type: String,
+      },
+    },
+  ],
 });
 
 module.exports = mongoose.model("LetterBuilder", letterSchema);

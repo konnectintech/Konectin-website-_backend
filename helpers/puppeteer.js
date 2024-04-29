@@ -1,10 +1,10 @@
 const puppeteer = require("puppeteer");
 
-exports.convertResumeIntoPdf = async (resumeHtml) => {
+exports.convertPageIntoPdf = async (resumeHtml) => {
   try {
     const browser = await puppeteer.launch({
       headless: "new",
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
 
