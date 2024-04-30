@@ -1,3 +1,4 @@
+const { timeStamp } = require("console");
 const mongoose = require("mongoose");
 
 const resumeSchema = new mongoose.Schema({
@@ -102,6 +103,13 @@ const resumeSchema = new mongoose.Schema({
   selectedTemplate: { type: String },
   currentStage: {
     type: Number,
+  },
+  isDownloaded: {
+    type: Boolean,
+    default: false,
+  },
+  downloadedTime: {
+    type: Date,
   },
 });
 

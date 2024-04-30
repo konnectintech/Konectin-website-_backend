@@ -167,6 +167,17 @@ exports.downloadPDF = async function (req, res) {
     // This tells the browser to download the file instead of displaying it
     res.setHeader("Content-Disposition", `attachment; filename="${cv.id}.pdf"`);
 
+    //update the resume model after the cv is downloaded
+    await ResumeBuilder.findByIdAndUpdate(
+      resumeId,
+      {
+        $set: {
+          isDownloaded: true, // Set isDownloaded to true
+          downloadedTime: new Date(), // Set downloadedTime to current time
+        },
+      },
+      { new: true } // To return the updated document
+    );
     // Send the PDF content as the response
     res.send(pdfContent);
   } catch (error) {
