@@ -9,6 +9,7 @@ router.post('/unsubscribeMail', common.unsubscribeNewsLetter);
 router.post('/subscribeIntern', verifyUserToken, isEmailVerified, common.subscribeIntern)
 router.patch('/subscribeIntern', verifyUserToken, isEmailVerified, common.updateSubscribeIntern)
 router.post('/uploadFile', common.uploadFile);
+router.post('/uploadResumeImage', verifyUserToken, isEmailVerified, common.uploadResumeImage);
 
 
 module.exports = router;

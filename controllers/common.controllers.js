@@ -5,6 +5,9 @@ const newsletter = require("../models/newsletter");
 const internSubscription = require("../models/internSubscription.model");
 const cloudinary = require("cloudinary").v2;
 const subscribedInternEmail = require("../utils/subscribedIntern");
+const ResumeImage = require("../models/resumeImage.model");
+const User = require("../models/user.model");
+const Path = require("path");
 
 cloudinary.config({
   secure: true,
@@ -162,6 +165,49 @@ exports.uploadFile = async (req, res) => {
         messgae: "File Uploaded Successfully",
         data: { url: result.secure_url },
       });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+exports.uploadResumeImage = async (req, res) => {
+  const userId = req.query.userId
+
+  if (!req.files || !req.files.file) {
+    return res.status(400).json({ message: "Please upload a file" });
+  }
+  const file = req.files.file;
+  const user = await User.findById(userId)
+  if (!user) {
+    return res.status(404).json({ message: "User Not Found" });
+  }
+  const options = {
+    unique_filename: true,
+    overwrite: true,
+  };
+
+  try {
+    // Upload the image
+    const resumeImage = new ResumeImage({ userId: user.id })
+    const folder_name = `konectin/resumePictures/${user.id}`
+    options.public_id = resumeImage.id
+    options.use_asset_folder_as_public_id_prefix = true
+    options.asset_folder = folder_name
+    const result = await cloudinary.uploader.upload(file.tempFilePath, options)
+    if (result && result?.secure_url) {
+      resumeImage.link = result.secure_url
+      await resumeImage.save()
+      return res
+        .status(200)
+        .json({
+          messgae: "File Uploaded Successfully",
+          data: resumeImage,
+        });
+    }
+    return res.status(200).json(resumeImage)
+    // const result = await cloudinary.uploader.upload(file.tempFilePath, options);
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: error.message });

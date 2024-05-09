@@ -111,6 +111,14 @@ const resumeSchema = new mongoose.Schema({
   downloadedTime: {
     type: Date,
   },
+  templateDetails: {
+    fontType: { type: String },
+    fontSize: { type: String },
+    colour: { type: String },
+  },
+  resumeImage: {
+
+  }
 });
 
 module.exports = mongoose.model("ResumeBuilder", resumeSchema);
