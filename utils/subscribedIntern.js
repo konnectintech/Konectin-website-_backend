@@ -1,5 +1,5 @@
 const subscribedInternEmail = (intern) => {
-    return `
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -36,7 +36,7 @@ const subscribedInternEmail = (intern) => {
         </tr>
         <tr>
             <th>Phone Number</th>
-            <td>${intern.phone_number}</td>
+            <td>${intern.phoneNumber}</td>
         </tr>
         <tr>
             <th>Country</th>
@@ -72,7 +72,7 @@ const subscribedInternEmail = (intern) => {
     </table>
     </body>
     </html>
-    `
-}
+    `;
+};
 
-module.exports = subscribedInternEmail
+module.exports = subscribedInternEmail;

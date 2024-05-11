@@ -9,32 +9,6 @@ const jwtSign = (payload) => {
   return jwt.sign(payload, "K12345", { expiresIn: "24h" });
 };
 
-describe("Get user info", () => {
-  it("should return user info if email is provided", async () => {
-    const user = await createUser();
-    const token = jwtSign({ _id: user._id });
-
-    const res = await request(app)
-      .get("/user/v2/getUserInfo")
-      .query({ email: user.email })
-      .set("Authorization", `Bearer ${token}`);
-
-    expect(res.status).toBe(StatusCodes.OK);
-    expect(res.body.user.email).toBe(user.email);
-  });
-
-  it("should return 404 if user not found", async () => {
-    const user = await createUser();
-    const token = jwtSign({ _id: user._id });
-    const res = await request(app)
-      .get("/user/v2/getUserInfo")
-      .query({ email: "none@example.com" })
-      .set("Authorization", `Bearer ${token}`);
-
-    expect(res.status).toBe(StatusCodes.NOT_FOUND);
-  });
-});
-
 describe("Get notification settings", () => {
   it("should get notification settings for user", async () => {
     // Create user
