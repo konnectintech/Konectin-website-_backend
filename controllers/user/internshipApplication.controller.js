@@ -1,4 +1,4 @@
-const Intern = require("../../models/internshipModel");
+const InternshipApplication = require("../../models/internshipModel");
 const { StatusCodes } = require("http-status-codes");
 const { uploadFile } = require("../../helpers/aws");
 const CurrentEducationEnum = require("../../utils/enums/CurrentEducationEnum");
@@ -69,14 +69,16 @@ exports.internshipApplication = async (req, res) => {
       ...otherFields,
     };
 
-    const internshipExists = await Intern.findOne({ email: email });
+    const internshipExists = await InternshipApplication.findOne({
+      email: email,
+    });
     if (internshipExists) {
       return res.status(StatusCodes.CONFLICT).json({
         message: "You've already registered for Konectin's Internship Program.",
       });
     }
 
-    const newInternship = new Intern({ ...newInternshipData });
+    const newInternship = new InternshipApplication({ ...newInternshipData });
 
     const savedInternship = await newInternship.save();
     res.status(StatusCodes.CREATED).json({

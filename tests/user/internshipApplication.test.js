@@ -39,7 +39,7 @@ describe("Internship Routes", () => {
       };
 
       const response = await request(app)
-        .post("/user/internship")
+        .post("/user/internshipApplication")
         .set("content-type", "application/json")
         .send(internshipData);
 
@@ -64,7 +64,7 @@ describe("Internship Routes", () => {
       };
 
       const response = await request(app)
-        .post("/user/internship")
+        .post("/user/internshipApplication")
         .set("content-type", "application/json")
         .send(internshipData);
 

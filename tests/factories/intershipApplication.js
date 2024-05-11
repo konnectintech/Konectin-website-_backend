@@ -1,12 +1,12 @@
-const Intern = require("../../models/internshipModel");
+const InternshipApplication = require("../../models/internshipModel");
 const createInternshipApplication = async (internshipData = {}) => {
-  const internship = new Intern({
+  const internshipApplication = new InternshipApplication({
     ...internshipData,
   });
 
-  await internship.save();
+  await internshipApplication.save();
 
-  return internship;
+  return internshipApplication;
 };
 
 module.exports = { createInternshipApplication };
