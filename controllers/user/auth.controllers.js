@@ -1,6 +1,6 @@
 const User = require("../../models/user.model");
 const { passwordCompare, passwordHash } = require("../../helpers/bcrypt");
-const { transporter } = require("../../config/email");
+const { transporter, sendHtmlEmail } = require("../../config/email");
 const { generateRegisterOTP } = require("../../helpers/registerToken");
 const { generatePasswordOTP } = require("../../helpers/passwordToken");
 const RegisterOTP = require("../../models/registerOTP");
@@ -54,6 +54,42 @@ exports.register = async (req, res) => {
       const msg = verifyEmail(user.fullname.split(" ")[0], user.email, token);
       //Send email
       await transporter(saveUser.email, subject, msg);
+
+      const welcomeSubject = "Welcome to Konectin!";
+      const welcomeHtml = `
+        <div style="background-color: #1E1E1E; color: white; padding: 20px;">
+          <h1 style="color: white;">Welcome to Konectin!</h1>
+          <p>Dear ${user.fullname.split(" ")[0]},</p>
+          <p>We're delighted to have you here!! We are dedicated to Empowering Africa's Future. As a new member, you now have access to a wide range of resources and opportunities to advance your career. At Konectin, we're committed to helping you succeed. Whether you're looking for job opportunities, career advice, or professional networking, we are here!</p>
+          <p>Explore our platform, check out our offerings, and don't hesitate to reach out if you have any questions. We're here to support you every step of the way. Welcome to the Konectin community!</p>
+          <p>Here's why Konectin is your ultimate career partner:</p>
+          <h3>Powerful Resume Builder</h3>
+          <p>Unlock your potential with our state-of-the-art Resume Builder. Craft stunning resumes that stand out and captivate potential employers.</p>
+          <a href="https://www.konectin.org/resume" style="background-color: #6A5ACD; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Create your Resume Now</a>
+          <h3>Curated Internship Listings</h3>
+          <p>Gain access to a wide range of exclusive internship listings from top companies in your field. Your dream internship is just a click away.</p>
+          <a href="https://www.konectin.org/internship" style="color: #6A5ACD;">https://www.konectin.org/internship</a>
+          <p>Your future begins here, and we're honored to be a part of your journey. Get ready to make your mark in the world of internships!</p>
+          <p>Regards,<br>Konectin Team</p>
+          <p>P.S. Don't forget to complete your profile and try out our Resume Builder—it's the first step to securing your dream internship!</p>
+          <div style="display: flex; justify-content: center; margin-top: 20px;">
+            <a href="https://www.linkedin.com/company/konectin" target="_blank" style="margin-right: 10px;"><img src="linkedin-icon.png" alt="LinkedIn" width="30" height="30"></a>
+            <a href="https://twitter.com/KonectinInc" target="_blank" style="margin-right: 10px;"><img src="twitter-icon.png" alt="Twitter" width="30" height="30"></a>
+            <a href="https://www.facebook.com/people/Konectin-Inc/" target="_blank"><img src="facebook-icon.png" alt="Facebook" width="30" height="30"></a>
+          </div>
+          <div style="margin-top: 20px; font-size: 12px;">
+            <a href="https://www.konectin.org" style="color: white; text-decoration: none;">www.konectin.org</a> - <a href="https://www.konectin.org/terms" style="color: white; text-decoration: none;">Terms of service</a> - <a href="https://www.konectin.org/policy" style="color: white; text-decoration: none;">Privacy Policy</a> - <a href="https://www.konectin.org/faq" style="color: white; text-decoration: none;">FAQ</a>
+          </div>
+          <div style="margin-top: 10px; font-size: 12px;">
+            Copyright © 2024 Konectin.
+          </div>
+          <div style="margin-top: 10px; font-size: 12px;">
+            Konectin Address
+          </div>
+        </div>
+      `;
+
+      await sendHtmlEmail(user.email, welcomeSubject, welcomeHtml);
 
       const payload = {
         _id: saveUser._id,
