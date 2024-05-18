@@ -104,54 +104,16 @@ exports.subscribeIntern = async (req, res) => {
     }
 
     const data = await internSubscription.create({ userId: userId, ...value });
-    message = subscribedInternEmail({ ...data.basicDetails, role: data.internType, upload: data.upload })
+    const firstName = data.basicDetails.fullName.split(" ")[0];
+    message = subscribedInternEmail({ firstName, email: data.basicDetails.email, role: data.internType, upload: data.upload });
     await sendHtmlEmail(
-      "interns@konectin.org",
+      process.env.INTERNS_EMAIL,
       "New Konectin Internship Subscription",
       message
     );
 
-    const { firstName, role, upload } = data.basicDetails;
-    const emailContent = `
-      <div style="background-color: #1E1E1E; color: white; padding: 20px;">
-        <h1 style="color: white;">Welcome to Konectin's Internship Program!</h1>
-        <p>Dear ${firstName},</p>
-        <p>Welcome to Konectin's Internship Program! We're excited to have you on board.</p>
-        <p>Our mission is to connect talented individuals like you with amazing internship opportunities that align with your career goals. Our platform is designed to provide you with a seamless experience, from creating your profile to getting matched with the perfect internship. This program is designed to be a stepping stone to your future career. Stay tuned for updates on available internships and don't hesitate to reach out if you have any questions. We're here to support you every step of the way.</p>
-        <p>Welcome to the Konectin community!</p>
-        <p>Best Regards,<br>Konectin Team</p>
-        <div style="margin-top: 20px;">
-          <h3>Learn more about us</h3>
-          <p>Join our community on X.com and LinkedIn for updates, networking opportunities, and more.</p>
-          <a href="https://www.konectin.com/community" style="background-color: #6A5ACD; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Join our community</a>
-        </div>
-        <div style="display: flex; justify-content: center; margin-top: 20px;">
-          <a href="https://www.linkedin.com/company/konectin" target="_blank" style="margin-right: 10px;"><img src="linkedin-icon.png" alt="LinkedIn" width="30" height="30"></a>
-          <a href="https://twitter.com/konectin" target="_blank" style="margin-right: 10px;"><img src="twitter-icon.png" alt="Twitter" width="30" height="30"></a>
-          <a href="https://www.facebook.com/konectin" target="_blank"><img src="facebook-icon.png" alt="Facebook" width="30" height="30"></a>
-        </div>
-        <div style="margin-top: 20px; font-size: 12px;">
-          <a href="https://www.konectin.com" style="color: white; text-decoration: none;">www.konectin.com</a> - <a href="https://www.konectin.com/terms-of-service" style="color: white; text-decoration: none;">Terms of service</a> - <a href="https://www.konectin.com/privacy-policy" style="color: white; text-decoration: none;">Privacy Policy</a> - <a href="https://www.konectin.com/faq" style="color: white; text-decoration: none;">FAQ</a>
-        </div>
-        <div style="margin-top: 10px; font-size: 12px;">
-          Copyright © 2023 Konectin.
-        </div>
-        <div style="margin-top: 10px; font-size: 12px;">
-          Konectin Address
-        </div>
-      </div>
-    `;
-
-    // Send email
-    await sendHtmlEmail(
-      "interns@konectin.org",
-      "New Konectin Internship Subscription",
-      emailContent
-    );
-
     return res.status(201).json({ message: "Subscribed successfully", data });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
@@ -176,7 +138,6 @@ exports.updateSubscribeIntern = async (req, res) => {
     );
     return res.status(201).json({ message: "Updated successfully", data });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
@@ -202,7 +163,6 @@ exports.uploadFile = async (req, res) => {
         data: { url: result.secure_url },
       });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
