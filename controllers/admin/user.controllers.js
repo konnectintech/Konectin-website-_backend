@@ -1,7 +1,9 @@
 const User = require("../../models/user.model")
 const fs = require("fs");
 const converter = require('json-2-csv')
-const { createTempFile } = require("../../utils/functions")
+const Resume = require("../../models/resume.model")
+const InternSub = require("../../models/internSubscription.model")
+const { createTempFile, intersection } = require("../../utils/functions")
 
 exports.getUsers = async (req, res) => {
     try {
@@ -41,6 +43,21 @@ exports.getUser = async (req, res) => {
         return res.status(200).json({ message: "User record retrieved successfully", data })
     }
     catch (err) {
+        console.error(err)
+        return res.status(500).json({ message: "Server error, try again later" })
+    }
+}
+
+exports.getPowerUsers = async (req, res) => {
+    try {
+        const resume_downloads = new Set((await Resume.find({ currentStage: 6 })).map((resume) => { return String(resume.userId) }))
+        const internship_subs = new Set((await InternSub.find()).map((intern) => { return String(intern.userId) }))
+        const result = [...intersection(resume_downloads, internship_subs)]
+        const data = await User.find({ _id: { "$in": result } }).select("-password").sort({ createdAt: -1 })
+        return res.status(200).json({ message: "User records retrieved successfully", data })
+
+    } catch (err) {
+        console.error(err)
         return res.status(500).json({ message: "Server error, try again later" })
     }
 }

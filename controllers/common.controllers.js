@@ -104,15 +104,16 @@ exports.subscribeIntern = async (req, res) => {
     }
 
     const data = await internSubscription.create({ userId: userId, ...value });
-    message = subscribedInternEmail({ ...data.basicDetails, role: data.internType, upload: data.upload })
+    const firstName = data.basicDetails.fullName.split(" ")[0];
+    message = subscribedInternEmail({ firstName, email: data.basicDetails.email, role: data.internType, upload: data.upload });
     await sendHtmlEmail(
-      "interns@konectin.org",
+      process.env.INTERNS_EMAIL,
       "New Konectin Internship Subscription",
       message
     );
+
     return res.status(201).json({ message: "Subscribed successfully", data });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
@@ -137,7 +138,6 @@ exports.updateSubscribeIntern = async (req, res) => {
     );
     return res.status(201).json({ message: "Updated successfully", data });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
@@ -163,7 +163,6 @@ exports.uploadFile = async (req, res) => {
         data: { url: result.secure_url },
       });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };

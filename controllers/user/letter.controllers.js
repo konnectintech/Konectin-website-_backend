@@ -15,23 +15,11 @@ exports.letterBuilder = async (req, res) => {
       content,
     } = req.body;
 
-    let userDetails = {};
-    if (userId) {
-      let user = await User.findById(userId);
-
-      userDetails = {
-        fullName: user.fullname,
-        email: user.email,
-      };
-    } else {
-      // If userId is not provided or empty, populate userDetails from the request body
-      userDetails = { fullName, email };
-    }
-
     const newLetterData = {
       userId: userId ? userId : null, // Set userId to empty string if not provided or empty
       details: {
-        ...userDetails,
+        fullName, 
+        email,
         jobPosition,
         companyName,
       },
@@ -166,25 +154,19 @@ exports.delete = async (req, res) => {
       .json({ message: err.message });
   }
 };
+
 exports.updateUserLetter = async (req, res) => {
   try {
-    const { letterId, userId } = req.query;
+    const { letterId } = req.query;
     const updateFields = req.body;
 
-    // Convert userId and letterId to ObjectId
-    const objectIdUserId = new Types.ObjectId(userId);
-    const objectIdLetterId = new Types.ObjectId(letterId);
-
     // Find the letter by id
-    let letter = await LetterBuilder.findOne({
-      _id: objectIdLetterId,
-      userId: objectIdUserId,
-    });
+    let letter = await LetterBuilder.findById({ _id: letterId });
 
     if (!letter) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: "Letter not found or unauthorized" });
+        .json({ message: "Letter not found" });
     }
 
     // Update the letter's fields

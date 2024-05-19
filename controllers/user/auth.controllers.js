@@ -1,6 +1,6 @@
 const User = require("../../models/user.model");
 const { passwordCompare, passwordHash } = require("../../helpers/bcrypt");
-const { transporter } = require("../../config/email");
+const { transporter, sendHtmlEmail } = require("../../config/email");
 const { generateRegisterOTP } = require("../../helpers/registerToken");
 const { generatePasswordOTP } = require("../../helpers/passwordToken");
 const RegisterOTP = require("../../models/registerOTP");
@@ -9,6 +9,7 @@ const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
 const { verifyEmail } = require("../../utils/verifyEmail");
 const { countries, getCountry } = require("../../utils/countrySearch");
+const { welcomeEmail } = require("../../utils/welcomeEmail");
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
@@ -53,12 +54,12 @@ exports.register = async (req, res) => {
       // Email body
       const msg = verifyEmail(user.fullname.split(" ")[0], user.email, token);
       //Send email
-      await transporter(saveUser.email, subject, msg);
+      await transporter(user.email, subject, msg);
 
       const payload = {
-        _id: saveUser._id,
-        fullname: saveUser.fullname,
-        email: saveUser.email,
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
       };
 
       const signUpToken = jwtSign(payload);
@@ -100,6 +101,10 @@ exports.verifyEmailAddress = async (req, res) => {
     user.isEmailVerified = true;
     await user.save();
 
+    const welcomeSubject = "Welcome to Konectin!";
+    const welcomeHtml = welcomeEmail(user.fullname.split(" ")[0]);
+
+    await transporter(user.email, welcomeSubject, welcomeHtml);
     return res
       .status(StatusCodes.OK)
       .json({ message: "Email verified successfully", user });
