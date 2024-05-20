@@ -104,16 +104,19 @@ exports.subscribeIntern = async (req, res) => {
     }
 
     const data = await internSubscription.create({ userId: userId, ...value });
+    const firstName = data.basicDetails.fullName.split(" ")[0];
     message = subscribedInternEmail({
-      ...data.basicDetails,
+      firstName,
+      email: data.basicDetails.email,
       role: data.internType,
       upload: data.upload,
     });
     await sendHtmlEmail(
-      "interns@konectin.org",
+      process.env.INTERNS_EMAIL,
       "New Konectin Internship Subscription",
       message
     );
+
     return res.status(201).json({ message: "Subscribed successfully", data });
   } catch (err) {
     return res.status(500).json({ message: "Server error, try again later!" });
