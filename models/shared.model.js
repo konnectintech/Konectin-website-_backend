@@ -2,7 +2,7 @@ const { CountryNamesEnum } = require("../utils/enums/CountryEnum");
 const InternshipTypeEnum = require("../utils/enums/InternshipTypeEnum");
 const PreferedFieldEnum = require("../utils/enums/PreferdFieldEnum");
 
-const sharedModel = {
+const sharedSchemaDefinition = {
   fullName: {
     type: String,
     required: true,
@@ -38,4 +38,4 @@ const sharedModel = {
   },
 };
 
-module.exports = sharedModel;
+module.exports = sharedSchemaDefinition;
