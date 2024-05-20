@@ -1,6 +1,6 @@
 const { transporter, sendHtmlEmail } = require("../config/email");
 const { internSubSchema } = require("../helpers/internSubscriptionValidate");
-const intern = require("../models/internshipModel");
+const intern = require("../models/internship.model");
 const newsletter = require("../models/newsletter");
 const internSubscription = require("../models/internSubscription.model");
 const cloudinary = require("cloudinary").v2;
@@ -104,7 +104,11 @@ exports.subscribeIntern = async (req, res) => {
     }
 
     const data = await internSubscription.create({ userId: userId, ...value });
-    message = subscribedInternEmail({ ...data.basicDetails, role: data.internType, upload: data.upload })
+    message = subscribedInternEmail({
+      ...data.basicDetails,
+      role: data.internType,
+      upload: data.upload,
+    });
     await sendHtmlEmail(
       "interns@konectin.org",
       "New Konectin Internship Subscription",
@@ -112,7 +116,6 @@ exports.subscribeIntern = async (req, res) => {
     );
     return res.status(201).json({ message: "Subscribed successfully", data });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
@@ -137,7 +140,6 @@ exports.updateSubscribeIntern = async (req, res) => {
     );
     return res.status(201).json({ message: "Updated successfully", data });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({ message: "Server error, try again later!" });
   }
 };
@@ -156,14 +158,11 @@ exports.uploadFile = async (req, res) => {
   try {
     // Upload the image
     const result = await cloudinary.uploader.upload(file.tempFilePath, options);
-    return res
-      .status(200)
-      .json({
-        messgae: "File Uploaded Successfully",
-        data: { url: result.secure_url },
-      });
+    return res.status(200).json({
+      messgae: "File Uploaded Successfully",
+      data: { url: result.secure_url },
+    });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };

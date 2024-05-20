@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
-const sharedModel = require("./shared.model");
+const sharedSchemaDefinition = require("./shared.model");
 const CompanySizeEnum = require("../utils/enums/companySizeEnum");
 const HiringFrequencyEnum = require("../utils/enums/HiringFrequencyEnum");
 
 const b2bSchema = new mongoose.Schema(
   {
-    ...sharedModel,
+    ...sharedSchemaDefinition,
     requiredRole: {
       type: String,
       required: true,

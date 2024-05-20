@@ -3,11 +3,11 @@ const { CountryCodesEnum } = require("../utils/enums/CountryEnum");
 const GenderEnum = require("../utils/enums/GenderEnum");
 const AgeRangeEnum = require("../utils/enums/AgeRangeEnum");
 const CurrentEducationEnum = require("../utils/enums/CurrentEducationEnum");
-const sharedModel = require("./shared.model");
+const sharedSchemaDefinition = require("./shared.model");
 
 const internshipSchema = new mongoose.Schema(
   {
-    ...sharedModel,
+    ...sharedSchemaDefinition,
     countryCode: {
       type: String,
       enum: Object.values(CountryCodesEnum),
