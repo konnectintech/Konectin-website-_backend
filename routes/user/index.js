@@ -6,6 +6,7 @@ const letterRoutes = require("./letter.routes");
 const dashboardRoutes = require("./dashboard.routes");
 const contactRoutes = require("./contact-us.routes");
 const internshipRoutes = require("./internship.routes");
+const partnerRoutes = require("./partner.routes");
 
 router.use(
   "",
@@ -14,7 +15,8 @@ router.use(
   dashboardRoutes,
   letterRoutes,
   contactRoutes,
-  internshipRoutes
+  internshipRoutes,
+  partnerRoutes
 );
 
 module.exports = router;

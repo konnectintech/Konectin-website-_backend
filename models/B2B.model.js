@@ -10,7 +10,7 @@ const b2bSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    campanyName: {
+    companyName: {
       type: String,
       required: true,
     },
@@ -23,6 +23,10 @@ const b2bSchema = new mongoose.Schema(
       type: String,
       required: true,
       match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"],
+    },
+    companyAddress: {
+      type: String,
+      required: true,
     },
     companySize: {
       type: String,
@@ -42,15 +46,13 @@ const b2bSchema = new mongoose.Schema(
       enum: Object.values(HiringFrequencyEnum),
       required: true,
     },
-    mou: {
-      content: {
-        type: String,
-        required: true,
-      },
-      confirmed: {
-        type: Boolean,
-        required: true,
-      },
+    mouContent: {
+      type: String,
+      required: true,
+    },
+    mouConfirmed: {
+      type: Boolean,
+      default: false,
     },
   },
 

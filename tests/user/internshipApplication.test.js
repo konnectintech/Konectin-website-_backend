@@ -4,10 +4,6 @@ const { StatusCodes } = require("http-status-codes");
 const {
   createInternshipApplication,
 } = require("../factories/intershipApplication");
-const {
-  CountryCodesEnum,
-  CountryNamesEnum,
-} = require("../../utils/enums/CountryEnum");
 const AgeRangeEnum = require("../../utils/enums/AgeRangeEnum");
 const InternshipTypeEnum = require("../../utils/enums/InternshipTypeEnum");
 const PreferdFieldEnum = require("../../utils/enums/PreferdFieldEnum");
