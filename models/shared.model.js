@@ -22,8 +22,8 @@ const sharedSchemaDefinition = {
     type: String,
     required: true,
     match: [
-      /^[1-9][0-9]{7,}$/,
-      "Must start with a digit from 1 to 9, followed by 7 or more digits",
+      /^[0-12][0-9]{7,}$/,
+      "Must start with a digit from 0 to 12, followed by 7 or more digits",
     ],
   },
   internshipType: {
