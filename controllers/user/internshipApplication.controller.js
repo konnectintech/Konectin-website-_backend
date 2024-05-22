@@ -1,7 +1,6 @@
-const InternshipApplication = require("../../models/internshipModel");
+const InternshipApplication = require("../../models/internship.model");
 const { StatusCodes } = require("http-status-codes");
 const { uploadFile } = require("../../helpers/aws");
-const CurrentEducationEnum = require("../../utils/enums/CurrentEducationEnum");
 
 exports.internshipApplication = async (req, res) => {
   try {
