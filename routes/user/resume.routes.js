@@ -5,6 +5,7 @@ const { verifyUserToken } = require("../../helpers/jsonwebtoken");
 router.post("/resume", resume.resumeBuilder);
 router.get("/getResumes", verifyUserToken, resume.getUserResumes);
 router.get("/getResume", verifyUserToken, resume.getUserResume);
+router.post("/duplicateResume", verifyUserToken, resume.duplicateResume)
 router.get("/getResumePictures", verifyUserToken, resume.getResumePictures)
 router.put("/updateResume", verifyUserToken, resume.updateUserResume);
 router.post("/v2/createPdf", verifyUserToken, resume.downloadPDF);

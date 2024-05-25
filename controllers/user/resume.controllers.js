@@ -233,3 +233,24 @@ exports.getResumePictures = async function (req, res) {
     return res.status(500).json({ message: error.message });
   }
 }
+
+exports.duplicateResume = async function (req, res) {
+  try {
+    const userId = req.query.userId;
+    const resumeId = req.query.resumeId;
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+    const resume = await ResumeBuilder.findById(resumeId)
+    if (!resume) {
+      return res.status(404).json({ message: "Resume Not Found" });
+    }
+    const { __v, _id, ...duplicated } = resume._doc
+    const duplicate = await ResumeBuilder.create(duplicated)
+    return res.status(200).json({ message: "Resume Duplicated Successfully", data: duplicate })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: error.message });
+  }
+}
