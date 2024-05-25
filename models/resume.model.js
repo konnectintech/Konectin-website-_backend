@@ -117,7 +117,8 @@ const resumeSchema = new mongoose.Schema({
     colour: { type: String },
   },
   resumeImage: {
-
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ResumeImage"
   }
 });
 
