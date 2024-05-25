@@ -8,7 +8,7 @@ const { createOTP } = require("../factories/otp.factory");
 const { v4 } = require("uuid");
 const randomOTP = v4();
 const User = require("../../models/user.model");
-const UserRoleEnum = require("../../utils/userRoleEnum");
+const UserRoleEnum = require("../../utils/enums/userRoleEnum");
 
 describe("Auth Routes", () => {
   describe("user registration", () => {
