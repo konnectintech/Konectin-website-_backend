@@ -8,6 +8,7 @@ const subscribedInternEmail = require("../utils/subscribedIntern");
 const ResumeImage = require("../models/resumeImage.model");
 const User = require("../models/user.model");
 const Path = require("path");
+const { uploadResumePicture } = require("../helpers/cloudinary");
 
 cloudinary.config({
   secure: true,
@@ -173,37 +174,22 @@ exports.uploadFile = async (req, res) => {
 
 exports.uploadResumeImage = async (req, res) => {
   const userId = req.query.userId
-
-  if (!req.files || !req.files.file) {
-    return res.status(400).json({ message: "Please upload a file" });
-  }
-  const file = req.files.file;
   const user = await User.findById(userId)
   if (!user) {
     return res.status(404).json({ message: "User Not Found" });
   }
-  const options = {
-    unique_filename: true,
-    overwrite: true,
-  };
-
+  if (!req.files || !req.files.file) {
+    return res.status(400).json({ message: "Please upload a file" });
+  }
+  const file = req.files.file;
   try {
     // Upload the image
     const resumeImage = new ResumeImage({ userId: user.id })
-    const folder_name = `konectin/resumePictures/${user.id}`
-    options.public_id = resumeImage.id
-    options.use_asset_folder_as_public_id_prefix = true
-    options.asset_folder = folder_name
-    const result = await cloudinary.uploader.upload(file.tempFilePath, options)
+    const result = await uploadResumePicture(file.tempFilePath, resumeImage)
     if (result && result?.secure_url) {
       resumeImage.link = result.secure_url
       await resumeImage.save()
-      return res
-        .status(200)
-        .json({
-          messgae: "File Uploaded Successfully",
-          data: resumeImage,
-        });
+      return res.status(200).json({ messgae: "File Uploaded Successfully", data: resumeImage });
     }
     return res.status(200).json(resumeImage)
     // const result = await cloudinary.uploader.upload(file.tempFilePath, options);
