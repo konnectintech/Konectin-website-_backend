@@ -6,6 +6,7 @@ const path = require("path");
 const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
 const { StatusCodes } = require("http-status-codes");
+const ResumeImage = require("../../models/resumeImage.model");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -68,7 +69,7 @@ exports.getUserResume = async function (req, res) {
   try {
     const { resumeId, userId } = req.query;
 
-    const cv = await ResumeBuilder.findById({ _id: resumeId });
+    const cv = await ResumeBuilder.findById({ _id: resumeId }).populate('resumeImage', "link -_id");
 
     if (!cv) {
       return res
@@ -216,3 +217,19 @@ exports.delete = async (req, res) => {
       .json({ message: err.message });
   }
 };
+
+
+exports.getResumePictures = async function (req, res) {
+  try {
+    const userId = req.query.userId
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+    const resumePictures = await ResumeImage.find({ userId: user.id })
+    return res.status(200).json({ message: "Resume Pictures Retrieved Successfully", data: resumePictures })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: error.message });
+  }
+}
