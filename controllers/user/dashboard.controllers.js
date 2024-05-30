@@ -1,7 +1,9 @@
+const { uploadProfilePicture, uploadResumePicture } = require("../../helpers/cloudinary");
 const User = require("../../models/user.model");
 const cloudinary = require("cloudinary").v2;
 const { StatusCodes } = require("http-status-codes");
-
+const ProfileImage = require("../../models/profileImage.model")
+const ResumeImage = require("../../models/resumeImage.model")
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -61,20 +63,20 @@ exports.updateNotificationSettings = async (req, res) => {
   try {
     const { userId } = req.query;
     const { emailNotifications, pushNotifications, resumeStatusUpdates, jobAlerts, internshipAlerts, blogUpdates, reminders } = req.body;
-    
+
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if(emailNotifications) user.notifications.emails = emailNotifications;
-    if(pushNotifications) user.notifications.pushNotifications = pushNotifications;
-    if(resumeStatusUpdates) user.notifications.resumeStatusUpdates = resumeStatusUpdates;
-    if(jobAlerts) user.notifications.jobAlerts = jobAlerts;
-    if(internshipAlerts) user.notifications.internshipAlerts = internshipAlerts;
-    if(blogUpdates) user.notifications.blogUpdates = blogUpdates;
-    if(reminders) user.notifications.reminders = reminders;
+    if (emailNotifications) user.notifications.emails = emailNotifications;
+    if (pushNotifications) user.notifications.pushNotifications = pushNotifications;
+    if (resumeStatusUpdates) user.notifications.resumeStatusUpdates = resumeStatusUpdates;
+    if (jobAlerts) user.notifications.jobAlerts = jobAlerts;
+    if (internshipAlerts) user.notifications.internshipAlerts = internshipAlerts;
+    if (blogUpdates) user.notifications.blogUpdates = blogUpdates;
+    if (reminders) user.notifications.reminders = reminders;
 
     await user.save();
 
@@ -136,10 +138,14 @@ exports.updateUser = async (req, res) => {
 }
 
 exports.updateUserPicture = async (req, res) => {
+  let file;
   try {
     const { userId } = req.query;
-    const file = req.body.picture;
-
+    if (req.files && req.files.file) {
+      file = req.files.file
+    } else {
+      file = req.body.picture
+    }
     if (!userId) {
       console.error('User ID not provided');
       return res.status(400).json({ message: "User ID is required" });
@@ -160,18 +166,31 @@ exports.updateUserPicture = async (req, res) => {
       return res.status(400).json({ message: "No picture file provided" });
     }
 
-    const result = await cloudinary.uploader.upload(file, {
-      folder: `profile_pictures/${userId}`,
-      unique_filename: true,
-      overwrite: true,
-    });
+    // const result = await cloudinary.uploader.upload(file, {
+    //   folder: `${userId}/profilePictures`,
+    //   unique_filename: true,
+    //   overwrite: true,
+    // });
+    const profileImage = new ProfileImage({ userId: user.id })
+    const result = await uploadProfilePicture(file, profileImage)
+    if (result && result?.secure_url) {
+      profileImage.link = result.secure_url
+      await profileImage.save()
+      user.picture = result.secure_url;
+      await user.save();
 
-    user.picture = result.secure_url;
-    await user.save();
-    
+      // create a corresponding resumeImage
+      const resumeImage = new ResumeImage({ userId: user.id })
+      const resumeImageUpload = await uploadResumePicture(file, resumeImage)
+      if (resumeImageUpload && resumeImageUpload.secure_url) {
+        resumeImage.link = resumeImageUpload.secure_url
+        await resumeImage.save()
+      }
+    }
+
     res.json({ message: "User picture updated successfully", url: user.picture });
   } catch (err) {
     console.error(`Error updating user picture: ${err.message}`);
-    res.status(500).json({ message: "Error updating user picture", error: err});
+    res.status(500).json({ message: "Error updating user picture", error: err });
   }
 };
