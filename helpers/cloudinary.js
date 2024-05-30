@@ -29,7 +29,6 @@ const uploadImage = async (filePath, params) => {
     ...params
   };
   const response = await cloudinary.uploader.upload(filePath, options)
-  console.log(response)
   return response
 }
 
