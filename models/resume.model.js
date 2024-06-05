@@ -110,6 +110,15 @@ const resumeSchema = new mongoose.Schema({
   downloadedTime: {
     type: Date,
   },
+  templateDetails: {
+    fontType: { type: String },
+    fontSize: { type: String },
+    colour: { type: String },
+  },
+  resumeImage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ResumeImage"
+  }
 });
 
 module.exports = mongoose.model("ResumeBuilder", resumeSchema);

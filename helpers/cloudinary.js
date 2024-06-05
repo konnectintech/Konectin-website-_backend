@@ -21,4 +21,36 @@ const cloudinaryUpload = (file) => {
   });
 };
 
-module.exports = { cloudinaryUpload };
+const uploadImage = async (filePath, params) => {
+  const options = {
+    unique_filename: true,
+    overwrite: true,
+    uses_asset_folder_as_public_id_prefix: true,
+    ...params
+  };
+  const response = await cloudinary.uploader.upload(filePath, options)
+  return response
+}
+
+const uploadResumePicture = async function (filePath, resumeImage, params) {
+  const options = {
+    folder: `${resumeImage.userId}/resumePictures`,
+    public_id: resumeImage.id,
+    ...params
+  };
+  const response = await uploadImage(filePath, options)
+  return response
+}
+
+const uploadProfilePicture = async function (filePath, profileImage, params) {
+  const options = {
+    folder: `${profileImage.userId}/profilePictures`,
+    public_id: profileImage.id,
+    ...params
+  };
+  const response = await uploadImage(filePath, options)
+  return response
+}
+
+
+module.exports = { cloudinaryUpload, uploadResumePicture, uploadProfilePicture };
