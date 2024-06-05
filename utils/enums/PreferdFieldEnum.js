@@ -1,4 +1,5 @@
 const PreferedFieldEnum = {
+  PROJECT_MANAGEMENT: "Project Management",
   PM: "Product Management",
   FE: "Software Development(Frontend)",
   BE: "Software Development (Backend)",

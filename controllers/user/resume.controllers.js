@@ -216,3 +216,19 @@ exports.delete = async (req, res) => {
       .json({ message: err.message });
   }
 };
+
+exports.numberOfDownloadeResumes = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const resumes = await ResumeBuilder.find({
+      userId: userId,
+      isDownloaded: true,
+    });
+
+    return res.status(StatusCodes.OK).json(resumes);
+  } catch (error) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
+  }
+};

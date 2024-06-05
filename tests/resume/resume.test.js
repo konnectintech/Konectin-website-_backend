@@ -316,4 +316,30 @@ describe("Resume Routes", () => {
       );
     });
   });
+  describe("NUMBER OF CV DOWNLOADED", () => {
+    it("should return a list of resumes downloaded", async () => {
+      const user = await createUser();
+      const resume1 = await createResume({
+        userId: user._id,
+        isDownloaded: true,
+      });
+
+      const resume2 = await createResume({
+        userId: user._id,
+        isDownloaded: true,
+      });
+      await createResume({
+        userId: user._id,
+      });
+
+      const response = await request(app)
+        .get("/user/resumesDownloaded")
+        .query({ userId: user._id.toString() });
+
+      expect(response.status).toEqual(StatusCodes.OK);
+      expect(response.body[0].isDownloaded).toEqual(resume1.isDownloaded);
+      expect(response.body[1].isDownloaded).toEqual(resume2.isDownloaded);
+      expect(response.body.length).toEqual(2);
+    });
+  });
 });
