@@ -15,7 +15,7 @@ describe("B2B Routes", () => {
       const data = {
         fullName: "test",
         email: "test@gmail.com",
-        phoneNumber: "97865432",
+        phoneNumber: "0978665432",
         country: "RWANDA",
         requiredRole: "Frontend",
         companyName: "partnet@name",
@@ -50,7 +50,7 @@ describe("B2B Routes", () => {
       const data = {
         fullName: "test",
         email: "test@gmail.com",
-        phoneNumber: "97865432",
+        phoneNumber: "0977865432",
         country: "RWANDA",
         requiredRole: "Frontend",
         companyName: "partnet@name",
@@ -81,7 +81,7 @@ describe("B2B Routes", () => {
       const data = {
         fullName: "test",
         email: "test@gmail.com",
-        phoneNumber: "97865432",
+        phoneNumber: "097865432",
         country: "RWANDA",
         requiredRole: "Frontend",
         companyName: "partnet@name",

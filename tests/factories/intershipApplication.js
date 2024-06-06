@@ -1,4 +1,4 @@
-const InternshipApplication = require("../../models/internshipModel");
+const InternshipApplication = require("../../models/internship.model");
 const createInternshipApplication = async (internshipData = {}) => {
   const internshipApplication = new InternshipApplication({
     ...internshipData,

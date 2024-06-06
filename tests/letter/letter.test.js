@@ -306,7 +306,7 @@ describe("Letter Routes", () => {
         .send(updateLetterDto)
         .set("Authorization", `Bearer ${token}`);
 
-      expect(response.body.message).toEqual("Letter not found or unauthorized");
+      expect(response.body.message).toEqual("Letter not found");
     });
     it("should update the letter if the user is authenticated", async () => {
       const user = await createUser();
@@ -346,6 +346,44 @@ describe("Letter Routes", () => {
         user._id.toString()
       );
       expect(response.body.letter.content).toEqual(updateLetterDto.content);
+    });
+  });
+  describe("NUMBER OF LETTERS DOWNLOADED", () => {
+    it("should return a list of letters downloaded", async () => {
+      const user = await createUser();
+      const letter1 = await createLetter({
+        details: {
+          email: user.email,
+          fullName: user.fullname,
+        },
+        userId: user._id,
+        isDownloaded: true,
+      });
+
+      const letter2 = await createLetter({
+        details: {
+          email: user.email,
+          fullName: user.fullname,
+        },
+        userId: user._id,
+        isDownloaded: true,
+      });
+      await createLetter({
+        details: {
+          email: user.email,
+          fullName: user.fullname,
+        },
+        userId: user._id,
+      });
+
+      const response = await request(app)
+        .get("/user/downloadedLetters")
+        .query({ userId: user._id.toString() });
+
+      expect(response.status).toEqual(StatusCodes.OK);
+      expect(response.body[0].isDownloaded).toEqual(letter1.isDownloaded);
+      expect(response.body[1].isDownloaded).toEqual(letter2.isDownloaded);
+      expect(response.body.length).toEqual(2);
     });
   });
 });

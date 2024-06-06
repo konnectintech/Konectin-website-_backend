@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const UserRoleEnum = require("../utils/enums/userRoleEnum");
+const GenderEnum = require("../utils/enums/GenderEnum");
 
 const userSchema = new mongoose.Schema(
   {
@@ -14,6 +15,16 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+    },
+    dob: {
+      type: Date,
+    },
+    age: {
+      type: Number,
+    },
+    gender: {
+      type: String,
+      enum: Object.values(GenderEnum),
     },
     picture: {
       type: String,

@@ -69,7 +69,7 @@ exports.getUserResume = async function (req, res) {
   try {
     const { resumeId, userId } = req.query;
 
-    const cv = await ResumeBuilder.findById({ _id: resumeId }).populate('resumeImage', "link -_id");
+    const cv = await ResumeBuilder.findById({ _id: resumeId });
 
     if (!cv) {
       return res
@@ -217,40 +217,58 @@ exports.delete = async (req, res) => {
       .json({ message: err.message });
   }
 };
-
-
 exports.getResumePictures = async function (req, res) {
   try {
-    const userId = req.query.userId
-    const user = await User.findById(userId)
+    const userId = req.query.userId;
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
-    const resumePictures = await ResumeImage.find({ userId: user.id })
-    return res.status(200).json({ message: "Resume Pictures Retrieved Successfully", data: resumePictures })
+    const resumePictures = await ResumeImage.find({ userId: user.id });
+    return res.status(200).json({
+      message: "Resume Pictures Retrieved Successfully",
+      data: resumePictures,
+    });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
-}
+};
 
 exports.duplicateResume = async function (req, res) {
   try {
     const userId = req.query.userId;
     const resumeId = req.query.resumeId;
-    const user = await User.findById(userId)
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
-    const resume = await ResumeBuilder.findById(resumeId)
+    const resume = await ResumeBuilder.findById(resumeId);
     if (!resume) {
       return res.status(404).json({ message: "Resume Not Found" });
     }
-    const { __v, _id, ...duplicated } = resume._doc
-    const duplicate = await ResumeBuilder.create(duplicated)
-    return res.status(200).json({ message: "Resume Duplicated Successfully", data: duplicate })
+    const { __v, _id, ...duplicated } = resume._doc;
+    const duplicate = await ResumeBuilder.create(duplicated);
+    return res
+      .status(200)
+      .json({ message: "Resume Duplicated Successfully", data: duplicate });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
-}
+};
+exports.numberOfDownloadeResumes = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const resumes = await ResumeBuilder.find({
+      userId: userId,
+      isDownloaded: true,
+    });
+
+    return res.status(StatusCodes.OK).json(resumes);
+  } catch (error) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: err.message });
+  }
+};
