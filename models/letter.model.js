@@ -44,6 +44,13 @@ const letterSchema = new mongoose.Schema({
       },
     },
   ],
+  isDownloaded: {
+    type: Boolean,
+    default: false,
+  },
+  downloadedTime: {
+    type: Date,
+  },
 });
 
 module.exports = mongoose.model("LetterBuilder", letterSchema);

@@ -557,6 +557,31 @@
         }
       }
     },
+    "/user/resumesDownloaded": {
+      "get": {
+        "summary": "Get user downloaded resumes",
+        "tags": ["Resume"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "user id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/user/letter": {
       "post": {
         "summary": "Create a new letter",
@@ -837,6 +862,31 @@
         }
       }
     },
+    "/user/downloadedLetters": {
+      "get": {
+        "summary": "Get user downloaded letters",
+        "tags": ["Letter"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "user id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/user/v2/getNotificationSettings": {
       "get": {
         "summary": "Get user notification settings",
@@ -1092,6 +1142,17 @@
             "type": "string",
             "format": "binary"
           },
+          "dob": {
+            "type": "string",
+            "format": "date"
+          },
+          "age": {
+            "type": "number"
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["Female", "Male", "Prefer not to say"]
+          },
           "isEmailVerified": {
             "type": "boolean",
             "default": false
@@ -1329,6 +1390,13 @@
           },
           "currentStage": {
             "type": "number"
+          },
+          "isDownloaded": {
+            "type": "boolean"
+          },
+          "downloadedTime": {
+            "type": "string",
+            "format": "date"
           }
         },
         "required": ["userId"]
@@ -1383,6 +1451,13 @@
                 }
               }
             }
+          },
+          "isDownloaded": {
+            "type": "boolean"
+          },
+          "downloadedTime": {
+            "type": "string",
+            "format": "date"
           }
         },
         "required": ["details"]
@@ -1836,7 +1911,7 @@
           },
           "gender": {
             "type": "string",
-            "enum": ["Female", "Male", "Prefer_not_to_say"]
+            "enum": ["Female", "Male", "Prefer not to say"]
           },
           "ageRange": {
             "type": "string",
@@ -1884,6 +1959,7 @@
           "preferedField": {
             "type": "string",
             "enum": [
+              "Project Management",
               "Product Management",
               "Software Development(Frontend)",
               "Software Development (Backend)",
@@ -2141,6 +2217,7 @@
           "preferedField": {
             "type": "string",
             "enum": [
+              "Project Management",
               "Product Management",
               "Software Development(Frontend)",
               "Software Development (Backend)",

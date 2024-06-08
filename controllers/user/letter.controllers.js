@@ -18,7 +18,7 @@ exports.letterBuilder = async (req, res) => {
     const newLetterData = {
       userId: userId ? userId : null, // Set userId to empty string if not provided or empty
       details: {
-        fullName, 
+        fullName,
         email,
         jobPosition,
         companyName,
@@ -224,6 +224,18 @@ exports.createLetterIntoDocx = async function (req, res) {
     // Convert DOCX to buffer
     const buffer = await Packer.toBuffer(doc);
 
+    //update the letter model after the letter is downloaded
+    await LetterBuilder.findByIdAndUpdate(
+      letterId,
+      {
+        $set: {
+          isDownloaded: true, // Set isDownloaded to true
+          downloadedTime: new Date(), // Set downloadedTime to current time
+        },
+      },
+      { new: true } // To return the updated document
+    );
+
     // Send response with appropriate headers
     res.set({
       "Content-Type":
@@ -237,5 +249,21 @@ exports.createLetterIntoDocx = async function (req, res) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: error.message });
+  }
+};
+
+exports.numberOfDownloadeLetters = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const letters = await LetterBuilder.find({
+      userId: userId,
+      isDownloaded: true,
+    });
+
+    return res.status(StatusCodes.OK).json(letters);
+  } catch (error) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
   }
 };

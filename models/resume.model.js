@@ -1,5 +1,3 @@
-const { timeStamp } = require("console");
-const { Certificate } = require("crypto");
 const mongoose = require("mongoose");
 
 const resumeSchema = new mongoose.Schema({
