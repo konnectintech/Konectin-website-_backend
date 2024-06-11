@@ -11,5 +11,6 @@ router.post("/duplicateResume", verifyUserToken, resume.duplicateResume);
 router.post("/v2/createPdf", verifyUserToken, resume.downloadPDF);
 router.delete("/delete/resume", verifyUserToken, resume.delete);
 router.get("/resumesDownloaded", resume.numberOfDownloadeResumes);
+router.post('/uploadResumeImage', verifyUserToken, resume.uploadResumeImage);
 
 module.exports = router;
