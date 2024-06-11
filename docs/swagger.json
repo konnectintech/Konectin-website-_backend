@@ -27,12 +27,16 @@
     "/user/register": {
       "post": {
         "summary": "Register a new user",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "multipart/form-data": {
-              "schema": { "$ref": "#/components/schemas/User" }
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
             }
           }
         },
@@ -52,7 +56,9 @@
     "/user/verifyEmail": {
       "post": {
         "summary": "Verify user's email address using OTP.",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "name": "email",
@@ -76,7 +82,9 @@
                     "description": "The One-Time Password (OTP) sent to the user's email."
                   }
                 },
-                "required": ["OTP"]
+                "required": [
+                  "OTP"
+                ]
               }
             }
           }
@@ -100,12 +108,16 @@
     "/user/login": {
       "post": {
         "summary": "User login",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/UserLogin" }
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
             }
           }
         },
@@ -114,7 +126,9 @@
             "description": "User logged in successfully",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/UserResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
               }
             }
           },
@@ -133,7 +147,9 @@
     "/user/requestEmail": {
       "post": {
         "summary": "Request email token",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -141,9 +157,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string" }
+                  "email": {
+                    "type": "string"
+                  }
                 },
-                "required": ["email"]
+                "required": [
+                  "email"
+                ]
               }
             }
           }
@@ -161,11 +181,12 @@
         }
       }
     },
-
     "/user/getUser": {
       "get": {
         "summary": "Get user by ID",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "name": "userId",
@@ -185,13 +206,21 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": { "type": "string" },
+                    "message": {
+                      "type": "string"
+                    },
                     "user": {
                       "type": "object",
                       "properties": {
-                        "_id": { "type": "string" },
-                        "fullname": { "type": "string" },
-                        "email": { "type": "string" }
+                        "_id": {
+                          "type": "string"
+                        },
+                        "fullname": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
                       }
                     }
                   }
@@ -211,7 +240,9 @@
     "/user/forgotPassword": {
       "post": {
         "summary": "Forget password",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -219,9 +250,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string" }
+                  "email": {
+                    "type": "string"
+                  }
                 },
-                "required": ["email"]
+                "required": [
+                  "email"
+                ]
               }
             }
           }
@@ -242,7 +277,9 @@
     "/user/verify-otp": {
       "post": {
         "summary": "Verify OTP",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -250,9 +287,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "OTP": { "type": "string" }
+                  "OTP": {
+                    "type": "string"
+                  }
                 },
-                "required": ["OTP"]
+                "required": [
+                  "OTP"
+                ]
               }
             }
           }
@@ -276,7 +317,9 @@
     "/user/resetPassword": {
       "post": {
         "summary": "Reset password",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -284,12 +327,25 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "OTP": { "type": "string" },
-                  "password": { "type": "string" },
-                  "confirmPassword": { "type": "string" },
-                  "email": { "type": "string" }
+                  "OTP": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "confirmPassword": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
                 },
-                "required": ["OTP", "password", "confirmPassword", "email"]
+                "required": [
+                  "OTP",
+                  "password",
+                  "confirmPassword",
+                  "email"
+                ]
               }
             }
           }
@@ -310,7 +366,9 @@
     "/user/resume": {
       "post": {
         "summary": "Create a new resume",
-        "tags": ["Resume"],
+        "tags": [
+          "Resume"
+        ],
         "parameters": [
           {
             "name": "userId",
@@ -347,7 +405,9 @@
     "/user/getResumes": {
       "get": {
         "summary": "Get all resumes for a user",
-        "tags": ["Resume"],
+        "tags": [
+          "Resume"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -379,7 +439,9 @@
     "/user/getResume": {
       "get": {
         "summary": "Get a specific resume for a user",
-        "tags": ["Resume"],
+        "tags": [
+          "Resume"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -422,7 +484,9 @@
     "/user/updateResume": {
       "put": {
         "summary": "Update a specific resume for a user",
-        "tags": ["Resume"],
+        "tags": [
+          "Resume"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -475,7 +539,9 @@
     "/user/v2/createPdf": {
       "post": {
         "summary": "Create a PDF version of a resume",
-        "tags": ["Resume"],
+        "tags": [
+          "Resume"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -517,7 +583,9 @@
     "/user/delete/resume": {
       "delete": {
         "summary": "Delete a specific resume for a user",
-        "tags": ["Resume"],
+        "tags": [
+          "Resume"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -560,7 +628,9 @@
     "/user/resumesDownloaded": {
       "get": {
         "summary": "Get user downloaded resumes",
-        "tags": ["Resume"],
+        "tags": [
+          "Resume"
+        ],
         "parameters": [
           {
             "name": "userId",
@@ -585,7 +655,9 @@
     "/user/letter": {
       "post": {
         "summary": "Create a new letter",
-        "tags": ["Letter"],
+        "tags": [
+          "Letter"
+        ],
         "parameters": [
           {
             "name": "userId",
@@ -613,7 +685,6 @@
           "400": {
             "description": "Invalid request data"
           },
-
           "500": {
             "description": "Internal server error"
           }
@@ -623,7 +694,9 @@
     "/user/getLetter": {
       "get": {
         "summary": "Get a letter by ID",
-        "tags": ["Letter"],
+        "tags": [
+          "Letter"
+        ],
         "parameters": [
           {
             "name": "letterId",
@@ -651,7 +724,9 @@
     "/user/getLetters": {
       "get": {
         "summary": "Get user's letters",
-        "tags": ["Letter"],
+        "tags": [
+          "Letter"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -703,7 +778,9 @@
     "/user/deleteLetter": {
       "delete": {
         "summary": "Delete a letter",
-        "tags": ["Letter"],
+        "tags": [
+          "Letter"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -748,7 +825,9 @@
     "/user/updateLetter": {
       "put": {
         "summary": "Update a letter",
-        "tags": ["Letter"],
+        "tags": [
+          "Letter"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -784,28 +863,48 @@
                   "details": {
                     "type": "object",
                     "properties": {
-                      "fullName": { "type": "string" },
-                      "email": { "type": "string" },
-                      "jobPosition": { "type": "string" },
-                      "companyName": { "type": "string" }
+                      "fullName": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "jobPosition": {
+                        "type": "string"
+                      },
+                      "companyName": {
+                        "type": "string"
+                      }
                     }
                   },
                   "description": {
                     "type": "object",
                     "properties": {
-                      "jobDescription": { "type": "string" },
-                      "companyInfo": { "type": "string" }
+                      "jobDescription": {
+                        "type": "string"
+                      },
+                      "companyInfo": {
+                        "type": "string"
+                      }
                     }
                   },
-                  "content": { "type": "string" },
-                  "professionalBio": { "type": "string" },
+                  "content": {
+                    "type": "string"
+                  },
+                  "professionalBio": {
+                    "type": "string"
+                  },
                   "chats": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
-                        "userType": { "type": "string" },
-                        "message": { "type": "string" }
+                        "userType": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
                       }
                     }
                   }
@@ -836,7 +935,9 @@
     "/user/v2/createLetterDocx": {
       "post": {
         "summary": "Download the letter content as docx",
-        "tags": ["Letter"],
+        "tags": [
+          "Letter"
+        ],
         "parameters": [
           {
             "name": "letterId",
@@ -848,7 +949,6 @@
             }
           }
         ],
-
         "responses": {
           "200": {
             "description": "Letter downloaded successfully"
@@ -865,7 +965,9 @@
     "/user/downloadedLetters": {
       "get": {
         "summary": "Get user downloaded letters",
-        "tags": ["Letter"],
+        "tags": [
+          "Letter"
+        ],
         "parameters": [
           {
             "name": "userId",
@@ -890,7 +992,9 @@
     "/user/v2/getNotificationSettings": {
       "get": {
         "summary": "Get user notification settings",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -926,7 +1030,9 @@
     "/user/v2/getSocials": {
       "get": {
         "summary": "Get user social media",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -962,7 +1068,9 @@
     "/user/v2/updateUser": {
       "put": {
         "summary": "Update a specific  user",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "BearerAuth": []
@@ -1007,7 +1115,9 @@
     "/user/v2/updateNotificationSetting": {
       "patch": {
         "summary": "Update user notification preferences",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "name": "userId",
@@ -1072,7 +1182,9 @@
     "/user/internship": {
       "post": {
         "summary": "Create a new internship application",
-        "tags": ["Internship"],
+        "tags": [
+          "Internship"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1099,7 +1211,9 @@
     "/user/partner": {
       "post": {
         "summary": "Create a new partnership application",
-        "tags": ["Partnership"],
+        "tags": [
+          "Partnership"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1151,7 +1265,11 @@
           },
           "gender": {
             "type": "string",
-            "enum": ["Female", "Male", "Prefer not to say"]
+            "enum": [
+              "Female",
+              "Male",
+              "Prefer not to say"
+            ]
           },
           "isEmailVerified": {
             "type": "boolean",
@@ -1159,7 +1277,11 @@
           },
           "typeOfUser": {
             "type": "string",
-            "enum": ["Regular", "Google", "Microsoft"],
+            "enum": [
+              "Regular",
+              "Google",
+              "Microsoft"
+            ],
             "default": "Regular"
           },
           "notificationSettings": {
@@ -1173,7 +1295,6 @@
               }
             }
           },
-
           "socials": {
             "type": "object",
             "properties": {
@@ -1195,27 +1316,48 @@
             }
           }
         },
-        "required": ["fullname", "email", "password"]
+        "required": [
+          "fullname",
+          "email",
+          "password"
+        ]
       },
       "UserLogin": {
         "type": "object",
         "properties": {
-          "email": { "type": "string" },
-          "password": { "type": "string" }
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
         },
-        "required": ["email", "password"]
+        "required": [
+          "email",
+          "password"
+        ]
       },
       "UserResponse": {
         "type": "object",
         "properties": {
-          "message": { "type": "string" },
-          "token": { "type": "string" },
+          "message": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
           "data": {
             "type": "object",
             "properties": {
-              "_id": { "type": "string" },
-              "fullname": { "type": "string" },
-              "email": { "type": "string" }
+              "_id": {
+                "type": "string"
+              },
+              "fullname": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
             }
           }
         }
@@ -1226,7 +1368,7 @@
           "resumeUrl": {
             "type": "string"
           },
-          "details": {
+          "basicInfo": {
             "type": "object",
             "properties": {
               "firstName": {
@@ -1297,7 +1439,8 @@
                   "type": "string"
                 },
                 "current": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "default": "false"
                 }
               }
             }
@@ -1397,9 +1540,112 @@
           "downloadedTime": {
             "type": "string",
             "format": "date"
+          },
+          "templateDetails": {
+            "type": "object",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fontType": {
+                  "type": "string"
+                },
+                "fontSize": {
+                  "type": "string"
+                },
+                "colour": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalInformation": {
+            "type": "object",
+            "properties": {
+              "awards": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "organization": {
+                      "type": "string"
+                    },
+                    "awardYear": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "certificates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "authority": {
+                      "type": "string"
+                    },
+                    "license": {
+                      "type": "string"
+                    },
+                    "startDate": {
+                      "type": "string"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "hobbies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "link": {
+                  "type": "string"
+                },
+                "duration": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
-        "required": ["userId"]
+        "required": [
+          "userId"
+        ]
       },
       "Letter": {
         "type": "object",
@@ -1460,13 +1706,19 @@
             "format": "date"
           }
         },
-        "required": ["details"]
+        "required": [
+          "details"
+        ]
       },
       "InternshipApplication": {
         "type": "object",
         "properties": {
-          "fullName": { "type": "string" },
-          "email": { "type": "string" },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
           "countryCode": {
             "type": "string",
             "enum": [
@@ -1709,7 +1961,9 @@
               "+263"
             ]
           },
-          "phoneNumber": { "type": "string" },
+          "phoneNumber": {
+            "type": "string"
+          },
           "country": {
             "type": "string",
             "enum": [
@@ -1911,7 +2165,11 @@
           },
           "gender": {
             "type": "string",
-            "enum": ["Female", "Male", "Prefer not to say"]
+            "enum": [
+              "Female",
+              "Male",
+              "Prefer not to say"
+            ]
           },
           "ageRange": {
             "type": "string",
@@ -1925,10 +2183,15 @@
               "65yrs and  above"
             ]
           },
-          "portfolio": { "type": "string" },
+          "portfolio": {
+            "type": "string"
+          },
           "resumes": {
             "type": "array",
-            "items": { "type": "string", "format": "binary" }
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
           },
           "currentEducation": {
             "type": "string",
@@ -1950,11 +2213,20 @@
             "type": "string",
             "format": "date"
           },
-          "graduationDate": { "type": "string", "format": "date" },
-          "moreDetails": { "type": "string" },
+          "graduationDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "moreDetails": {
+            "type": "string"
+          },
           "internshipType": {
             "type": "string",
-            "enum": ["Paid", "Unpaid", "Both"]
+            "enum": [
+              "Paid",
+              "Unpaid",
+              "Both"
+            ]
           },
           "preferedField": {
             "type": "string",
@@ -1996,14 +2268,30 @@
       "PartnershipApplication": {
         "type": "object",
         "properties": {
-          "fullName": { "type": "string" },
-          "email": { "type": "string" },
-          "requiredRole": { "type": "string" },
-          "phoneNumber": { "type": "string" },
-          "companyName": { "type": "string" },
-          "companyWebsite": { "type": "string" },
-          "supportEmail": { "type": "string" },
-          "companyAddress": { "type": "string" },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "requiredRole": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "companyWebsite": {
+            "type": "string"
+          },
+          "supportEmail": {
+            "type": "string"
+          },
+          "companyAddress": {
+            "type": "string"
+          },
           "country": {
             "type": "string",
             "enum": [
@@ -2205,15 +2493,28 @@
           },
           "companySize": {
             "type": "string",
-            "enum": ["1-10", "11-50", "51-100", "100+"]
+            "enum": [
+              "1-10",
+              "11-50",
+              "51-100",
+              "100+"
+            ]
           },
-          "logo": { "type": "string", "format": "binary" },
-          "companyDescription": { "type": "string" },
+          "logo": {
+            "type": "string",
+            "format": "binary"
+          },
+          "companyDescription": {
+            "type": "string"
+          },
           "hiringFrequency": {
             "type": "string",
-            "enum": ["Always Hiring", "Hiring Frequently", "Hire few months"]
+            "enum": [
+              "Always Hiring",
+              "Hiring Frequently",
+              "Hire few months"
+            ]
           },
-
           "preferedField": {
             "type": "string",
             "enum": [
@@ -2239,7 +2540,11 @@
           },
           "internshipType": {
             "type": "string",
-            "enum": ["Paid", "Unpaid", "Both"]
+            "enum": [
+              "Paid",
+              "Unpaid",
+              "Both"
+            ]
           },
           "mouContent": {
             "type": "string"
