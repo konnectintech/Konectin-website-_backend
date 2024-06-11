@@ -118,6 +118,36 @@ const resumeSchema = new mongoose.Schema({
   resumeImage: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ResumeImage"
+  },
+  additionalInformation: {
+    awards: [
+      {
+        title: String,
+        organization: String,
+        awardYear: String,
+        description: String
+      }
+    ],
+    certificates: [
+      {
+        name: String,
+        authority: String,
+        license: String,
+        startDate: Date,
+        endDate: Date
+      }
+    ],
+    hobbies: [String],
+    languages: [String],
+    projects: [
+      {
+        title: String,
+        description: String,
+        role: String,
+        link: String,
+        duration: String
+      }
+    ]
   }
 });
 
