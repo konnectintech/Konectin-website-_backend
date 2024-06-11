@@ -7,6 +7,7 @@ const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
 const { StatusCodes } = require("http-status-codes");
 const ResumeImage = require("../../models/resumeImage.model");
+const { uploadResumePicture } = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
   try {

@@ -8,7 +8,6 @@ const subscribedInternEmail = require("../utils/subscribedIntern");
 const ResumeImage = require("../models/resumeImage.model");
 const User = require("../models/user.model");
 const Path = require("path");
-const { uploadResumePicture } = require("../helpers/cloudinary");
 
 cloudinary.config({
   secure: true,
