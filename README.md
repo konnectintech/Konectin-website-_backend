@@ -40,3 +40,11 @@ Before running the tests, ensure that you have Node.js and npm installed on your
 ### Writing Tests
 
 Tests are written using Jest and Supertest. The test files are typically located in the `tests` directory.
+
+### Updating swagger docs
+ - All schemas are stored in docs/components/schemas
+ - All routes are stored in docs/paths
+
+When adding schemas, ensure it reflects in the index.js of the schemas folder
+
+When adding paths, ensure it reflects in the index.js of the paths folder
