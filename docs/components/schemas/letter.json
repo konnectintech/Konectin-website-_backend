@@ -1,0 +1,65 @@
+{
+    "Letter": {
+        "type": "object",
+        "properties": {
+            "details": {
+                "type": "object",
+                "properties": {
+                    "fullName": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "jobPosition": {
+                        "type": "string"
+                    },
+                    "companyName": {
+                        "type": "string"
+                    }
+                }
+            },
+            "description": {
+                "type": "object",
+                "properties": {
+                    "jobDescription": {
+                        "type": "string"
+                    },
+                    "companyInfo": {
+                        "type": "string"
+                    }
+                }
+            },
+            "content": {
+                "type": "string"
+            },
+            "professionalBio": {
+                "type": "string"
+            },
+            "chats": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "userType": {
+                            "type": "string"
+                        },
+                        "message": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "isDownloaded": {
+                "type": "boolean"
+            },
+            "downloadedTime": {
+                "type": "string",
+                "format": "date"
+            }
+        },
+        "required": [
+            "details"
+        ]
+    }
+}
