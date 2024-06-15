@@ -7,7 +7,7 @@ const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
 const { StatusCodes } = require("http-status-codes");
 const ResumeImage = require("../../models/resumeImage.model");
-const { uploadResumePicture } = require("../../helpers/cloudinary");
+const { uploadResumeProfilePicture } = require("../../helpers/cloudinary");
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -274,7 +274,7 @@ exports.numberOfDownloadeResumes = async (req, res) => {
   }
 };
 
-exports.uploadResumeImage = async (req, res) => {
+exports.uploadResumeProfilePicture = async (req, res) => {
   const userId = req.query.userId
   const user = await User.findById(userId)
   if (!user) {
@@ -287,7 +287,7 @@ exports.uploadResumeImage = async (req, res) => {
   try {
     // Upload the image
     const resumeImage = new ResumeImage({ userId: user.id })
-    const result = await uploadResumePicture(file.tempFilePath, resumeImage)
+    const result = await uploadResumeProfilePicture(file.tempFilePath, resumeImage)
     if (result && result?.secure_url) {
       resumeImage.link = result.secure_url
       await resumeImage.save()
