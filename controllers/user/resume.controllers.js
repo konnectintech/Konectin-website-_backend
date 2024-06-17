@@ -217,6 +217,7 @@ exports.delete = async (req, res) => {
       .json({ message: err.message });
   }
 };
+
 exports.getResumePictures = async function (req, res) {
   try {
     const userId = req.query.userId;

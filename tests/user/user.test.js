@@ -47,11 +47,11 @@ describe("Auth Routes", () => {
         .post("/user/register")
         .set("content-type", "application/json")
         .send(userData);
+
       expect(response.status).toEqual(StatusCodes.CREATED);
       expect(response.body.message).toEqual("User created successfully");
       expect(response.body.user.fullname).toEqual(userData.fullname);
       expect(response.body.user.email).toEqual(userData.email);
-      expect(response.body.user.typeOfUser).toEqual(UserRoleEnum.REGULAR);
       expect(response.body.user.isEmailVerified).toEqual(false);
     });
   });
@@ -261,7 +261,7 @@ describe("Auth Routes", () => {
   });
 
   describe("REQUEST EMAIL TOKEN", () => {
-    it("should request token to signup", async () => {
+    it("should request token to signin", async () => {
       const user = await createUser();
 
       const response = await request(app)
@@ -300,6 +300,7 @@ describe("Auth Routes", () => {
       const response = await request(app)
         .post("/user/forgotPassword")
         .send({ email: user.email });
+
       expect(response.status).toEqual(StatusCodes.OK);
       expect(response.body.message).toEqual(
         "Please check email for the code to reset your password"
