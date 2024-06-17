@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    typeOfUser: {
+      type: String,
+      enum: Object.values(UserRoleEnum),
+      required: true,
+      default: UserRoleEnum.REGULAR,
+    },
     dob: {
       type: Date,
     },
