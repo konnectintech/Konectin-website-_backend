@@ -32,7 +32,7 @@ const uploadImage = async (filePath, params) => {
   return response
 }
 
-const uploadResumePicture = async function (filePath, resumeImage, params) {
+const uploadResumeProfilePicture = async function (filePath, resumeImage, params) {
   const options = {
     folder: `${resumeImage.userId}/resumePictures`,
     public_id: resumeImage.id,
@@ -53,4 +53,4 @@ const uploadProfilePicture = async function (filePath, profileImage, params) {
 }
 
 
-module.exports = { cloudinaryUpload, uploadResumePicture, uploadProfilePicture };
+module.exports = { cloudinaryUpload, uploadResumeProfilePicture, uploadProfilePicture };
