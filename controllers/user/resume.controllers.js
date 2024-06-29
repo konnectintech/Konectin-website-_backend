@@ -7,6 +7,10 @@ const { uploadFile, downloadFile } = require("../../helpers/aws");
 const fs = require("fs");
 const { StatusCodes } = require("http-status-codes");
 const ResumeImage = require("../../models/resumeImage.model");
+const ManualReview = require("../../models/manualReview.model");
+const multer = require("multer");
+const os = require('os');
+const fsP = require('fs/promises');
 
 exports.resumeBuilder = async (req, res) => {
   try {
@@ -258,6 +262,7 @@ exports.duplicateResume = async function (req, res) {
     return res.status(500).json({ message: error.message });
   }
 };
+
 exports.numberOfDownloadeResumes = async (req, res) => {
   try {
     const { userId } = req.query;
@@ -271,5 +276,89 @@ exports.numberOfDownloadeResumes = async (req, res) => {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ message: err.message });
+  }
+};
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, '/tmp')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname))
+  }
+});
+const upload = multer({ storage: storage }).single('resume');
+
+exports.submitManualReview = async (req, res) => {
+  try {
+    if (!process.env.AWS_BUCKET_NAME) {
+      console.error("AWS_BUCKET_NAME is not set in environment variables");
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Server configuration error" });
+    }
+    
+    const {
+      firstName,
+      lastName,
+      email,
+      currentCity,
+      currentCountry,
+      countryCode,
+      phoneNumber,
+      desiredJobTitle,
+      desiredIndustry,
+      interestedCompanies
+    } = req.body;
+
+    if (!firstName || !lastName || !email || !currentCity || !currentCountry || !countryCode || !phoneNumber || !desiredJobTitle || !desiredIndustry || !req.files || !req.files.resume) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required, including the resume file" });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
+    }
+
+    const resumeFile = req.files.resume;
+    const tempFilePath = path.join(os.tmpdir(), `${Date.now()}_${resumeFile.name}`);
+
+    try {
+      // Write the file to a temporary location
+      await fsP.writeFile(tempFilePath, resumeFile.data);
+
+      // Upload the file to AWS S3
+      const fileName = `${user._id}_${Date.now()}_${resumeFile.name}`;
+      const resumeUrl = await uploadFile(tempFilePath, fileName);
+
+      const manualReview = new ManualReview({
+        userId: user._id,
+        firstName,
+        lastName,
+        email,
+        currentCity,
+        currentCountry,
+        countryCode,
+        phoneNumber,
+        desiredJobTitle,
+        desiredIndustry,
+        interestedCompanies: interestedCompanies ? interestedCompanies.split(',').map(company => company.trim()) : [],
+        resumeUrl,
+        status: "Pending"
+      });
+
+      await manualReview.save();
+
+      return res.status(StatusCodes.CREATED).json({
+        message: "Manual review request submitted successfully",
+        reviewId: manualReview._id
+      });
+    } finally {
+      // Clean up: delete the temporary file
+      await fsP.unlink(tempFilePath).catch(console.error);
+    }
+
+  } catch (err) {
+    console.error(err);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while processing your request" });
   }
 };
