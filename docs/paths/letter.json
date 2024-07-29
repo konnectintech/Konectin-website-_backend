@@ -1,0 +1,339 @@
+{
+    "/user/letter": {
+        "post": {
+            "summary": "Create a new letter",
+            "tags": [
+                "Letter"
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": false,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Letter"
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "201": {
+                    "description": "Letter created successfully"
+                },
+                "400": {
+                    "description": "Invalid request data"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/getLetter": {
+        "get": {
+            "summary": "Get a letter by ID",
+            "tags": [
+                "Letter"
+            ],
+            "parameters": [
+                {
+                    "name": "letterId",
+                    "in": "query",
+                    "description": "ID of the letter",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Letter retrieved successfully"
+                },
+                "404": {
+                    "description": "Letter not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/getLetters": {
+        "get": {
+            "summary": "Get user's letters",
+            "tags": [
+                "Letter"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "description": "ID of the user",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "page",
+                    "in": "query",
+                    "description": "Page number",
+                    "schema": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "name": "pageSize",
+                    "in": "query",
+                    "description": "Number of items per page",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Letters retrieved successfully"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "404": {
+                    "description": "User not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/deleteLetter": {
+        "delete": {
+            "summary": "Delete a letter",
+            "tags": [
+                "Letter"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "letterId",
+                    "in": "query",
+                    "description": "ID of the letter",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "description": "ID of the user",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Letter deleted successfully"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "404": {
+                    "description": "Letter not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/updateLetter": {
+        "put": {
+            "summary": "Update a letter",
+            "tags": [
+                "Letter"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "letterId",
+                    "in": "query",
+                    "description": "ID of the letter",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "description": "ID of the user",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "details": {
+                                    "type": "object",
+                                    "properties": {
+                                        "fullName": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "jobPosition": {
+                                            "type": "string"
+                                        },
+                                        "companyName": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "description": {
+                                    "type": "object",
+                                    "properties": {
+                                        "jobDescription": {
+                                            "type": "string"
+                                        },
+                                        "companyInfo": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "content": {
+                                    "type": "string"
+                                },
+                                "professionalBio": {
+                                    "type": "string"
+                                },
+                                "chats": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "userType": {
+                                                "type": "string"
+                                            },
+                                            "message": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Letter updated successfully"
+                },
+                "400": {
+                    "description": "Invalid request data"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "404": {
+                    "description": "Letter not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/v2/createLetterDocx": {
+        "post": {
+            "summary": "Download the letter content as docx",
+            "tags": [
+                "Letter"
+            ],
+            "parameters": [
+                {
+                    "name": "letterId",
+                    "in": "query",
+                    "description": "ID of the letter",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Letter downloaded successfully"
+                },
+                "404": {
+                    "description": "Letter not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/downloadedLetters": {
+        "get": {
+            "summary": "Get user downloaded letters",
+            "tags": [
+                "Letter"
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "description": "user id",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    }
+}

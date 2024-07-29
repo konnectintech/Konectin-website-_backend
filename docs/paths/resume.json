@@ -1,0 +1,411 @@
+{
+    "/user/resume": {
+        "post": {
+            "summary": "Create a new resume",
+            "tags": [
+                "Resume"
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Resume"
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "201": {
+                    "description": "Resume created successfully"
+                },
+                "404": {
+                    "description": "User does not exist, please register"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/getResumes": {
+        "get": {
+            "summary": "Get all resumes for a user",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Resumes retrieved successfully"
+                },
+                "404": {
+                    "description": "User does not exist, please register"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/getResume": {
+        "get": {
+            "summary": "Get a specific resume for a user",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "resumeId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Resume retrieved successfully"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "404": {
+                    "description": "Resume with Id does not exist"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/updateResume": {
+        "put": {
+            "summary": "Update a specific resume for a user",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "resumeId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Resume"
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Resume Updated successfully"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "404": {
+                    "description": "CV not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/v2/createPdf": {
+        "post": {
+            "summary": "Create a PDF version of a resume",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "resumeId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Resume"
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "Resume downloaded successfully"
+                },
+                "404": {
+                    "description": "CV not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/delete/resume": {
+        "delete": {
+            "summary": "Delete a specific resume for a user",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "resumeId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Resume has been deleted successfully"
+                },
+                "401": {
+                    "description": "Unauthorized"
+                },
+                "404": {
+                    "description": "CV not found"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/resumesDownloaded": {
+        "get": {
+            "summary": "Get user downloaded resumes",
+            "tags": [
+                "Resume"
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "description": "user id",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/duplicateResume": {
+        "post": {
+            "summary": "Duplicate an existing resume",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "resumeId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Resume Duplicated Successfully"
+                },
+                "404": {
+                    "description": "User does not exist, please register"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/uploadResumeProfilePicture": {
+        "post": {
+            "summary": "Upload a profile picture to be used on a resume",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "requestBody": {
+                "required": true,
+                "content": {
+                    "multipart/form-data": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ResumeProfilePictureUpload"
+                        }
+                    }
+                }
+            },
+            "responses": {
+                "200": {
+                    "description": "File Uploaded Successfully"
+                },
+                "404": {
+                    "description": "User does not exist, please register"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    },
+    "/user/getResumeProfilePictures": {
+        "get": {
+            "summary": "Get all resume profile pictures for a user",
+            "tags": [
+                "Resume"
+            ],
+            "security": [
+                {
+                    "BearerAuth": []
+                }
+            ],
+            "parameters": [
+                {
+                    "name": "userId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "Resume Pictures Retrieved Successfully"
+                },
+                "404": {
+                    "description": "User does not exist, please register"
+                },
+                "500": {
+                    "description": "Internal server error"
+                }
+            }
+        }
+    }
+}
