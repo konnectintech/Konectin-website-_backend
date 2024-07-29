@@ -38,7 +38,6 @@ app.get("/", (request, response) => {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
-console.log(swaggerDocument)
 const server = app.listen(port, () => {
   console.log(`Server running on port: ${port}`);
 });
