@@ -55,17 +55,20 @@ exports.register = async (req, res) => {
       const msg = verifyEmail(user.fullname.split(" ")[0], user.email, token);
       //Send email
       await transporter(user.email, subject, msg);
-
-      const payload = {
-        _id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-      };
-
-      const signUpToken = jwtSign(payload);
-      return res.status(201).json({ message: "User created successfully", user: { ...payload, isEmailVerified: false }, token: signUpToken });
     }
 
+    const payload = {
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+    };
+
+    const signUpToken = jwtSign(payload);
+    return res.status(201).json({
+      message: "User created successfully",
+      user: { ...payload, isEmailVerified: false },
+      token: signUpToken,
+    });
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -100,11 +103,15 @@ exports.verifyEmailAddress = async (req, res) => {
 
     user.isEmailVerified = true;
     await user.save();
+    if (
+      process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "production"
+    ) {
+      const welcomeSubject = "Welcome to Konectin!";
+      const welcomeHtml = welcomeEmail(user.fullname.split(" ")[0]);
 
-    const welcomeSubject = "Welcome to Konectin!";
-    const welcomeHtml = welcomeEmail(user.fullname.split(" ")[0]);
-
-    await transporter(user.email, welcomeSubject, welcomeHtml);
+      await transporter(user.email, welcomeSubject, welcomeHtml);
+    }
     return res
       .status(StatusCodes.OK)
       .json({ message: "Email verified successfully", user });
@@ -300,13 +307,17 @@ exports.requestEmailToken = async (req, res) => {
         .json({ message: "Please sign up before requesting a new token" });
     }
     const token = await generateRegisterOTP(user._id);
-
-    const subject = "Konectin Technical - OTP Code request";
-    const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
+    if (
+      process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "production"
+    ) {
+      const subject = "Konectin Technical - OTP Code request";
+      const msg = `Use this code to verify your Konectin account. It expires in 10 minutes.
               <h1 class="code block text-5xl text-center font-bold tracking-wide my-10">${token}</h1>
               <p class="text-xs my-1 text-center">If you did not request this email, kindly ignore it or reach out to support if you think your account is at risk.</p>
           `;
-    await transporter(email, subject, msg);
+      await transporter(email, subject, msg);
+    }
     return res
       .status(StatusCodes.OK)
       .json({ message: "Check your email for the verification code" });
@@ -332,46 +343,52 @@ exports.forgetPassword = async (req, res) => {
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "Please sign-up first" });
     }
-    //
-    const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
-    if (isIPv6) {
-      // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
-      ipAddress = ipAddress.includes("::ffff:")
-        ? ipAddress.replace(/^.*:/, "")
-        : null;
-    }
-    if (!ipAddress) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Some error occured, try again later" });
-    }
-    //Get location
-    const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
-    if (!response.ok) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Some error occured, try again later" });
-    }
+    if (
+      process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "production"
+    ) {
+      //
+      const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
+      if (isIPv6) {
+        // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
+        ipAddress = ipAddress.includes("::ffff:")
+          ? ipAddress.replace(/^.*:/, "")
+          : null;
+      }
+      if (!ipAddress) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Some error occured, try again later" });
+      }
+      //Get location
+      const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
+      if (!response.ok) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Some error occured, try again later" });
+      }
 
-    const locationData = await response.json();
-    const countryAbbreviation = locationData.country;
-    const sortedData = countries.sort(
-      (a, b) => a.abbreviation - b.abbreviation
-    );
+      const locationData = await response.json();
+      const countryAbbreviation = locationData.country;
+      const sortedData = countries.sort(
+        (a, b) => a.abbreviation - b.abbreviation
+      );
 
-    let location = getCountry(sortedData, countryAbbreviation);
-    location !== -1 ? location : (location = countryAbbreviation);
-    let device = userAgent;
+      let location = getCountry(sortedData, countryAbbreviation);
+      location !== -1 ? location : (location = countryAbbreviation);
+      let device = userAgent;
 
-    const token = await generatePasswordOTP(user._id);
-    const subject = "Konectin Technical - Reset password";
-    const msg = ResetPasswordEmail(
-      user.fullname.split(" ")[0],
-      location,
-      device,
-      token
-    );
-    await transporter(email, subject, msg);
+      const token = await generatePasswordOTP(user._id);
+
+      const subject = "Konectin Technical - Reset password";
+      const msg = ResetPasswordEmail(
+        user.fullname.split(" ")[0],
+        location,
+        device,
+        token
+      );
+      await transporter(email, subject, msg);
+    }
     return res.status(StatusCodes.OK).json({
       message: "Please check email for the code to reset your password",
     });
