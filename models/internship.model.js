@@ -1,18 +1,19 @@
 const mongoose = require("mongoose");
-const { CountryCodesEnum } = require("../utils/enums/CountryEnum");
 const GenderEnum = require("../utils/enums/GenderEnum");
 const AgeRangeEnum = require("../utils/enums/AgeRangeEnum");
 const CurrentEducationEnum = require("../utils/enums/CurrentEducationEnum");
 const sharedSchemaDefinition = require("./shared.model");
+const PreferedFieldEnum = require("../utils/enums/PreferdFieldEnum");
 
 const internshipSchema = new mongoose.Schema(
   {
     ...sharedSchemaDefinition,
-    countryCode: {
+    preferedField: {
       type: String,
-      enum: Object.values(CountryCodesEnum),
+      enum: Object.values(PreferedFieldEnum),
       required: true,
     },
+
     gender: {
       type: String,
       enum: Object.values(GenderEnum),
