@@ -1,6 +1,8 @@
-const { CountryNamesEnum } = require("../utils/enums/CountryEnum");
+const {
+  CountryNamesEnum,
+  CountryCodesEnum,
+} = require("../utils/enums/CountryEnum");
 const InternshipTypeEnum = require("../utils/enums/InternshipTypeEnum");
-const PreferedFieldEnum = require("../utils/enums/PreferdFieldEnum");
 
 const sharedSchemaDefinition = {
   fullName: {
@@ -18,9 +20,13 @@ const sharedSchemaDefinition = {
     enum: Object.values(CountryNamesEnum),
     required: true,
   },
+  countryCode: {
+    type: String,
+    enum: Object.values(CountryCodesEnum),
+  },
+
   phoneNumber: {
     type: String,
-    required: true,
     match: [
       /^[0-12][0-9]{7,}$/,
       "Must start with a digit from 0 to 12, followed by 7 or more digits",
@@ -29,11 +35,6 @@ const sharedSchemaDefinition = {
   internshipType: {
     type: String,
     enum: Object.values(InternshipTypeEnum),
-    required: true,
-  },
-  preferedField: {
-    type: String,
-    enum: Object.values(PreferedFieldEnum),
     required: true,
   },
 };

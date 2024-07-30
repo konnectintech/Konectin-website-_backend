@@ -1,10 +1,10 @@
 const B2BApplication = require("../../models/B2B.model");
 const createPartnershipApplication = async (partnershipData = {}) => {
-  const partnershipApplication = new B2BApplication({
+  const partnershipApplication = await B2BApplication.create({
     ...partnershipData,
   });
 
-  await partnershipApplication.save();
+  // await partnershipApplication.save();
 
   return partnershipApplication;
 };

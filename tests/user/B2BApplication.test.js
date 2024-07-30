@@ -5,30 +5,27 @@ const {
   createPartnershipApplication,
 } = require("../factories/partnershipApplication");
 const InternshipTypeEnum = require("../../utils/enums/InternshipTypeEnum");
-const PreferdFieldEnum = require("../../utils/enums/PreferdFieldEnum");
 const CompanySizeEnum = require("../../utils/enums/companySizeEnum");
 const HiringFrequencyEnum = require("../../utils/enums/HiringFrequencyEnum");
+const LanguagesEnum = require("../../utils/enums/languagesEnum");
+const InternsEnum = require("../../utils/enums/internsEnum");
 
 describe("B2B Routes", () => {
   describe("Partnership Application", () => {
     it("should return a conflict error if a user already sends an application", async () => {
       const data = {
-        fullName: "test",
-        email: "test@gmail.com",
-        phoneNumber: "0978665432",
-        country: "RWANDA",
-        requiredRole: "Frontend",
-        companyName: "partnet@name",
-        companyWebsite: "https://www.linkedin.com/in/test/",
-        supportEmail: "test1@email.com",
-        companySize: CompanySizeEnum["100+"],
-        companyAddress: "Kigali",
-        logo: "image.png",
-        companyDescription: "testhjbddhjf",
+        fullName: "Jehanne MUSA",
+        email: "konectin@gmail.com",
+        country: "Rwanda",
+        countryCode: "+250",
+        internshipType: InternshipTypeEnum.PAID,
+        requiredRole: "Backend",
+        companyName: "KonectIn",
+        supportEmail: "support@gmail.com",
+        companySize: CompanySizeEnum["1-10"],
         hiringFrequency: HiringFrequencyEnum.ALWAYS_HIRING,
-        internshipType: InternshipTypeEnum.Both,
-        preferedField: PreferdFieldEnum.FINANCE,
-        mouContent: "rhjdh jfb bhc",
+        languages: LanguagesEnum.FRENCH,
+        internsNeeded: InternsEnum["10-20"],
         mouConfirmed: true,
       };
       const existingPartnership = await createPartnershipApplication(data);
@@ -48,22 +45,18 @@ describe("B2B Routes", () => {
     });
     it("should return a bad request error if mouConfirmed is not equal to true", async () => {
       const data = {
-        fullName: "test",
-        email: "test@gmail.com",
-        phoneNumber: "0977865432",
-        country: "RWANDA",
-        requiredRole: "Frontend",
-        companyName: "partnet@name",
-        companyWebsite: "https://www.linkedin.com/in/test/",
-        supportEmail: "test1@email.com",
-        companySize: CompanySizeEnum["100+"],
-        companyAddress: "Kigali",
-        logo: "image.png",
-        companyDescription: "testhjbddhjf",
+        fullName: "Jehanne MUSA",
+        email: "konectin@gmail.com",
+        country: "Rwanda",
+        countryCode: "+250",
+        internshipType: InternshipTypeEnum.PAID,
+        requiredRole: "Backend",
+        companyName: "KonectIn",
+        supportEmail: "support@gmail.com",
+        companySize: CompanySizeEnum["1-10"],
         hiringFrequency: HiringFrequencyEnum.ALWAYS_HIRING,
-        internshipType: InternshipTypeEnum.Both,
-        preferedField: PreferdFieldEnum.FINANCE,
-        mouContent: "rhjdh jfb bhc",
+        languages: LanguagesEnum.FRENCH,
+        internsNeeded: InternsEnum["10-20"],
         mouConfirmed: false,
       };
 
@@ -79,22 +72,18 @@ describe("B2B Routes", () => {
 
     it("should return a success message if the registration is successful", async () => {
       const data = {
-        fullName: "test",
-        email: "test@gmail.com",
-        phoneNumber: "097865432",
-        country: "RWANDA",
-        requiredRole: "Frontend",
-        companyName: "partnet@name",
-        companyWebsite: "https://www.linkedin.com/in/test/",
-        supportEmail: "test1@email.com",
-        companySize: CompanySizeEnum["100+"],
-        companyAddress: "Kigali",
-        companyDescription: "testhjbddhjf",
-        logo: "image.png",
+        fullName: "Jehanne MUSA",
+        email: "konectin@gmail.com",
+        country: "Rwanda",
+        countryCode: "+250",
+        internshipType: InternshipTypeEnum.PAID,
+        requiredRole: "Backend",
+        companyName: "KonectIn",
+        supportEmail: "support@gmail.com",
+        companySize: CompanySizeEnum["1-10"],
         hiringFrequency: HiringFrequencyEnum.ALWAYS_HIRING,
-        internshipType: InternshipTypeEnum.Both,
-        preferedField: PreferdFieldEnum.FINANCE,
-        mouContent: "rhjdh jfb bhc",
+        languages: LanguagesEnum.FRENCH,
+        internsNeeded: InternsEnum["10-20"],
         mouConfirmed: true,
       };
 
