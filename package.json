@@ -42,7 +42,7 @@
     "passport": "^0.6.0",
     "passport-google-oauth2": "^0.2.0",
     "prettier": "^2.8.6",
-    "puppeteer": "^21.6.1",
+    "puppeteer": "^22.15.0",
     "rand-token": "^1.0.1",
     "tmp": "^0.2.1"
   },
@@ -50,10 +50,10 @@
     "@babel/preset-env": "^7.23.6",
     "@faker-js/faker": "^8.3.1",
     "cross-env": "^7.0.3",
-    "faker": "^6.6.6",
+    "faker": "^5.5.3",
     "jest": "^29.7.0",
     "nodemailer-mock": "^2.0.3",
-    "nodemon": "^2.0.21",
+    "nodemon": "^3.1.4",
     "supertest": "^6.3.3"
   },
   "jest": {
