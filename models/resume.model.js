@@ -38,6 +38,12 @@ const resumeSchema = new mongoose.Schema({
     phoneCode: {
       type: String,
     },
+    expertise: {
+      id: { type: Number },
+      name: { type: String },
+      text: { type: String }
+
+    },
   },
   jobExperience: [
     {
@@ -88,6 +94,9 @@ const resumeSchema = new mongoose.Schema({
       awards: [{ name: String }],
       relevantCourses: [{ name: String }],
       current: Boolean,
+      type: { type: String },
+      instituteType: { type: String },
+      qualifications: [{ type: String }]
     },
   ],
   skills: [
@@ -99,7 +108,11 @@ const resumeSchema = new mongoose.Schema({
   currentEditedJob: { type: Number },
   currentEditedEducation: { type: Number },
   bio: { type: String },
-  selectedTemplate: { type: String },
+  selectedTemplate: {
+    name: { type: String },
+    id: { type: String },
+    themeSet: { type: String }
+  },
   currentStage: {
     type: Number,
   },
@@ -148,7 +161,22 @@ const resumeSchema = new mongoose.Schema({
         duration: String
       }
     ]
-  }
+  },
+  theme: {
+    color: { type: String },
+    font: {
+      family: { type: String },
+      size: {
+        heading: { type: String },
+        paragraph: { type: String }
+      },
+      weight: { type: String }
+    }
+  },
+  image: {
+    show: { type: Boolean },
+    value: { type: String }
+  },
 });
 
 module.exports = mongoose.model("ResumeBuilder", resumeSchema);
