@@ -42,7 +42,6 @@ const resumeSchema = new mongoose.Schema({
       id: { type: Number },
       name: { type: String },
       text: { type: String }
-
     },
   },
   jobExperience: [
@@ -111,7 +110,7 @@ const resumeSchema = new mongoose.Schema({
   selectedTemplate: {
     name: { type: String },
     id: { type: String },
-    themeSet: { type: String }
+    themeSet: [{ type: String }]
   },
   currentStage: {
     type: Number,
