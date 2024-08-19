@@ -153,6 +153,11 @@ exports.login = async (req, res) => {
       _id: user._id,
       fullname: user.fullname,
       email: user.email,
+      country: user.country,
+      city: user.city,
+      phoneNumber: user.phoneNumber,
+      state: user.state,
+      college: user.college
     };
     const token = jwtSign(payload);
 
@@ -235,17 +240,32 @@ exports.googleLogin = async (req, res) => {
       _id: user._id,
       fullname: user.fullname,
       email: user.email,
+      country: user.country,
+      city: user.city,
+      phoneNumber: user.phoneNumber,
+      state: user.state,
+      college: user.college
     };
 
     return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
-      data: user,
+      data: payload,
       token: token,
     });
   } else {
+      const payload = {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        country: user.country,
+        city: user.city,
+        phoneNumber: user.phoneNumber,
+        state: user.state,
+        college: user.college
+      };
     return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
-      data: user,
+      data: payload,
       token: token,
     });
   }
@@ -288,7 +308,13 @@ exports.microsoftLogin = async function (req, res) {
     _id: user._id,
     fullname: user.fullname,
     email: user.email,
+    country: user.country,
+    city: user.city,
+    phoneNumber: user.phoneNumber,
+    state: user.state,
+    college: user.college
   };
+  
   const token = jwtSign(payload);
   user.token = token;
   return res
