@@ -157,7 +157,8 @@ exports.login = async (req, res) => {
       city: user.city,
       phoneNumber: user.phoneNumber,
       state: user.state,
-      college: user.college
+      college: user.college,
+      picture: user.picture
     };
     const token = jwtSign(payload);
 
@@ -244,7 +245,8 @@ exports.googleLogin = async (req, res) => {
       city: user.city,
       phoneNumber: user.phoneNumber,
       state: user.state,
-      college: user.college
+      college: user.college,
+      picture: user.picture
     };
 
     return res.status(StatusCodes.OK).json({
@@ -261,7 +263,8 @@ exports.googleLogin = async (req, res) => {
         city: user.city,
         phoneNumber: user.phoneNumber,
         state: user.state,
-        college: user.college
+        college: user.college,
+        picture: user.picture
       };
     return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
@@ -290,6 +293,8 @@ exports.microsoftLogin = async function (req, res) {
       _id: user._id,
       fullname: user.fullname,
       email: user.email,
+      college: user.college,
+      picture: user.picture
     };
     const token = jwtSign(payload);
     return res.status(StatusCodes.OK).json({
@@ -312,7 +317,8 @@ exports.microsoftLogin = async function (req, res) {
     city: user.city,
     phoneNumber: user.phoneNumber,
     state: user.state,
-    college: user.college
+    college: user.college,
+    picture: user.picture
   };
   
   const token = jwtSign(payload);
