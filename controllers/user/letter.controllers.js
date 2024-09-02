@@ -4,7 +4,7 @@ require("dotenv").config();
 const { Types } = require("mongoose");
 const { StatusCodes } = require("http-status-codes");
 const { Document, Packer, Paragraph, TextRun } = require("docx");
-
+const formatCoverLetter = require("../../utils/formatLetter")
 exports.letterBuilder = async (req, res) => {
   try {
     const { userId } = req.query;
@@ -207,6 +207,9 @@ exports.createLetterIntoDocx = async function (req, res) {
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Letter not found" });
     }
+    console.log(letter.content)
+    letter.content = formatCoverLetter(letter.content)
+    console.log(letter.content)
 
     const doc = new Document({
       sections: [
