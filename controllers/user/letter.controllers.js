@@ -207,19 +207,21 @@ exports.createLetterIntoDocx = async function (req, res) {
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Letter not found" });
     }
-    console.log(letter.content)
     letter.content = formatCoverLetter(letter.content)
-    console.log(letter.content)
+    let contents = letter.content.split("\n")
+    let paragraphs = []
+    for (let i = 0; i < contents.length; i++) {
+      const paragraph = new Paragraph({
+        children: [new TextRun(contents[i])],
+      })
+      paragraphs.push(paragraph)
 
+    }
     const doc = new Document({
       sections: [
         {
           properties: {},
-          children: [
-            new Paragraph({
-              children: [new TextRun(letter.content)],
-            }),
-          ],
+          children: paragraphs
         },
       ],
     });
