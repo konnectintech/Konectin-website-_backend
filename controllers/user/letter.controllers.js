@@ -229,27 +229,13 @@ exports.createLetterIntoDocx = async function (req, res) {
               docParagraphs.push(
                 new Paragraph({
                   children: paragraphChildren,
-                  spacing: { after: 300 },
+                  spacing: { after: 400 },
                 })
               );
               paragraphChildren.length = 0; // Clear the current paragraph children
             }
-            // // Create an empty paragraph to represent the <br> tag
-            // docParagraphs.push(
-            //   new Paragraph({
-            //     spacing: { after: 100 },
-            //   })
-            // );
           }
         });
-        // if (paragraphChildren.length > 0) {
-        //   docParagraphs.push(
-        //     new Paragraph({
-        //       children: paragraphChildren,
-        //       spacing: { after: 100 },
-        //     })
-        //   );
-        // }
       }
     };
 
