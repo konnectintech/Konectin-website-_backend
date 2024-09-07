@@ -4,6 +4,7 @@ require("dotenv").config();
 const { Types } = require("mongoose");
 const { StatusCodes } = require("http-status-codes");
 const { Document, Packer, Paragraph, TextRun } = require("docx");
+const { JSDOM } = require("jsdom");
 
 exports.letterBuilder = async (req, res) => {
   try {
@@ -195,7 +196,6 @@ exports.updateUserLetter = async (req, res) => {
       .json({ message: err.message });
   }
 };
-
 exports.createLetterIntoDocx = async function (req, res) {
   try {
     const { letterId } = req.query;
@@ -208,15 +208,44 @@ exports.createLetterIntoDocx = async function (req, res) {
         .json({ message: "Letter not found" });
     }
 
+    // Use JSDOM to parse the HTML content
+    const dom = new JSDOM(letter.content);
+    const document = dom.window.document;
+
+    const docParagraphs = [];
+
+    const processNode = (node) => {
+      if (node.nodeName === "P") {
+        const paragraphChildren = [];
+        node.childNodes.forEach((childNode) => {
+          if (childNode.nodeType === childNode.TEXT_NODE) {
+            const text = childNode.textContent.trim();
+            if (text) {
+              paragraphChildren.push(new TextRun(text));
+            }
+          } else if (childNode.nodeName === "BR") {
+            // Add a new paragraph for each <br> tag
+            if (paragraphChildren.length > 0) {
+              docParagraphs.push(
+                new Paragraph({
+                  children: paragraphChildren,
+                  spacing: { after: 400 },
+                })
+              );
+              paragraphChildren.length = 0; // Clear the current paragraph children
+            }
+          }
+        });
+      }
+    };
+
+    document.body.childNodes.forEach(processNode);
+
     const doc = new Document({
       sections: [
         {
           properties: {},
-          children: [
-            new Paragraph({
-              children: [new TextRun(letter.content)],
-            }),
-          ],
+          children: docParagraphs,
         },
       ],
     });
@@ -224,16 +253,16 @@ exports.createLetterIntoDocx = async function (req, res) {
     // Convert DOCX to buffer
     const buffer = await Packer.toBuffer(doc);
 
-    //update the letter model after the letter is downloaded
+    // Update the letter model after the letter is downloaded
     await LetterBuilder.findByIdAndUpdate(
       letterId,
       {
         $set: {
-          isDownloaded: true, // Set isDownloaded to true
-          downloadedTime: new Date(), // Set downloadedTime to current time
+          isDownloaded: true,
+          downloadedTime: new Date(),
         },
       },
-      { new: true } // To return the updated document
+      { new: true }
     );
 
     // Send response with appropriate headers
