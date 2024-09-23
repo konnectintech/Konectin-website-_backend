@@ -496,7 +496,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Resume"
+                "type": "object",
+                "properties": {
+                  "resumeHtml": {
+                    "type": "string",
+                    "description": "HTML string of the resume to generate PDF"
+                  }
+                },
+                "required": ["resumeHtml"]
               }
             }
           }
