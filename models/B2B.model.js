@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const sharedSchemaDefinition = require("./shared.model");
 const CompanySizeEnum = require("../utils/enums/companySizeEnum");
 const HiringFrequencyEnum = require("../utils/enums/HiringFrequencyEnum");
+const LanguagesEnum = require("../utils/enums/languagesEnum");
+const InternsEnum = require("../utils/enums/internsEnum");
 
 const b2bSchema = new mongoose.Schema(
   {
@@ -16,7 +18,6 @@ const b2bSchema = new mongoose.Schema(
     },
     companyWebsite: {
       type: String,
-      required: true,
       match: [/(ftp|http|https):\/\/[^ "]+/, "Invalid URL format"],
     },
     supportEmail: {
@@ -26,28 +27,25 @@ const b2bSchema = new mongoose.Schema(
     },
     companyAddress: {
       type: String,
-      required: true,
     },
     companySize: {
       type: String,
       enum: Object.values(CompanySizeEnum),
       required: true,
     },
-    logo: {
-      type: String,
-      required: true,
-    },
-    companyDescription: {
-      type: String,
-      required: true,
-    },
+
     hiringFrequency: {
       type: String,
       enum: Object.values(HiringFrequencyEnum),
       required: true,
     },
-    mouContent: {
+    languages: {
       type: String,
+      enum: Object.values(LanguagesEnum),
+    },
+    internsNeeded: {
+      type: String,
+      enum: Object.values(InternsEnum),
       required: true,
     },
     mouConfirmed: {
