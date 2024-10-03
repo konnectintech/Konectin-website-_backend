@@ -1,4 +1,4 @@
-const { uploadProfilePicture, uploadResumePicture } = require("../../helpers/cloudinary");
+const { uploadProfilePicture, uploadResumeProfilePicture } = require("../../helpers/cloudinary");
 const User = require("../../models/user.model");
 const cloudinary = require("cloudinary").v2;
 const { StatusCodes } = require("http-status-codes");
@@ -181,7 +181,7 @@ exports.updateUserPicture = async (req, res) => {
 
       // create a corresponding resumeImage
       const resumeImage = new ResumeImage({ userId: user.id })
-      const resumeImageUpload = await uploadResumePicture(file, resumeImage)
+      const resumeImageUpload = await uploadResumeProfilePicture(file, resumeImage)
       if (resumeImageUpload && resumeImageUpload.secure_url) {
         resumeImage.link = resumeImageUpload.secure_url
         await resumeImage.save()

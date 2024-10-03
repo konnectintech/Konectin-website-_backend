@@ -1,0 +1,124 @@
+{
+    "User": {
+        "type": "object",
+        "properties": {
+            "fullname": {
+                "type": "string"
+            },
+            "email": {
+                "type": "string"
+            },
+            "password": {
+                "type": "string"
+            },
+            "picture": {
+                "type": "string",
+                "format": "binary"
+            },
+            "dob": {
+                "type": "string",
+                "format": "date"
+            },
+            "age": {
+                "type": "number"
+            },
+            "gender": {
+                "type": "string",
+                "enum": [
+                    "Female",
+                    "Male",
+                    "Prefer not to say"
+                ]
+            },
+            "isEmailVerified": {
+                "type": "boolean",
+                "default": false
+            },
+            "typeOfUser": {
+                "type": "string",
+                "enum": [
+                    "Regular",
+                    "Google",
+                    "Microsoft"
+                ],
+                "default": "Regular"
+            },
+            "notificationSettings": {
+                "type": "object",
+                "properties": {
+                    "emails": {
+                        "type": "boolean"
+                    },
+                    "pushNotifications": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "socials": {
+                "type": "object",
+                "properties": {
+                    "github": {
+                        "type": "string"
+                    },
+                    "facebook": {
+                        "type": "string"
+                    },
+                    "instagram": {
+                        "type": "string"
+                    },
+                    "linkedin": {
+                        "type": "string"
+                    },
+                    "medium": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "required": [
+            "fullname",
+            "email",
+            "password"
+        ]
+    },
+    "UserLogin": {
+        "type": "object",
+        "properties": {
+            "email": {
+                "type": "string"
+            },
+            "password": {
+                "type": "string"
+            }
+        },
+        "required": [
+            "email",
+            "password"
+        ]
+    },
+    "UserResponse": {
+        "type": "object",
+        "properties": {
+            "message": {
+                "type": "string"
+            },
+            "token": {
+                "type": "string"
+            },
+            "data": {
+                "type": "object",
+                "properties": {
+                    "_id": {
+                        "type": "string"
+                    },
+                    "fullname": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

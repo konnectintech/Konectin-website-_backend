@@ -1,0 +1,299 @@
+{
+    "Resume": {
+        "type": "object",
+        "properties": {
+            "resumeUrl": {
+                "type": "string"
+            },
+            "basicInfo": {
+                "type": "object",
+                "properties": {
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "phoneNumber": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "state": {
+                        "type": "string"
+                    },
+                    "zipCode": {
+                        "type": "string"
+                    },
+                    "profession": {
+                        "type": "string"
+                    },
+                    "phoneCode": {
+                        "type": "string"
+                    }
+                }
+            },
+            "jobExperience": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "jobTitle": {
+                            "type": "string"
+                        },
+                        "company": {
+                            "type": "string"
+                        },
+                        "country": {
+                            "type": "string"
+                        },
+                        "city": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "string"
+                        },
+                        "startMonth": {
+                            "type": "string"
+                        },
+                        "startYear": {
+                            "type": "string"
+                        },
+                        "endMonth": {
+                            "type": "string"
+                        },
+                        "endYear": {
+                            "type": "string"
+                        },
+                        "workDesc": {
+                            "type": "string"
+                        },
+                        "current": {
+                            "type": "boolean",
+                            "default": "false"
+                        }
+                    }
+                }
+            },
+            "education": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string"
+                        },
+                        "country": {
+                            "type": "string"
+                        },
+                        "degree": {
+                            "type": "string"
+                        },
+                        "startMonth": {
+                            "type": "string"
+                        },
+                        "startYear": {
+                            "type": "number"
+                        },
+                        "schoolName": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "string"
+                        },
+                        "endMonth": {
+                            "type": "string"
+                        },
+                        "endYear": {
+                            "type": "string"
+                        },
+                        "awards": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "relevantCourses": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "current": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            },
+            "skills": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "lvl": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "currentEditedJob": {
+                "type": "number"
+            },
+            "currentEditedEducation": {
+                "type": "number"
+            },
+            "bio": {
+                "type": "string"
+            },
+            "selectedTemplate": {
+                "type": "string"
+            },
+            "currentStage": {
+                "type": "number"
+            },
+            "isDownloaded": {
+                "type": "boolean"
+            },
+            "downloadedTime": {
+                "type": "string",
+                "format": "date"
+            },
+            "templateDetails": {
+                "type": "object",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "fontType": {
+                            "type": "string"
+                        },
+                        "fontSize": {
+                            "type": "string"
+                        },
+                        "colour": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "additionalInformation": {
+                "type": "object",
+                "properties": {
+                    "awards": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "organization": {
+                                    "type": "string"
+                                },
+                                "awardYear": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "certificates": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "authority": {
+                                    "type": "string"
+                                },
+                                "license": {
+                                    "type": "string"
+                                },
+                                "startDate": {
+                                    "type": "string"
+                                },
+                                "endDate": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "hobbies": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "languages": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "projects": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "title": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "role": {
+                            "type": "string"
+                        },
+                        "link": {
+                            "type": "string"
+                        },
+                        "duration": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "required": [
+            "userId"
+        ]
+    },
+    "ResumeProfilePictureUpload": {
+        "type": "object",
+        "properties": {
+            "file": {
+                "type": "string",
+                "format": "binary"
+            }
+        },
+        "required": [
+            "file"
+        ]
+    }
+}

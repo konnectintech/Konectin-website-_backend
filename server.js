@@ -10,7 +10,7 @@ const expressFileUpload = require("express-fileupload");
 const moment = require("moment-timezone");
 const connectDatabase = require("./config/database");
 const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./docs/swagger.json");
+const swaggerDocument = require("./docs");
 
 // set the default timezone to West African Standard Time
 moment.tz.setDefault("Africa/Lagos");
@@ -38,7 +38,6 @@ app.get("/", (request, response) => {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
-
 const server = app.listen(port, () => {
   console.log(`Server running on port: ${port}`);
 });
