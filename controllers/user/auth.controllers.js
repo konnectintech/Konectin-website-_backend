@@ -4,6 +4,7 @@ const { transporter, sendHtmlEmail } = require("../../config/email");
 const { generateRegisterOTP } = require("../../helpers/registerToken");
 const { generatePasswordOTP } = require("../../helpers/passwordToken");
 const RegisterOTP = require("../../models/registerOTP");
+const passwordOTP = require("../../models/passwordOTP");
 const { jwtSign } = require("../../helpers/jsonwebtoken");
 const { ResetPasswordEmail } = require("../../utils/resetPasswordEmail");
 const moment = require("moment-timezone");
@@ -255,17 +256,17 @@ exports.googleLogin = async (req, res) => {
       token: token,
     });
   } else {
-      const payload = {
-        _id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-        country: user.country,
-        city: user.city,
-        phoneNumber: user.phoneNumber,
-        state: user.state,
-        college: user.college,
-        picture: user.picture
-      };
+    const payload = {
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      country: user.country,
+      city: user.city,
+      phoneNumber: user.phoneNumber,
+      state: user.state,
+      college: user.college,
+      picture: user.picture
+    };
     return res.status(StatusCodes.OK).json({
       message: "User logged in successfully!",
       data: payload,
@@ -320,7 +321,7 @@ exports.microsoftLogin = async function (req, res) {
     college: user.college,
     picture: user.picture
   };
-  
+
   const token = jwtSign(payload);
   user.token = token;
   return res
@@ -380,50 +381,65 @@ exports.forgetPassword = async (req, res) => {
       process.env.NODE_ENV === "production"
     ) {
       //
-      const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
-      if (isIPv6) {
-        // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
-        ipAddress = ipAddress.includes("::ffff:")
-          ? ipAddress.replace(/^.*:/, "")
-          : null;
+      if (req.ip != "::1") {
+        const isIPv6 = /^[:0-9a-fA-F]+$/.test(`${ipAddress}`);
+        if (isIPv6) {
+          // Extract the IPv4 part (if it's an IPv6-mapped IPv4 address)
+          ipAddress = ipAddress.includes("::ffff:")
+            ? ipAddress.replace(/^.*:/, "")
+            : null;
+        }
+        if (!ipAddress) {
+          return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ message: "Some error occured, try again later" });
+        }
+        //Get location
+        const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
+        if (!response.ok) {
+          return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ message: "Some error occured, try again later" });
+        }
+
+        const locationData = await response.json();
+        const countryAbbreviation = locationData.country;
+        const sortedData = countries.sort(
+          (a, b) => a.abbreviation - b.abbreviation
+        );
+
+        let location = getCountry(sortedData, countryAbbreviation);
+        location !== -1 ? location : (location = countryAbbreviation);
+        let device = userAgent;
+
+        const token = await generatePasswordOTP(user._id);
+
+        const subject = "Konectin Technical - Reset password";
+        const msg = ResetPasswordEmail(
+          user.fullname.split(" ")[0],
+          location,
+          device,
+          token
+        );
+        await transporter(email, subject, msg);
+      } else {
+        const location = null
+        device = null
+        const token = await generatePasswordOTP(user._id);
+        const subject = "Konectin Technical - Reset password";
+        const msg = ResetPasswordEmail(
+          user.fullname.split(" ")[0],
+          location,
+          device,
+          token
+        );
+        await transporter(email, subject, msg);
       }
-      if (!ipAddress) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Some error occured, try again later" });
-      }
-      //Get location
-      const response = await fetch(`https://ipinfo.io/${ipAddress}/json`);
-      if (!response.ok) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ message: "Some error occured, try again later" });
-      }
-
-      const locationData = await response.json();
-      const countryAbbreviation = locationData.country;
-      const sortedData = countries.sort(
-        (a, b) => a.abbreviation - b.abbreviation
-      );
-
-      let location = getCountry(sortedData, countryAbbreviation);
-      location !== -1 ? location : (location = countryAbbreviation);
-      let device = userAgent;
-
-      const token = await generatePasswordOTP(user._id);
-
-      const subject = "Konectin Technical - Reset password";
-      const msg = ResetPasswordEmail(
-        user.fullname.split(" ")[0],
-        location,
-        device,
-        token
-      );
-      await transporter(email, subject, msg);
+      return res.status(StatusCodes.OK).json({
+        message: "Please check email for the code to reset your password",
+      });
     }
-    return res.status(StatusCodes.OK).json({
-      message: "Please check email for the code to reset your password",
-    });
+
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -480,7 +496,7 @@ exports.resetPassword = async (req, res) => {
         .json({ message: "Passwords do not match" });
     }
 
-    const token = await RegisterOTP.findOne({ OTP: OTP });
+    const token = await passwordOTP.findOne({ OTP: OTP });
 
     if (!token) {
       return res

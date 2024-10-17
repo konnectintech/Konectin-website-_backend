@@ -1,6 +1,6 @@
 const verifyEmail = (first_name, email, otp) => {
     return `
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -161,7 +161,7 @@ const verifyEmail = (first_name, email, otp) => {
                             </p>
                         </div>
                         <div class="cta">
-                            <a class="cta-btn" href="#">${otp}</a>
+                            <span class="cta-btn">${otp}</span>
                         </div>
                         <div>
                             <p style="margin-bottom: 0">
